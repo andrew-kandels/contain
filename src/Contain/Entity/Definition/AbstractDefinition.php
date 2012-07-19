@@ -114,9 +114,6 @@ abstract class AbstractDefinition implements Iterator
      */
     public function init()
     {
-        foreach ($this->import as $definition) {
-            $definition->init();
-        }
     }
 
     /**

@@ -20,17 +20,18 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Exception\InvalidArgumentException;
-use DateTime;
+use Contain\Exception\RuntimeException;
+use Traversable;
 
 /**
- * DateTime Data Type
+ * A child entity reference.
  *
  * @category    akandels
  * @package     contain
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class DateTimeType extends StringType
+class EntityType extends StringType
 {
     /**
      * Constructor
@@ -39,14 +40,17 @@ class DateTimeType extends StringType
      */
     public function __construct()
     {
-        $this->options['dateFormat'] = 'Y-m-d H:i:s';
+        $this->options = array(
+            'className' => '',
+            'serialize' => true,
+        );
     }
 
     /**
      * Parse a given input into a suitable value for the current data type.
      *
      * @param   mixed               Value to be set
-     * @return  mixed               Internal value
+     * @return  Contain\Entity\     Internal value
      * @throws  COntain\Exception\InvalidArgumentException
      */
     public function parse($value)
@@ -55,21 +59,33 @@ class DateTimeType extends StringType
             return $this->getUnsetValue();
         }
 
-        if ($value instanceof DateTime) {
-            return $value;
+        if (!$type = $this->getOption('className')) {
+            throw new RuntimeException('$value is invalid because no type has been set for '
+                . 'the ' . __CLASS__ . ' data type.'
+            );
         }
 
-        if (is_string($value)) {
-            return new DateTime($value);
+        if ($this->getOption('serialize') && is_string($value)) {
+            $value = json_decode($value, true);
+            $value = is_array($value) || $value instanceof Traversable ? $value : array();
+            $value = new $type($value);
         }
 
-        if (is_integer($value)) {
-            $obj = new DateTime();
-            $obj->setTimestamp($value);
-            return $obj;
+        if (is_array($value) || $value instanceof Traversable) {
+            $value = new $type($value);
         }
 
-        throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+        if (!is_object($value)) {
+            throw new RuntimeException('$value is invalid, must be an entity object.'); 
+        }
+
+        if (!$value instanceof $type) {
+            throw new InvalidArgumentException('Class \'' . get_class($value) . '\' is not of '
+                . 'type \'' . $type . '\'.'
+            );
+        }
+
+        return $value;
     }
 
     /**
@@ -82,11 +98,9 @@ class DateTimeType extends StringType
      */
     public function parseString($value)
     {
-        if (!$when = $this->parse($value)) {
-            return $this->getUnsetValue();
-        }
-
-        return $when->format($this->getOption('dateFormat'));
+        return $this->getOption('serialize') && $value
+            ? json_encode($this->parse($value)->export())
+            : $this->getUnsetValue();
     }
 
     /**

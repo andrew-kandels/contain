@@ -89,7 +89,7 @@ class Property
             }
 
             if (!is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
-                throw new InvalidArgumentException('$type should be an instance of '
+                throw new InvalidArgumentException("'$type' is not an instance of "
                     . 'Contain\Entity\Property\Type\TypeInterface or the name of a class that is.'
                 );
             }

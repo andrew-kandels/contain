@@ -7,7 +7,7 @@
 <?php endif; ?>
      * @return  array
      */
-    public function getProperties($includeUnset = false, <?php if ($this->hasExtended): ?>$includeExtended = false<?php endif; ?>)
+    public function getProperties($includeUnset = false<?php if ($this->hasExtended): ?>, $includeExtended = false<?php endif; ?>)
     {
         $result = array();
 <?php foreach ($this->v as $property): ?>
@@ -111,7 +111,7 @@
 <?php endif; ?>
      * @return  array
      */
-    public function export($includeUnset = false, <?php if ($this->hasExtended): ?>$includeExtended = false<?php endif; ?>)
+    public function export($includeUnset = false<?php if ($this->hasExtended): ?>, $includeExtended = false<?php endif; ?>)
     {
         $properties = $this->getProperties(true);
         $result     = array();

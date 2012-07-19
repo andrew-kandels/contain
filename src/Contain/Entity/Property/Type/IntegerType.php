@@ -41,7 +41,7 @@ class IntegerType extends StringType
     public function parse($value = null)
     {
         if (!$value) {
-            return 0;
+            return $this->getUnsetValue();
         }
 
         if (is_string($value)) {

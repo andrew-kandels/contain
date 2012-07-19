@@ -1,6 +1,12 @@
+        $this->init();
 
         if ($properties) {
-            $this->fromArray($properties);
+            $className = __CLASS__;
+            if (is_object($properties) && $properties instanceof $className) {
+                $this->fromArray($properties->toArray());
+            } else {
+                $this->fromArray($properties);
+            }
         }
     }
 

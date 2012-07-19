@@ -24,7 +24,7 @@ use Contain\Exception\RuntimeException;
 use Traversable;
 
 /**
- * List of Like Values
+ * List of like-value items.
  *
  * @category    akandels
  * @package     contain
@@ -40,7 +40,10 @@ class ListType extends StringType
      */
     public function __construct()
     {
-        $this->options['type'] = '';
+        $this->options = array(
+            'type' => '',
+            'json' => true,
+        );
     }
 
     /**
@@ -63,8 +66,12 @@ class ListType extends StringType
         }
 
         if (!$type instanceof TypeInterface) {
+            if (is_string($type) && strpos('/', $type) === false) {
+                $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
+            }
+
             if (!is_string($type) || !is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
-                throw new InvalidArgumentException('$type is not a valid, should extend '
+                throw new InvalidArgumentException("Type '$type' is not valid. Should extend "
                     . 'Contain\Entity\Property\Type\TypeInterface or be a FQCN to a class that does.'
                 );
             }
@@ -72,23 +79,36 @@ class ListType extends StringType
             $this->options['type'] = $type = new $type();
         }
 
-        if ($value instanceof Traversable) {
+        if ($this->getOption('json') && is_string($value)) {
+            $value = json_decode($value);
+        }
+
+        if (is_array($value) || $value instanceof Traversable) {
             $return = array();
             foreach ($value as $key => $val) {
-                $return[$key] = $val;
+                $return[] = $type->parse($val);
             }
             $value = $return;
-        }
-            
-        if (!is_array($value)) {
+        } else {
             throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
         }
 
-        foreach ($value as $key => $val) {
-            $value[$key] = $this->getType()->parse($val);
-        }
-
         return $value;
+    }
+
+    /**
+     * Returns the internal value represented as a string value
+     * for purposes of debugging or export.
+     *
+     * @param   mixed       Internal value
+     * @return  string
+     * @throws  Contain\Exception\InvalidArgumentException
+     */
+    public function parseString($value)
+    {
+        return $this->getOption('json') && $value
+            ? json_encode($this->parse($value))
+            : $this->getUnsetValue();
     }
 
     /**
