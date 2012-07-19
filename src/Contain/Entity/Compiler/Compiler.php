@@ -50,12 +50,12 @@ class Compiler
      * @param   Contain\Entity\Definition\AbstractDefinition|string
      * @return  $this
      */
-    public function setDefinition($definition)
+    protected function setDefinition($definition)
     {
-        if (!$definition instanceof Contain\Entity\Definition\AbstractDefinition) {
+        if (!$definition instanceof AbstractDefinition) {
             if (!is_subclass_of($definition, 'Contain\Entity\Definition\AbstractDefinition')) {
-                throw new InvalidArgumentException('$definition must either be an instance of Contain\Entity\Definition\AbstractDefinition '
-                    . 'or the name of a class that is.'
+                throw new InvalidArgumentException('$definition must either be an instance '
+                    . 'of Contain\Entity\Definition\AbstractDefinition or the name of a class that is.'
                 );
             }
 
@@ -63,27 +63,56 @@ class Compiler
         }
 
         $this->definition = $definition;
-        $this->targetPath = $definition->getTargetPath();
     }
 
     /**
-     * Returns the full path to the target entity class file.
+     * Returns the full path to the target based on its key.
      *
+     * @param   string                  Target key (entity, filter, etc.)
      * @return  string
      */
-    public function getTargetFile()
+    public function getTargetFile($target)
     {
-        return $this->targetPath . '/' . $this->definition->getName() . '.php';
+        $path = $this->definition->getTarget($target);
+        if (empty($path)) {
+            throw new InvalidArgumentException(
+                "Target '$target' unspecified in definition, use setTarget() to configure."
+            );
+        }
+
+        if (!is_dir($path = realpath($path))) {
+            throw new InvalidArgumentException(
+                "Target '$target' -> '$path' is not a directory, use setTarget() to configure."
+            );
+        }
+
+        return sprintf('%s/%s.php',
+            $path,
+            $this->definition->getName()
+        );
     }
 
     /**
-     * Returns the namespace for the entity class.
+     * Returns the namespace for a given target key.
      *
+     * @param   string                  Target key (entity, filter, etc.)
      * @return  string
      */
-    public function getNamespace()
+    public function getTargetNamespace($target)
     {
-        $path = $this->targetPath;
+        $path = $this->definition->getTarget($target);
+        if (empty($path)) {
+            throw new InvalidArgumentException(
+                "Target '$target' unspecified in definition, use setTarget() to configure."
+            );
+        }
+
+        if (!is_dir($path = realpath($path))) {
+            throw new InvalidArgumentException(
+                "Target '$target' -> '$path' is not a directory, use setTarget() to configure."
+            );
+        }
+
         if (preg_match('!module/([^/]+)/src/(.*)!', $path, $matches)) {
             $path = $matches[2];
         }
@@ -189,9 +218,31 @@ class Compiler
     {
         $this->setDefinition($definition);
 
-        $outputFile = $this->getTargetFile();
+        $targets = $this->definition->getTargets();
+
+        if (!empty($targets['entity'])) {
+            $this->compileEntity();
+        }
+
+        if (!empty($targets['filter'])) {
+            $this->compileFilter();
+        }
+        
+        return $this;
+    }
+
+    /*
+     * Compiles the entity object target.
+     *
+     * @return  $this
+     */
+    protected function compileEntity()
+    {
+        $outputFile = $this->getTargetFile('entity');
         if (!$this->handle = fopen($outputFile, 'wt')) {
-            throw new RuntimeException("Cannot open '$outputFile' for writing.");
+            throw new RuntimeException("Cannot open '$outputFile' for writing. Use "
+                . 'setTarget() in the definition to configure or set permissions.'
+            );
         }
 
         $v = array();
@@ -199,27 +250,26 @@ class Compiler
             $v[$property->getName()] = get_class($property->getType());
         }
 
-        $this->append('base', array(
-            'hasEvents'    => $this->definition->hasEvents(),
-            'namespace'    => $this->getNamespace(),
-            'hasExtended'  => $this->definition->hasExtended(),
+        $this->append('Entity/construct', array(
+            'hasEvents'    => $this->definition->getOption('events'),
+            'namespace'    => $this->getTargetNamespace('entity'),
+            'hasExtended'  => $this->definition->getOption('extended'),
             'name'         => $this->definition->getName(),
             'v'            => $v,
-            'hasIteration' => $this->definition->hasIteration(),
+            'hasIteration' => $this->definition->getOption('iteration'),
             'implementors' => $this->definition->getImplementors(),
             'extends'      => $this->definition->getParentClass(),
         ));
 
         foreach ($this->definition as $property) {
-            $this->append('constructProperty', array(
+            $this->append('Entity/properties', array(
                 'property'  => $property,
-                'options'   => $property->getType()->serialize(),
             ));
         }
 
-        $this->append('constructClose', array(
-            'hasEvents'   => $this->definition->hasEvents(),
-            'hasExtended' => $this->definition->hasExtended(),
+        $this->append('Entity/main', array(
+            'hasEvents'   => $this->definition->getOption('events'),
+            'hasExtended' => $this->definition->getOption('extended'),
             'name'        => $this->definition->getName(),
             'init'        => $this->importMethods('init'),
         ));
@@ -229,8 +279,8 @@ class Compiler
             $v[] = $property->getName();
         }
 
-        $this->append('toFromArray', array(
-            'hasExtended' => $this->definition->hasExtended(),
+        $this->append('Entity/importExport', array(
+            'hasExtended' => $this->definition->getOption('extended'),
             'v'           => $v,
             'name'        => $this->definition->getName(),
         ));
@@ -242,27 +292,67 @@ class Compiler
                 $type = strtolower($matches[1]);
             }
 
-            $this->append('accessors', array(
+            $this->append('Entity/accessors', array(
                 'property'  => $property,
                 'type'      => $type,
-                'hasEvents' => $this->definition->hasEvents(),
+                'hasEvents' => $this->definition->getOption('events'),
             ));
         }
 
-        if ($this->definition->hasIteration()) {
-            $this->append('iterator');
+        if ($this->definition->getOption('iteration')) {
+            $this->append('Entity/iterator');
         }
 
         foreach ($this->definition->getRegisteredMethods() as $method) {
             fputs($this->handle, $this->importMethod($method[0], $method[1], true) . PHP_EOL);
         }
 
-        fputs($this->handle, '}');
+        $this->append('Entity/close');
 
         fclose($this->handle);
 
         return $this;
     }
 
+    /*
+     * Compiles the entity filter target, an instance of 
+     * Zend\InputFilter\InputFilter.
+     *
+     * @return  $this
+     */
+    protected function compileFilter()
+    {
+        $outputFile = $this->getTargetFile('filter');
+        if (!$this->handle = fopen($outputFile, 'wt')) {
+            throw new RuntimeException("Cannot open '$outputFile' for writing. Use "
+                . 'setTarget() in the definition to configure or set permissions.'
+            );
+        }
+
+        $v = array();
+        foreach ($this->definition as $property) {
+            $v[$property->getName()] = get_class($property->getType());
+        }
+
+        $this->append('Filter/construct', array(
+            'namespace'    => $this->getTargetNamespace('filter'),
+            'name'         => $this->definition->getName(),
+        ));
+
+        foreach ($this->definition as $property) {
+            $this->append('Filter/properties', array(
+                'name'       => $property->getName(),
+                'required'   => $property->getOption('required'),
+                'filters'    => $property->getOption('filters'),
+                'validators' => $property->getOption('validators'),
+            ));
+        }
+
+        $this->append('Filter/close');
+
+        fclose($this->handle);
+
+        return $this;
+    }
 
 }

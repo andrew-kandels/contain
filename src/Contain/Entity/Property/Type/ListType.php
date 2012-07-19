@@ -31,44 +31,16 @@ use Traversable;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class ListType implements TypeInterface
+class ListType extends StringType
 {
     /**
-     * @var Contain\Entity\Property\Type\TypeInterface
-     */
-    protected $type;
-
-    /**
-     * Sets the type each list item should adhere to.
+     * Constructor
      *
-     * @param   Contain\Entity\Property\Type\TypeInterface
      * @return  $this
      */
-    public function setType($type)
+    public function __construct()
     {
-        if (!$type instanceof TypeInterface) {
-            if (!is_string($type) || !is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
-                throw new InvalidArgumentException('$type is not a valid, should extend '
-                    . 'Contain\Entity\Property\Type\TypeInterface or be a FQCN to a class that does.'
-                );
-            }
-
-            $type = new $type();
-        }
-
-        $this->type = $type;
-
-        return $this;
-    }
-
-    /**
-     * Gets the type each list item should adhere to.
-     *
-     * @return  Contain\Entity\Property\Type\TypeInterface
-     */
-    public function getType()
-    {
-        return $this->type;
+        $this->options['type'] = '';
     }
 
     /**
@@ -80,10 +52,20 @@ class ListType implements TypeInterface
      */
     public function parse($value)
     {
-        if ($this->options === null) {
+        if (!$type = $this->getOption('type')) {
             throw new RuntimeException('$value is invalid because no type has been set for '
                 . 'the ' . __CLASS__ . ' data type.'
             );
+        }
+
+        if (!$type instanceof TypeInterface) {
+            if (!is_string($type) || !is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
+                throw new InvalidArgumentException('$type is not a valid, should extend '
+                    . 'Contain\Entity\Property\Type\TypeInterface or be a FQCN to a class that does.'
+                );
+            }
+
+            $this->options['type'] = $type = new $type();
         }
 
         if ($value instanceof Traversable) {
@@ -106,25 +88,6 @@ class ListType implements TypeInterface
     }
 
     /**
-     * Returns the internal value represented as a scalar value (non-object/array)
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  null
-     * @throws  Contain\Exception\InvalidArgumentException
-     */
-    public function parseScalar($value)
-    {
-        $value = $this->parse($value);
-
-        foreach ($value as $key => $val) {
-            $value[$key] = $this->getType()->parseScalar($val);
-        }
-
-        return json_encode($value);
-    }
-
-    /**
      * The value to compare the internal value to which translates to empty or null.
      *
      * @return  mixed
@@ -132,40 +95,5 @@ class ListType implements TypeInterface
     public function getEmptyValue()
     {
         return false;
-    }
-
-    /**
-     * The value to compare the internal value to which translates to not being
-     * set during hydration.
-     *
-     * @return  mixed
-     */
-    public function getUnsetValue()
-    {
-        return null;
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @return  string
-     */
-    public function serialize()
-    {
-        return $this->type;
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @param   string
-     * @return  $this
-     */
-    public function unserialize($input)
-    {
-        $this->type = $input;
-        return $this;
     }
 }

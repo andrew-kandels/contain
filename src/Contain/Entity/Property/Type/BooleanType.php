@@ -29,14 +29,14 @@ use Contain\Exception\InvalidArgumentException;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class BooleanType implements TypeInterface
+class BooleanType extends StringType
 {
     /**
      * Parse a given input into a suitable value for the current data type.
      *
      * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  COntain\Exception\InvalidArgumentException
+     * @return  string              Internal value
+     * @throws  Contain\Exception\InvalidArgumentException
      */
     public function parse($value)
     {
@@ -45,59 +45,15 @@ class BooleanType implements TypeInterface
     }
 
     /**
-     * Returns the internal value represented as a scalar value (non-object/array)
+     * Returns the internal value represented as a string value
      * for purposes of debugging or export.
      *
      * @param   mixed       Internal value
-     * @return  null
+     * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseScalar($value)
+    public function parseString($value)
     {
         return $this->parse($value);
-    }
-
-    /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  mixed
-     */
-    public function getEmptyValue()
-    {
-        return false;
-    }
-
-    /**
-     * The value to compare the internal value to which translates to not being
-     * set during hydration.
-     *
-     * @return  mixed
-     */
-    public function getUnsetValue()
-    {
-        return null;
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @return  string
-     */
-    public function serialize()
-    {
-        return null;
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @param   string
-     * @return  $this
-     */
-    public function unserialize($input)
-    {
-        return $this;
     }
 }

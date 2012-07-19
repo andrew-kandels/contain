@@ -30,35 +30,16 @@ use DateTime;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class DateTimeType implements TypeInterface
+class DateTimeType extends StringType
 {
     /**
-     * @var string
-     */
-    protected $scalarDateFormat = 'Y-m-d H:i:s';
-
-    /**
-     * Gets the date/time format for the property when represented as a scalar
-     * value.
+     * Constructor
      *
-     * @return  string              PHP Date Format (compatible with date())
-     */
-    public function getScalarDateFormat()
-    {
-        return $this->scalarDateFormat;
-    }
-
-    /**
-     * Sets the date/time format for the property when represented as a scalar
-     * value.
-     *
-     * @param   string              PHP Date Format (compatible with date())
      * @return  $this
      */
-    public function setScalarDateFormat($format)
+    public function __construct()
     {
-        $this->scalarDateFormat = $format;
-        return $this;
+        $this->options['dateFormat'] = 'Y-m-d H:i:s';
     }
 
     /**
@@ -88,17 +69,17 @@ class DateTimeType implements TypeInterface
     }
 
     /**
-     * Returns the internal value represented as a scalar value (non-object/array)
+     * Returns the internal value represented as a string value
      * for purposes of debugging or export.
      *
      * @param   mixed       Internal value
-     * @return  null
+     * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseScalar($value)
+    public function parseString($value)
     {
-        $obj = $this->parse($value);
-        return $obj->format($this->getScalarDateFormat());
+        $when = $this->parse($value);
+        return $when->format($this->getOption('dateFormat'));
     }
 
     /**
@@ -109,39 +90,5 @@ class DateTimeType implements TypeInterface
     public function getEmptyValue()
     {
         return false;
-    }
-
-    /**
-     * The value to compare the internal value to which translates to not being
-     * set during hydration.
-     *
-     * @return  mixed
-     */
-    public function getUnsetValue()
-    {
-        return null;
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @return  string
-     */
-    public function serialize()
-    {
-        return null;
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @param   string
-     * @return  $this
-     */
-    public function unserialize($input)
-    {
-        return $this;
     }
 }

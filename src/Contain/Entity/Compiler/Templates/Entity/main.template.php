@@ -8,7 +8,7 @@
      * Called when the <?php echo $this->name; ?> entity has been initialized. Commonly used to register
      * event hooks.
      *
-     * @return  $this
+     * @return  void
      */
     protected function init()
     {

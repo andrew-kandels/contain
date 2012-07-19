@@ -39,12 +39,10 @@ class Timestampable extends AbstractDefinition
     public function setUp()
     {
         $this->setProperty('createdAt', 'DateTime')
-             ->setRequired();
+             ->setOption('required', true);
 
         $this->setProperty('updatedAt', 'DateTime')
-             ->setRequired();
-
-        $this->registerMethod('getLastUpdate');
+             ->setOption('required', true);
     }
 
     public function init()
@@ -61,10 +59,5 @@ class Timestampable extends AbstractDefinition
             $now    = new DateTime('now');
             $entity->setUpdatedAt($now);
         });
-    }
-
-    public function getLastUpdate()
-    {
-        return 'whenever';
     }
 }

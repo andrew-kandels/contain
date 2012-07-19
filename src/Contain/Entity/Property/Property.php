@@ -21,6 +21,7 @@ namespace Contain\Entity\Property;
 
 use Contain\Entity\Property\Type\AbstractType;
 use Contain\Entity\Property\Type\TypeInterface;
+use Traversable;
 use Contain\Exception\InvalidArgumentException;
 use Contain\Exception\RuntimeException;
 
@@ -45,24 +46,22 @@ class Property
     protected $type;
 
     /**
-     * @var boolean
+     * @var array
      */
-    protected $required = false;
+    protected $options = array();
 
     /**
-     * @var boolean
+     * @var array
      */
-    protected $generated = false;
-
-    /**
-     * @var mixed
-     */
-    protected $defaultValue;
-
-    /**
-     * @var boolean
-     */
-    protected $primary = false;
+    protected $validOptions = array(
+        'defaultValue',
+        'generated',
+        'primary',
+        'emptyValue',
+        'required',
+        'filters',
+        'validators',
+    );
 
     /**
      * Constructs the property which needs be associated with a name 
@@ -118,26 +117,67 @@ class Property
         return $this->type;
     }
 
-    /** 
-     * Gets the default value for the property.
+    /**
+     * Set entity options.
      *
-     * @return  mixed
+     * @param   array|Traversable       Option name/value pairs
+     * @return  $this
      */
-    public function getDefaultValue()
+    public function setOptions($options)
     {
-        return $this->defaultValue;
+        if (!is_array($options) && !$options instanceof Traversable) {
+            throw new InvalidArgumentException(
+                '$options must be an instance of Traversable or an array.'
+            );
+        }
+
+        foreach ($options as $name => $value) {
+            $this->setOption($name, $value);
+        }
+
+        return $this;
     }
 
     /**
-     * Sets a default value for a property.
+     * Sets the value for an entity property's option.
      *
-     * @param   mixed               Value
+     * @param   string              Option name
+     * @param   mixed               Option value
      * @return  $this
      */
-    public function setDefaultValue($value)
+    public function setOption($name, $value)
     {
-        $this->defaultValue = $this->getType()->parse($value);
+        if (!in_array($name, $this->validOptions)) {
+            throw new InvalidArgumentException(
+                "'$name' is not a valid option. Valid options are: "
+                . implode(', ', $this->validOptions) . '.'
+            );
+        }
+
+        $this->options[$name] = $value;
+
         return $this;
+    }
+
+    /**
+     * Retrieves entity property's options as an array.
+     *
+     * @return  array
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * Retrieves entity property's property by name.
+     *
+     * @param   string              Option name
+     * @return  array|null
+     */
+    public function getOption($name)
+    {
+        return isset($this->options[$name]) ? $this->options[$name] : null;
     }
 
     /**
@@ -148,71 +188,5 @@ class Property
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * Defines whether the property requires a value be set.
-     *
-     * @param   boolean
-     * @return  $this
-     */
-    public function setRequired($value = true)
-    {
-        $this->required = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Answers whether the property requires a value be set.
-     *
-     * @return bool
-     */
-    public function isRequired()
-    {
-        return $this->required;
-    }
-
-    /**
-     * Is the property the result of an AUTO_INCREMENT or sequence?
-     *
-     * @param   boolean
-     * @return  $this
-     */
-    public function setGenerated($value = true)
-    {
-        $this->generated = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Answers whether the property requires a value be set.
-     *
-     * @return bool
-     */
-    public function isGenerated()
-    {
-        return $this->generated;
-    }
-
-    /**
-     * Sets whether the property is a primary key / UID.
-     * 
-     * @param   boolean
-     * @return  $this
-     */
-    public function setPrimary($value = true)
-    {
-        $this->primary = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Answers whether the property is a primary key / UID.
-     *
-     * @return  boolean
-     */
-    public function isPrimary()
-    {
-        return $this->primary;
     }
 }

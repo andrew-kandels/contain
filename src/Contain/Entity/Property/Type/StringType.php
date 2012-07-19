@@ -32,6 +32,11 @@ use Contain\Exception\InvalidArgumentException;
 class StringType implements TypeInterface
 {
     /**
+     * @var array
+     */
+    protected $options = array();
+
+    /**
      * Parse a given input into a suitable value for the current data type.
      *
      * @param   mixed               Value to be set
@@ -60,16 +65,16 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Returns the internal value represented as a scalar value (non-object/array)
+     * Returns the internal value represented as a string value
      * for purposes of debugging or export.
      *
      * @param   mixed       Internal value
-     * @return  null
+     * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseScalar($value)
+    public function parseString($value)
     {
-        return $this->parse($value);
+        return (string) $this->parse($value);
     }
 
     /**
@@ -94,25 +99,64 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
+     * Returns specific options for this type.
      *
-     * @return  string
+     * @return  array
      */
-    public function serialize()
+    public function getOptions()
     {
-        return null;
+        return $this->options;
     }
 
     /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
+     * Returns a single option for this type by name.
      *
-     * @param   string
+     * @param   string                  Option name
+     * @return  array
+     */
+    public function getOption($name)
+    {
+        return isset($this->options[$name]) ? $this->options[$name] : null;
+    }
+
+    /**
+     * Sets specific options for this type.
+     *
+     * @param   array|Traversable           Option name/value pairs
      * @return  $this
      */
-    public function unserialize($input)
+    public function setOptions($options)
     {
+        if (!is_array($options) && !$options instanceof Traversable) {
+            throw new InvalidArgumentException('$options argument must be an array or '
+                . 'an instance of Traversable.'
+            );
+        }
+
+        foreach ($options as $name => $value) {
+            $this->setOption($name, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets a specific option for this type.
+     *
+     * @param   string                  Option name
+     * @param   mixed                   Value
+     * @return  $this
+     */
+    public function setOption($name, $value)
+    {
+        if (!isset($this->options[$name])) {
+            throw new InvalidArgumentException("'$name' is not a valid option, valid "
+                . 'options are: ' . implode(', ', array_keys($this->options)) . '.'
+            );
+        }
+
+        $this->options[$name] = $value;
+
         return $this;
     }
 }

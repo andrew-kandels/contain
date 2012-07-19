@@ -39,14 +39,14 @@ interface TypeInterface
     public function parse($value);
 
     /**
-     * Returns the internal value represented as a scalar value (non-object/array)
+     * Returns the internal value represented as a string value
      * for purposes of debugging or export.
      *
      * @param   mixed       Internal value
-     * @return  null
+     * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseScalar($value);
+    public function parseString($value);
 
     /**
      * The value to compare the internal value to which translates to empty or null.
@@ -64,19 +64,17 @@ interface TypeInterface
     public function getUnsetValue();
 
     /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
+     * Returns specific options for this type.
      *
-     * @return  string
+     * @return  array
      */
-    public function serialize();
+    public function getOptions();
 
     /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
+     * Sets specific options for this type.
      *
-     * @param   string
+     * @param   array|Traversable           Option name/value pairs
      * @return  $this
      */
-    public function unserialize($input);
+    public function setOptions($options);
 }

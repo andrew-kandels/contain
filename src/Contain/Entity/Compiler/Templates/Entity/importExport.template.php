@@ -63,6 +63,28 @@
     }
 
     /**
+     * Returns an array of all the entity properties
+     * as an array of string-converted values (no objects).
+     *
+     * @return  array
+     */
+    public function export()
+    {
+        $properties = $this->getProperties();
+        $result     = array();
+
+        foreach ($properties as $property) {
+            $method = 'get' . ucfirst($property);
+            $value = $this->$method();
+            if ($this->_types[$property]->getUnsetValue() !== $value) {
+                $result[$property] = $this->_types[$property]->parseString($value);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Hydrates entity properties from an array.
      *
      * @param   array               Property key/value pairs

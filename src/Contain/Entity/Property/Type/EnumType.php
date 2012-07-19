@@ -32,30 +32,13 @@ use Contain\Exception\InvalidArgumentException;
 class EnumType extends StringType
 {
     /**
-     * @var array
-     */
-    protected $options = array();
-
-    /**
-     * Sets the available options for the list.
+     * Constructor
      *
-     * @param   array               Options
      * @return  $this
      */
-    public function setOptions(array $options)
+    public function __construct()
     {
-        $this->options = $options;
-        return $this;
-    }
-
-    /**
-     * Gets the available options for the list.
-     *
-     * @return  array
-     */
-    public function getOptions()
-    {
-        return $this->options;
+        $this->options['options'] = array();
     }
 
     /**
@@ -69,34 +52,10 @@ class EnumType extends StringType
     {
         $value = parent::parse($value);
 
-        if (in_array($value, $this->getOptions())) {
+        if (in_array($value, $this->getOption('options'))) {
             return $value;
         }
 
         throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @return  string
-     */
-    public function serialize()
-    {
-        return json_encode($this->options);
-    }
-
-    /**
-     * Exports options to a JSON array for the compiler in order to reconstruct the 
-     * type in compiled code.
-     *
-     * @param   string
-     * @return  $this
-     */
-    public function unserialize($input)
-    {
-        $this->options = json_decode($input);
-        return $this;
     }
 }

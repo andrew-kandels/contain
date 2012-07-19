@@ -32,8 +32,18 @@ use Iterator;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class AbstractDefinition implements Iterator
+abstract class AbstractDefinition implements Iterator
 {
+    /**
+     * @var string
+     */
+    const ENTITY = 'entity';
+
+    /**
+     * @var string
+     */
+    const FILTER = 'filter';
+
     /**
      * @var array
      */
@@ -45,14 +55,13 @@ class AbstractDefinition implements Iterator
     protected $position = 0;
 
     /**
-     * @var boolean
+     * @var array
      */
-    protected $hasExtended = false;
-
-    /**
-     * @var boolean
-     */
-    protected $hasIteration = true;
+    protected $options = array(
+        'extended'  => false,
+        'iteration' => true,
+        'events'    => false,
+    );
 
     /**
      * @var array
@@ -72,12 +81,10 @@ class AbstractDefinition implements Iterator
     /**
      * @var string
      */
-    protected $targetPath;
-
-    /**
-     * @var boolean
-     */
-    protected $hasEvents = false;
+    protected $targets = array(
+        'entity' => '',
+        'filter' => '',
+    );
 
     /** 
      * @var string
@@ -110,8 +117,6 @@ class AbstractDefinition implements Iterator
         foreach ($this->import as $definition) {
             $definition->init();
         }
-
-        return $this;
     }
 
     /**
@@ -202,29 +207,59 @@ class AbstractDefinition implements Iterator
     }
 
     /**
-     * Sets the file system path to build the compiled entity.
+     * Sets the target path for the compiler of a given item, of 
+     * which the valid options include:
      *
-     * @param   string              Path
+     * 1) entity: The compiled entity object
+     * 2) filter: The Zend\InputFilter\InputFilter implementation 
+     *            for validation and data sanitizing.
+     *
+     * @param   string                  Target key (see above, e.g.: entity)
+     * @param   string                  File system path
      * @return  $this
      */
-    public function setTargetPath($path)
+    public function registerTarget($target, $path)
     {
-        $this->targetPath = realpath($path);
+        if (!isset($this->targets[$target])) {
+            throw new InvalidArgumentException(
+                "'$target' is not a valid key, valid options are: "
+                . implode(', ', array_keys($this->targets)) . '.'
+            );
+        }
+
+        $this->targets[$target] = $path;
+
         return $this;
     }
 
     /**
-     * Gets the file system path to build the compiled entity.
+     * Returns an array of target keys and their paths (see setTarget()
+     * for a list of valid keys and their definitions).
      *
+     * @return  array
+     */
+    public function getTargets()
+    {
+        return $this->targets;
+    }
+
+    /**
+     * Gets the target path for a given target key (see setTarget()
+     * for a list of valid keys and their definitions).
+     *
+     * @param   string                  Target key (e.g.: entity)
      * @return  string
      */
-    public function getTargetPath()
+    public function getTarget($target)
     {
-        if (!$this->targetPath) {
-            throw new RuntimeException('No target path set, setTargetPath must be called first.');
+        if (!isset($this->targets[$target])) {
+            throw new InvalidArgumentException(
+                "'$target' is not a valid key, valid options are: "
+                . implode(', ', array_keys($this->targets)) . '.'
+            );
         }
 
-        return $this->targetPath;
+        return $this->targets[$target];
     }
 
     /**
@@ -275,76 +310,6 @@ class AbstractDefinition implements Iterator
     public function valid()
     {
         return isset($this->properties[$this->position]);
-    }
-
-    /**
-     * Enables extended properties for the entity which are dynamic properties that 
-     * can be created on-the-fly without having to be defined.
-     *
-     * @param   boolean
-     * @return  $this
-     */
-    public function setExtended($value = true)
-    {
-        $this->hasExtended = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Whether extended properties for the entity are allowed, which are dynamic 
-     * properties that can be created on-the-fly without having to be defined.
-     *
-     * @param   boolean
-     * @return  $this
-     */
-    public function hasExtended()
-    {
-        return $this->hasExtended;
-    }
-
-    /**
-     * Sets whether to register events with the Zend EventManager.
-     *
-     * @param   boolean
-     * @return  $this
-     */
-    public function setEvents($value = true)
-    {
-        $this->hasEvents = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Gets whether to register events with the Zend EventManager.
-     *
-     * @param   boolean
-     * @return  $this
-     */
-    public function hasEvents()
-    {
-        return $this->hasEvents;
-    }
-
-    /**
-     * Sets whether the entity can be traversed for its properties.
-     *
-     * @param   boolean
-     * @return  $this
-     */
-    public function setIteration($value = true)
-    {
-        $this->hasIteration = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Gets whether the entity can be traversed for its properties.
-     *
-     * @return  boolean
-     */
-    public function hasIteration()
-    {
-        return $this->hasIteration;
     }
 
     /**
@@ -482,6 +447,18 @@ class AbstractDefinition implements Iterator
     }
 
     /** 
+     * Registers an interface the compiled entity will implement.
+     *
+     * @param   array
+     * @return  $this
+     */
+    public function registerImplementor($implementor)
+    {
+        $this->implementors[] = $implementor;
+        return $this;
+    }
+
+    /** 
      * Sets the interfaces the compiled entity will implement.
      *
      * @param   array
@@ -502,10 +479,73 @@ class AbstractDefinition implements Iterator
     {
         $result = $this->implementors;
 
-        if ($this->hasIteration() && !in_array('Iterator', $this->implementors)) {
+        if ($this->getOption('iteration') && !in_array('Iterator', $this->implementors)) {
             $result[] = '\Iterator';
         }
 
         return $result;
+    }
+
+    /**
+     * Set entity level options.
+     *
+     * @param   array|Traversable       Option name/value pairs
+     * @return  $this
+     */
+    public function setOptions($options)
+    {
+        if (!is_array($options) && !$options instanceof Traversable) {
+            throw new InvalidArgumentException(
+                '$options must be an instance of Traversable or an array.'
+            );
+        }
+
+        foreach ($options as $name => $value) {
+            $this->setOption($name, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for an entity's option.
+     *
+     * @param   string              Option name
+     * @param   mixed               Option value
+     * @return  $this
+     */
+    public function setOption($name, $value)
+    {
+        if (!isset($this->options[$name])) {
+            throw new InvalidArgumentException(
+                "'$name' is not a valid option. Valid options are: " 
+                . implode(', ', array_keys($this->options)) . '.'
+            );
+        }
+
+        $this->options[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Retrieves entity property's options as an array.
+     *
+     * @return  array
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * Retrieves entity property's property by name.
+     *
+     * @param   string              Option name
+     * @return  array|null
+     */
+    public function getOption($name)
+    {
+        return isset($this->options[$name]) ? $this->options[$name] : null;
     }
 }
