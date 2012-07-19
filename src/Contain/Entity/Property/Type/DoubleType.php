@@ -38,8 +38,12 @@ class DoubleType extends IntegerType
      * @return  double              Internal value
      * @throws  COntain\Exception\InvalidArgumentException
      */
-    public function parse($value)
+    public function parse($value = null)
     {
+        if (!$value) {
+            return $this->getUnsetValue();
+        }
+
         if (is_string($value)) {
             return doubleval($value);
         }

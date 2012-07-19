@@ -1,16 +1,17 @@
     /**
      * Gets an array of all the entity's properties.
      *
+     * @param   boolean             Include unset properties
 <?php if ($this->hasExtended): ?>
      * @param   boolean             Include extended properties
 <?php endif; ?>
      * @return  array
      */
-    public function getProperties(<?php if ($this->hasExtended): ?>$includeExtended = false<?php endif; ?>)
+    public function getProperties($includeUnset = false, <?php if ($this->hasExtended): ?>$includeExtended = false<?php endif; ?>)
     {
         $result = array();
 <?php foreach ($this->v as $property): ?>
-        if ($this->has<?php echo ucfirst($property); ?>()) {
+        if ($includeUnset || $this->has<?php echo ucfirst($property); ?>()) {
             $result[] = '<?php echo $property; ?>';
         }
 <?php endforeach; ?>
@@ -63,28 +64,6 @@
     }
 
     /**
-     * Returns an array of all the entity properties
-     * as an array of string-converted values (no objects).
-     *
-     * @return  array
-     */
-    public function export()
-    {
-        $properties = $this->getProperties();
-        $result     = array();
-
-        foreach ($properties as $property) {
-            $method = 'get' . ucfirst($property);
-            $value = $this->$method();
-            if ($this->_types[$property]->getUnsetValue() !== $value) {
-                $result[$property] = $this->_types[$property]->parseString($value);
-            }
-        }
-
-        return $result;
-    }
-
-    /**
      * Hydrates entity properties from an array.
      *
      * @param   array               Property key/value pairs
@@ -120,5 +99,43 @@
         }
 
         return $this;
+    }
+
+    /**
+     * Returns an array of all the entity properties
+     * as an array of string-converted values (no objects).
+     *
+     * @param   boolean                 Include unset properties
+<?php if ($this->hasExtended): ?>
+     * @param   boolean             Use extended properties for any undefined index
+<?php endif; ?>
+     * @return  array
+     */
+    public function export($includeUnset = false, <?php if ($this->hasExtended): ?>$includeExtended = false<?php endif; ?>)
+    {
+        $properties = $this->getProperties(true);
+        $result     = array();
+
+        foreach ($properties as $property) {
+            $method       = 'get' . ucfirst($property);
+            $unsetValue   = $this->_types[$property]->getUnsetValue();
+            $defaultValue = $this->_types[$property]->getOption('defaultValue') ?: $unsetValue;
+            $value        = $this->$method() ?: $defaultValue;
+            if ($includeUnset || $unsetValue !== $value) {
+                $result[$property] = $this->_types[$property]->parseString($value);
+            }
+        }
+<?php if ($this->hasExtended): ?>
+
+        if ($includeExtended) {
+            foreach ($this->_extendedProperties as $key => $value) {
+                if (!isset($result[$key])) {
+                    $result[$key] = (string) $value;
+                }
+            }
+        }
+<?php endif; ?>
+
+        return $result;
     }
 

@@ -7,15 +7,21 @@
     public function get<?php echo ucfirst($this->property->getName()); ?>()
     {
 <?php if ($this->hasEvents): ?>
-        return $this->onEventGetter(
+        $value = $this->onEventGetter(
             '<?php echo $this->property->getName(); ?>', 
             $this-><?php echo $this->property->getName(); ?>,
             $this->_types['<?php echo $this->property->getName(); ?>']->getUnsetValue() !== $this-><?php echo $this->property->getName(); ?>
 
         );
 <?php else: ?>
-        return $this-><?php echo $this->property->getName(); ?>;
+        $value = $this-><?php echo $this->property->getName(); ?>;
 <?php endif; ?>
+<?php if ($defaultValue = $this->property->getOption('defaultValue')): ?>
+        if ($value === $this->_types['<?php echo $this->property->getName(); ?>']->getUnsetValue()) {
+            $value = $this->_types['<?php echo $this->property->getName(); ?>']->parse(<?php var_export($defaultValue); ?>);
+        }
+<?php endif; ?>
+        return $value;
     }
 
     /**

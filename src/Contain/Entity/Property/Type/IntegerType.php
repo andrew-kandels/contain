@@ -38,8 +38,12 @@ class IntegerType extends StringType
      * @return  integer             Internal value
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parse($value)
+    public function parse($value = null)
     {
+        if (!$value) {
+            return 0;
+        }
+
         if (is_string($value)) {
             return intval($value);
         }

@@ -45,6 +45,10 @@ class StringType implements TypeInterface
      */
     public function parse($value)
     {
+        if (!$value) {
+            return $this->getUnsetValue();
+        }
+
         if (is_string($value)) {
             return $value;
         }

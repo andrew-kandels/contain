@@ -52,6 +52,10 @@ class ListType extends StringType
      */
     public function parse($value)
     {
+        if (!$value) {
+            return $this->getUnsetValue();
+        }
+
         if (!$type = $this->getOption('type')) {
             throw new RuntimeException('$value is invalid because no type has been set for '
                 . 'the ' . __CLASS__ . ' data type.'

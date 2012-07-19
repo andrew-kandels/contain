@@ -51,6 +51,10 @@ class DateTimeType extends StringType
      */
     public function parse($value)
     {
+        if (!$value) {
+            return $this->getUnsetValue();
+        }
+
         if ($value instanceof DateTime) {
             return $value;
         }

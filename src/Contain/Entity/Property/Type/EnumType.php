@@ -50,6 +50,10 @@ class EnumType extends StringType
      */
     public function parse($value)
     {
+        if (!$value) {
+            return $this->getUnsetValue();
+        }
+
         $value = parent::parse($value);
 
         if (in_array($value, $this->getOption('options'))) {
