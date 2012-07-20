@@ -46,6 +46,11 @@ class MongoDB implements DriverInterface
     protected $collectionName;
 
     /**
+     * @var string
+     */
+    protected $databaseName;
+
+    /**
      * @var MongoCollection
      */
     protected $collection;
@@ -67,13 +72,15 @@ class MongoDB implements DriverInterface
      *
      * @param   string Entity namespace
      * @param   Contain\Mapper\Driver\ConnectionInterface
+     * @param   string MongoDB Database Name
      * @param   string MongoDB Collection Name
      * @return  $this
      */
-    public function __construct($entityClass, ConnectionInterface $connection, $collection)
+    public function __construct($entityClass, ConnectionInterface $connection, $database, $collection)
     {
         $this->entityClass    = $entityClass;
         $this->connection     = $connection;
+        $this->databaseName   = $database;
         $this->collectionName = $collection;
     }
 
@@ -85,8 +92,10 @@ class MongoDB implements DriverInterface
     public function getCollection()
     {
         if (!$this->collection) {
-            $collection = $this->collectionName;
-            $this->collection = $this->connection->getConnection()->$collection;
+            $this->collection = $this->connection
+                                     ->getConnection()
+                                     ->{$this->databaseName}
+                                     ->{$this->collectionName};
         }
 
         return $this->collection;
@@ -158,7 +167,7 @@ class MongoDB implements DriverInterface
             $select = new Selector($select);
         }
 
-        $select = $select->getSelects();
+        $select = $select->getSelect();
 
         $fields = array();
 

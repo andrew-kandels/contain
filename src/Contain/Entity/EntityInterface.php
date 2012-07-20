@@ -30,14 +30,6 @@ namespace Contain\Entity;
 interface EntityInterface
 {
     /**
-     * Called when the entity has been initialized. Commonly used to register
-     * event hooks.
-     *
-     * @return  void
-     */
-    protected function init();
-
-    /**
      * Gets an array of all the entity's properties.
      *
      * @param   boolean             Include unset properties

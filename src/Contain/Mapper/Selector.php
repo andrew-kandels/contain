@@ -17,7 +17,7 @@
  * @link        http://andrewkandels.com/contain
  */
 
-namespace Contain\Mapper\Selector;
+namespace Contain\Mapper;
 
 use Traversable;
 

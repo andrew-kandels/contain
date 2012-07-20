@@ -59,7 +59,7 @@ class Connection implements ConnectionInterface
             );
         }
 
-        $this->config = ArrayUtils::toArray($config);
+        $this->config = ArrayUtils::iteratorToArray($config);
     }
 
     /**
