@@ -58,7 +58,6 @@ abstract class AbstractDefinition implements Iterator
      * @var array
      */
     protected $options = array(
-        'extended'  => false,
         'iteration' => true,
         'events'    => false,
     );
@@ -474,7 +473,10 @@ abstract class AbstractDefinition implements Iterator
      */
     public function getImplementors()
     {
-        $result = $this->implementors;
+        $result = array_merge(
+            array('\Contain\Entity\EntityInterface'),
+            $this->implementors
+        );
 
         if ($this->getOption('iteration') && !in_array('Iterator', $this->implementors)) {
             $result[] = '\Iterator';

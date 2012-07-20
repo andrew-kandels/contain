@@ -253,7 +253,6 @@ class Compiler
         $this->append('Entity/construct', array(
             'hasEvents'    => $this->definition->getOption('events'),
             'namespace'    => $this->getTargetNamespace('entity'),
-            'hasExtended'  => $this->definition->getOption('extended'),
             'name'         => $this->definition->getName(),
             'v'            => $v,
             'hasIteration' => $this->definition->getOption('iteration'),
@@ -261,7 +260,12 @@ class Compiler
             'extends'      => $this->definition->getParentClass(),
         ));
 
+        $primary = null;
         foreach ($this->definition as $property) {
+            if ($property->getOption('primary')) {
+                $primary = $property;
+            }
+
             $this->append('Entity/properties', array(
                 'property'  => $property,
             ));
@@ -269,9 +273,9 @@ class Compiler
 
         $this->append('Entity/main', array(
             'hasEvents'   => $this->definition->getOption('events'),
-            'hasExtended' => $this->definition->getOption('extended'),
             'name'        => $this->definition->getName(),
             'init'        => $this->importMethods('init'),
+            'primary'     => $primary,
         ));
 
         $v = array();
@@ -280,7 +284,6 @@ class Compiler
         }
 
         $this->append('Entity/importExport', array(
-            'hasExtended' => $this->definition->getOption('extended'),
             'v'           => $v,
             'name'        => $this->definition->getName(),
         ));

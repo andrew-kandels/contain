@@ -2,12 +2,9 @@
      * Gets an array of all the entity's properties.
      *
      * @param   boolean             Include unset properties
-<?php if ($this->hasExtended): ?>
-     * @param   boolean             Include extended properties
-<?php endif; ?>
      * @return  array
      */
-    public function getProperties($includeUnset = false<?php if ($this->hasExtended): ?>, $includeExtended = false<?php endif; ?>)
+    public function getProperties($includeUnset = false)
     {
         $result = array();
 <?php foreach ($this->v as $property): ?>
@@ -15,50 +12,28 @@
             $result[] = '<?php echo $property; ?>';
         }
 <?php endforeach; ?>
-<?php if ($this->hasExtended): ?>
-
-        if ($includeExtended) {
-            foreach ($this->_extendedProperties as $key => $value) {
-                if (!in_array($key, $result)) {
-                    $result[] = $key;
-                }
-            }
-        }
-<?php endif; ?>
 
         return $result;
     }
 
     /**
-     * Returns an array of all the entity properties<?php if ($this->hasExtended): ?> (including extended properties)<?php endif; ?>.
+     * Returns an array of all the entity properties.
      *
-<?php if ($this->hasExtended): ?>
-     * @param   boolean             Include extended properties
-<?php endif; ?>
+     * @param   boolean             Include unset properties
      * @return  array
      */
-    public function toArray(<?php if ($this->hasExtended): ?>$includeExtended = false<?php endif; ?>)
+    public function toArray($includeUnset = false)
     {
-        $properties = $this->getProperties();
+        $properties = $this->getProperties($includeUnset);
         $result     = array();
 
         foreach ($properties as $property) {
             $method = 'get' . ucfirst($property);
             $value = $this->$method();
-            if ($this->_types[$property]->getUnsetValue() !== $value) {
+            if ($includeUnset || $this->_types[$property]->getUnsetValue() !== $value) {
                 $result[$property] = $value;
             }
         }
-<?php if ($this->hasExtended): ?>
-
-        if ($includeExtended) {
-            foreach ($this->_extendedProperties as $key => $value) {
-                if (!isset($result[$key])) {
-                    $result[$key] = $value;
-                }
-            }
-        }
-<?php endif; ?>
 
         return $result;
     }
@@ -66,13 +41,10 @@
     /**
      * Hydrates entity properties from an array.
      *
-     * @param   array               Property key/value pairs
-<?php if ($this->hasExtended): ?>
-     * @param   boolean             Use extended properties for any undefined index
-<?php endif; ?>
+     * @param   array|Traversable   Property key/value pairs
      * @return  $this
      */
-    public function fromArray($properties<?php if ($this->hasExtended): ?>, $allowExtended = false<?php endif; ?>)
+    public function fromArray($properties)
     {
         if (!is_array($properties) && !$properties instanceof Traversable) {
             throw new InvalidArgumentException('$properties must be an array or an instance of Traversable.');
@@ -87,13 +59,9 @@
 
 <?php endforeach; ?>
                 default:
-<?php if ($this->hasExtended): ?>
-                    if ($allowExtended) {
-                        $this->_extendedProperties[$key] = $value;
-                        return $this;
-                    }
-<?php endif; ?>
-                    throw new InvalidArgumentException("'$key' is not a valid property of the <?php echo $this->name; ?> entity.");
+                    throw new InvalidArgumentException("'$key' is not a valid property of "
+                        . "the <?php echo $this->name; ?> entity."
+                    );
                     break;
             }
         }
@@ -106,12 +74,9 @@
      * as an array of string-converted values (no objects).
      *
      * @param   boolean                 Include unset properties
-<?php if ($this->hasExtended): ?>
-     * @param   boolean             Use extended properties for any undefined index
-<?php endif; ?>
      * @return  array
      */
-    public function export($includeUnset = false<?php if ($this->hasExtended): ?>, $includeExtended = false<?php endif; ?>)
+    public function export($includeUnset = false)
     {
         $properties = $this->getProperties(true);
         $result     = array();
@@ -125,16 +90,6 @@
                 $result[$property] = $this->_types[$property]->parseString($value);
             }
         }
-<?php if ($this->hasExtended): ?>
-
-        if ($includeExtended) {
-            foreach ($this->_extendedProperties as $key => $value) {
-                if (!isset($result[$key])) {
-                    $result[$key] = (string) $value;
-                }
-            }
-        }
-<?php endif; ?>
 
         return $result;
     }

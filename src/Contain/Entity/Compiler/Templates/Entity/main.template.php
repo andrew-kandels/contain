@@ -98,8 +98,8 @@
 
         return $argv['property']['value'];
     }
+<?php endif; ?>
 
-<?php endif; if ($this->hasExtended): ?>
     /**
      * Fetches an extended property which can be set at anytime.
      *
@@ -117,6 +117,22 @@
 <?php else: ?>
         return isset($this->_extendedProperties[$name]) ? $this->_extendedProperties[$name] : null;
 <?php endif; ?>
+    }
+
+    /**
+     * Fetches all extended properties.
+     *
+     * @return  array
+     */
+    public function getExtendedProperties()
+    {
+        $result = array();
+
+        foreach ($this->_extendedProperties as $name => $value) {
+            $result[$name] = $this->getExtendedProperty($name);
+        }
+
+        return $result;
     }
 
     /**
@@ -142,4 +158,59 @@
         return $this;
     }
 
+    /**
+     * Returns a unique identifier for this entity.
+     *
+     * @return  mixed
+     */
+    public function getPrimaryValue()
+    {
+<?php if ($this->primary): ?>
+        return $this->get<?php echo ucfirst($this->primary->getName()); ?>();
+<?php else: ?>
+        throw new RuntimeException('<?php echo $this->name; ?> entity does not have a primary '
+            . 'property.'
+        );
 <?php endif; ?>
+    }
+
+    /**
+     * Returns a unique property for this entity.
+     *
+     * @return  mixed
+     */
+    public function getPrimaryName()
+    {
+<?php if ($this->primary): ?>
+        return '<?php echo $this->primary->getName(); ?>';
+<?php else: ?>
+        throw new RuntimeException('<?php echo $this->name; ?> entity does not have a primary '
+            . 'property.'
+        );
+<?php endif; ?>
+    }
+
+    /**
+     * Unsets one, some or all properties.
+     *
+     * @param   string              Property name
+     * @return  $this
+     */
+    public function clear($property = null)
+    {
+        if (!$property) {
+            $property = $this->getProperties();
+        }
+
+        if (is_array($property) || $property instanceof Traversable) {
+            foreach ($property as $name) {
+                $this->clear($name);
+            }
+
+            return $this;
+        }
+
+        $this->setProperty($property, $this->_types[$property]->getUnsetValue());
+
+        return $this;
+    }

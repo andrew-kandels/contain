@@ -55,11 +55,9 @@ class <?php echo $this->name; ?><?php
     protected $_eventManager;
 
 <?php endif; ?>
-<?php if ($this->hasExtended): ?>
     /** @var array */
     protected $_extendedProperties = array();
 
-<?php endif; ?>
     /**
      * Constructor
      *
