@@ -213,10 +213,11 @@ class MongoDB implements DriverInterface
     {
         $primary = $entity->getPrimaryValue();
 
-        // up(date|sert)
+        // update
         if ($id = $entity->getExtendedProperty('_id')) {
             $newValue = array('$set' => array());
-            foreach ($entity as $name => $value) {
+            $values   = $entity->export();
+            foreach ($values as $name => $value) {
                 $newValue['$set'][$name] = $value;
             }
 

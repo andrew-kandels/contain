@@ -42,7 +42,6 @@ class EntityType extends StringType
     {
         $this->options = array(
             'className' => '',
-            'serialize' => true,
         );
     }
 
@@ -63,12 +62,6 @@ class EntityType extends StringType
             throw new RuntimeException('$value is invalid because no type has been set for '
                 . 'the ' . __CLASS__ . ' data type.'
             );
-        }
-
-        if ($this->getOption('serialize') && is_string($value)) {
-            $value = json_decode($value, true);
-            $value = is_array($value) || $value instanceof Traversable ? $value : array();
-            $value = new $type($value);
         }
 
         if (is_array($value) || $value instanceof Traversable) {
@@ -93,14 +86,16 @@ class EntityType extends StringType
      * for purposes of debugging or export.
      *
      * @param   mixed       Internal value
-     * @return  string
+     * @return  mixed
      * @throws  Contain\Exception\InvalidArgumentException
      */
     public function parseString($value)
     {
-        return $this->getOption('serialize') && $value
-            ? json_encode($this->parse($value)->export())
-            : $this->getUnsetValue();
+        if ($entity = $this->parse($value)) {
+            return $value->export();
+        }
+
+        return $this->getUnsetValue();
     }
 
     /**

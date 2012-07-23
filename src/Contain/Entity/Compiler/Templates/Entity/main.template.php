@@ -63,7 +63,7 @@
     {
         $eventManager = $this->getEventManager();
         $argv = $eventManager->prepareArgs(array('property' => array(
-            'name'          => $property,
+            'property'      => $property,
             'currentValue'  => $currentValue,
             'isSet'         => $isValueSet,
         )));
