@@ -49,14 +49,14 @@ class Timestampable extends AbstractDefinition
     {
         $this->getEventManager()->attach('insert.pre', function (Event $e) {
             $entity = $e->getTarget();
-            $now    = new DateTime('now');
+            $now    = new \DateTime('now');
             $entity->setCreatedAt($now)
                    ->setUpdatedAt($now);
         });
 
         $this->getEventManager()->attach('update.pre', function (Event $e) {
             $entity = $e->getTarget();
-            $now    = new DateTime('now');
+            $now    = new \DateTime('now');
             $entity->setUpdatedAt($now);
         });
     }

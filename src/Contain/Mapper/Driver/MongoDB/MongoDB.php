@@ -215,6 +215,8 @@ class MongoDB implements DriverInterface
 
         // update
         if ($id = $entity->getExtendedProperty('_id')) {
+            $entity->getEventManager()->trigger('update.pre', $entity);
+
             $newValue = array('$set' => array());
             $values   = $entity->export();
             foreach ($values as $name => $value) {
@@ -234,11 +236,15 @@ class MongoDB implements DriverInterface
                     ))
                 );
 
+                $entity->getEventManager()->trigger('update.post', $entity);
+
                 return $this;
             }
         }
 
         // insert
+        $entity->getEventManager()->trigger('insert.pre', $entity);
+
         $data        = $entity->export();
         $data['_id'] = $primary;
         $entity->setExtendedProperty('_id', $primary);
@@ -251,6 +257,8 @@ class MongoDB implements DriverInterface
                 'timeout',
             ))
         );
+
+        $entity->getEventManager()->trigger('insert.post', $entity);
 
         return $this;
     }

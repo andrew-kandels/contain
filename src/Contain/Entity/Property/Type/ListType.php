@@ -22,6 +22,8 @@ namespace Contain\Entity\Property\Type;
 use Contain\Exception\InvalidArgumentException;
 use Contain\Exception\RuntimeException;
 use Traversable;
+use Contain\Entity\EntityInterface;
+use Contain\Entity\Property\Type\EntityType;
 
 /**
  * List of like-value items.
@@ -42,8 +44,42 @@ class ListType extends StringType
     {
         $this->options = array(
             'type' => '',
-            'json' => true,
+            'className' => '',
         );
+    }
+
+    /**
+     * Resolves the list item type.
+     *
+     * @return  Entity\Property\AbstractType
+     */
+    protected function getType()
+    {
+        if (!$type = $this->getOption('type')) {
+            throw new RuntimeException('$value is invalid because no type has been set for '
+                . 'the ' . __CLASS__ . ' data type.'
+            );
+        }
+
+        if (!$type instanceof TypeInterface) {
+            if (is_string($type) && strpos($type, '\\') === false) {
+                $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
+            }
+
+            if (!is_string($type) || !is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
+                throw new InvalidArgumentException("Type '$type' is not valid. Should extend "
+                    . 'Contain\Entity\Property\Type\TypeInterface or be a FQCN to a class that does.'
+                );
+            }
+
+            $this->options['type'] = $type = new $type();
+        }
+
+        if ($type instanceof EntityType && $className = $this->getOption('className')) {
+            $type->setOption('className', $className);
+        }
+
+        return $type;
     }
 
     /**
@@ -59,33 +95,11 @@ class ListType extends StringType
             return $this->getUnsetValue();
         }
 
-        if (!$type = $this->getOption('type')) {
-            throw new RuntimeException('$value is invalid because no type has been set for '
-                . 'the ' . __CLASS__ . ' data type.'
-            );
-        }
-
-        if (!$type instanceof TypeInterface) {
-            if (is_string($type) && strpos('/', $type) === false) {
-                $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
-            }
-
-            if (!is_string($type) || !is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
-                throw new InvalidArgumentException("Type '$type' is not valid. Should extend "
-                    . 'Contain\Entity\Property\Type\TypeInterface or be a FQCN to a class that does.'
-                );
-            }
-
-            $this->options['type'] = $type = new $type();
-        }
-
-        if ($this->getOption('json') && is_string($value)) {
-            $value = json_decode($value);
-        }
+        $type = $this->getType();
 
         if (is_array($value) || $value instanceof Traversable) {
             $return = array();
-            foreach ($value as $key => $val) {
+            foreach ($value as $val) {
                 $return[] = $type->parse($val);
             }
             $value = $return;
@@ -106,9 +120,21 @@ class ListType extends StringType
      */
     public function parseString($value)
     {
-        return $this->getOption('json') && $value
-            ? json_encode($this->parse($value))
-            : $this->getUnsetValue();
+        $type = $this->getType();
+
+        if (!$value = $this->parse($value)) {
+            return $this->getUnsetValue();
+        }
+
+        foreach ($value as $index => $item) {
+            if ($item instanceof EntityInterface) {
+                $value[$index] = $item->export();
+            } else {
+                $value[$index] = $type->parseString($item);
+            }
+        }
+
+        return $value;
     }
 
     /**
@@ -118,6 +144,6 @@ class ListType extends StringType
      */
     public function getEmptyValue()
     {
-        return false;
+        return array();
     }
 }
