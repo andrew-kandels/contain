@@ -61,21 +61,35 @@ class ListType extends StringType
             );
         }
 
-        if (!$type instanceof TypeInterface) {
-            if (is_string($type) && strpos($type, '\\') === false) {
+        if (is_object($type) && !$type instanceof TypeInterface) {
+            throw new InvalidArgumentException("Object passed to type option must implement "
+                . 'Contain\Entity\Property\Type\TypeInterface.'
+            );
+        }
+
+        if (!is_object($type)) {
+            if (strpos($type, '\\') === false) {
                 $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
             }
 
-            if (!is_string($type) || !is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
-                throw new InvalidArgumentException("Type '$type' is not valid. Should extend "
-                    . 'Contain\Entity\Property\Type\TypeInterface or be a FQCN to a class that does.'
+            $type = new $type();
+
+            if (!$type instanceof TypeInterface) {
+                throw new InvalidArgumentException("Type option '$type' must implement "
+                    . 'Contain\Entity\Property\Type\TypeInterface.'
                 );
             }
 
-            $this->options['type'] = $type = new $type();
+            $this->options['type'] = $type;
         }
 
-        if ($type instanceof EntityType && $className = $this->getOption('className')) {
+        if ($type instanceof EntityType) {
+            if (!$className = $this->getOption('className')) {
+                throw new InvalidArgumentException('$type of entity must specify a className '
+                    . 'option that points to a class that implements '
+                    . 'Contain\Entity\EntityInterface.'
+                );
+            }
             $type->setOption('className', $className);
         }
 

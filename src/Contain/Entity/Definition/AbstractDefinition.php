@@ -318,9 +318,8 @@ abstract class AbstractDefinition implements Iterator
     {
         if (!$definition instanceof AbstractDefinition) {
             if (!is_string($definition)) {
-                throw new InvalidArgumentException('$definition should be an '
-                    . 'Contain\Entity\Definition\AbstractDefinition instance or a '
-                    . 'reference a class that is.'
+                throw new InvalidArgumentException('$definition must implement '
+                    . 'Contain\Entity\Definition\AbstractDefinition.'
                 );
             }
 
@@ -328,13 +327,13 @@ abstract class AbstractDefinition implements Iterator
                 $def = 'Contain\Entity\Definition\\' . $definition;
             }
 
-            if (!is_subclass_of($definition, 'Contain\Entity\Definition\AbstractDefinition')) {
-                throw new InvalidArgumentException('$definition does not refer to a class that extends '
+            $definition = new $definition();
+
+            if (!$definition instanceof AbstractDefinition) {
+                throw new InvalidArgumentException('$definition does not implement '
                     . 'Contain\Entity\Definition\AbstractDefinition.'
                 );
             }
-
-            $definition = new $definition();
         }
 
         foreach ($definition as $property) {

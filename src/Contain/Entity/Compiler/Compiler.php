@@ -53,13 +53,13 @@ class Compiler
     protected function setDefinition($definition)
     {
         if (!$definition instanceof AbstractDefinition) {
-            if (!is_subclass_of($definition, 'Contain\Entity\Definition\AbstractDefinition')) {
-                throw new InvalidArgumentException('$definition must either be an instance '
-                    . 'of Contain\Entity\Definition\AbstractDefinition or the name of a class that is.'
+            $definition = new $definition();
+
+            if (!$definition instanceof AbstractDefinition) {
+                throw new InvalidArgumentException('$definition must extend '
+                    . 'Contain\Entity\Definition\AbstractDefinition.'
                 );
             }
-
-            $definition = new $definition();
         }
 
         $this->definition = $definition;

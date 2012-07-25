@@ -88,13 +88,13 @@ class Property
                 $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
             }
 
-            if (!is_subclass_of($type, 'Contain\Entity\Property\Type\TypeInterface')) {
-                throw new InvalidArgumentException("'$type' is not an instance of "
-                    . 'Contain\Entity\Property\Type\TypeInterface or the name of a class that is.'
+            $type = new $type();
+
+            if (!$type instanceof TypeInterface) {
+                throw new InvalidArgumentException("'$type' does not implement "
+                    . 'Contain\Entity\Property\Type\TypeInterface.'
                 );
             }
-
-            $type = new $type();
         }
 
         $this->type = $type;
