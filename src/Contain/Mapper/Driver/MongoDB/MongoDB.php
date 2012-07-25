@@ -24,6 +24,7 @@ use Contain\Mapper\Driver\DriverInterface;
 use Contain\Exception\InvalidArgumentException;
 use Contain\Entity\EntityInterface;
 use Contain\Mapper\Selector;
+use Exception;
 
 /**
  * Contain's MongoDB Driver
@@ -193,7 +194,15 @@ class MongoDB implements DriverInterface
         }
 
         $entityClass = $this->entityClass;
-        $entity      = new $entityClass($data);
+        $entity      = new $entityClass();
+
+        foreach ($data as $key => $value) {
+            try {
+                $entity->fromArray(array($key => $value));
+            } catch (Exception $e) {
+                // ignore single property failures, schema may have just changed
+            }
+        }
 
         if ($id) {
             $entity->setExtendedProperty('_id', $id);

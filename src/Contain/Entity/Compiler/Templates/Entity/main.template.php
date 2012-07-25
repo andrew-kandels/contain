@@ -210,7 +210,9 @@
             return $this;
         }
 
-        $this->setProperty($property, $this->_types[$property]->getUnsetValue());
+        $method = 'set' . ucfirst($property);
+
+        $this->$method($this->_types[$property]->getUnsetValue());
 
         return $this;
     }
