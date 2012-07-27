@@ -124,6 +124,19 @@ class MongoDB implements DriverInterface
     }
 
     /**
+     * Deletes a row by a condition.
+     *
+     * @param   array                   Search criteria
+     * @return  $this
+     */
+    public function delete(array $criteria, array $options = array())
+    {
+        $options += $this->options;
+        $result = $this->getCollection()->remove($criteria, $options);
+        return $this;
+    }
+
+    /**
      * Finds a subset of entities by some condition and returns them in a 
      * array of hydrated entity objects.
      *
