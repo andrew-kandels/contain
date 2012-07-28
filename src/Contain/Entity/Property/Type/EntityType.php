@@ -64,7 +64,9 @@ class EntityType extends StringType
             );
         }
 
-        if (is_array($value) || $value instanceof Traversable) {
+        // can't use traversable here because entities are Traversable, so it would
+        // wipe them out and recreate them which can be annoying
+        if (is_array($value)) {
             $value = new $type($value);
         }
 
