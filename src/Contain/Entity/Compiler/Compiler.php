@@ -22,6 +22,7 @@ namespace Contain\Entity\Compiler;
 use Contain\Entity\Definition\AbstractDefinition;
 use Contain\Exception\RuntimeException;
 use Contain\Exception\InvalidArgumentException;
+use Contain\Entity\Property\Type\EntityType;
 use ReflectionMethod;
 
 /**
@@ -260,10 +261,10 @@ class Compiler
             'extends'      => $this->definition->getParentClass(),
         ));
 
-        $primary = null;
+        $primary = array();
         foreach ($this->definition as $property) {
             if ($property->getOption('primary')) {
-                $primary = $property;
+                $primary[] = $property;
             }
 
             $this->append('Entity/properties', array(
@@ -271,17 +272,23 @@ class Compiler
             ));
         }
 
+        $v = array();
+        $children = array();
+        
+        foreach ($this->definition as $property) {
+            $v[] = $property->getName();
+            if ($property->getType() instanceof EntityType) {
+                $children[] = $property;
+            }
+        }
+
         $this->append('Entity/main', array(
             'hasEvents'   => $this->definition->getOption('events'),
             'name'        => $this->definition->getName(),
             'init'        => $this->importMethods('init'),
             'primary'     => $primary,
+            'children'    => $children,
         ));
-
-        $v = array();
-        foreach ($this->definition as $property) {
-            $v[] = $property->getName();
-        }
 
         $this->append('Entity/importExport', array(
             'v'           => $v,

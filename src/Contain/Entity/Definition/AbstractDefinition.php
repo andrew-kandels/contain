@@ -37,6 +37,11 @@ abstract class AbstractDefinition implements Iterator
     /**
      * @var string
      */
+    const PROPERTY_NAME_VALID = '/^[a-z][a-z0-9\-_]*$/i';
+
+    /**
+     * @var string
+     */
     const ENTITY = 'entity';
 
     /**
@@ -134,6 +139,12 @@ abstract class AbstractDefinition implements Iterator
             if (!$type) {
                 throw new InvalidArgumentException('$type must be specified if $property is not an object.');
             }
+        }
+
+        if (!preg_match(self::PROPERTY_NAME_VALID, $name)) {
+            throw new InvalidArgumentException('Property $name does not match allowed: '
+                . self::PROPERTY_NAME_VALID . '.'
+            );
         }
 
         $this->removeProperty($name);

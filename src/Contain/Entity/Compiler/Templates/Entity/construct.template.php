@@ -59,6 +59,9 @@ class <?php echo $this->name; ?><?php
     /** @var array */
     protected $_extendedProperties = array();
 
+    /** @var array */
+    protected $_dirty = array();
+
     /**
      * Constructor
      *

@@ -63,16 +63,11 @@ interface EntityInterface
     public function export($includeUnset = false);
 
     /**
-     * Returns a unique identifier for this entity.
+     * Returns an array of the columns flagged as primary as the 
+     * key(s) and the current values for the keys as the property
+     * values.
      *
      * @return  mixed
      */
-    public function getPrimaryValue();
-
-    /**
-     * Returns a unique property for this entity.
-     *
-     * @return  mixed
-     */
-    public function getPrimaryName();
+    public function getPrimary();
 }

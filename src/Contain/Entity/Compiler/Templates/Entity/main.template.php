@@ -159,41 +159,25 @@
     }
 
     /**
-     * Returns a unique identifier for this entity.
+     * Returns an array of the columns flagged as primary as the 
+     * key(s) and the current values for the keys as the property
+     * values.
      *
      * @return  mixed
      */
-    public function getPrimaryValue()
+    public function getPrimary()
     {
-<?php if ($this->primary): ?>
-        return $this->get<?php echo ucfirst($this->primary->getName()); ?>();
-<?php else: ?>
-        throw new RuntimeException('<?php echo $this->name; ?> entity does not have a primary '
-            . 'property.'
+        return array(
+<?php foreach ($this->primary as $property): ?>
+            '<?php echo $property->getName(); ?>' => $this->get<?php echo ucfirst($property->getName()); ?>(),
+<?php endforeach; ?>
         );
-<?php endif; ?>
-    }
-
-    /**
-     * Returns a unique property for this entity.
-     *
-     * @return  mixed
-     */
-    public function getPrimaryName()
-    {
-<?php if ($this->primary): ?>
-        return '<?php echo $this->primary->getName(); ?>';
-<?php else: ?>
-        throw new RuntimeException('<?php echo $this->name; ?> entity does not have a primary '
-            . 'property.'
-        );
-<?php endif; ?>
     }
 
     /**
      * Unsets one, some or all properties.
      *
-     * @param   string              Property name
+     * @param   string|array|Traversable|null       Propert(y|ies)
      * @return  $this
      */
     public function clear($property = null)
@@ -215,4 +199,91 @@
         $this->$method($this->_types[$property]->getUnsetValue());
 
         return $this;
+    }
+
+    /**
+     * Marks a changed property (or all properties by default) as clean, 
+     * or unmodified.
+     *
+     * @param   string|array|Traversable|null       Propert(y|ies)
+     * @return  $this
+     */
+    public function clean($property = null)
+    {
+        if (!$property) {
+            $this->_dirty = array();
+
+<?php foreach ($this->children as $entity): ?>
+            if ($this-><?php echo $entity->getName(); ?> !== $this->_types['<?php echo $entity->getName(); ?>']->getUnsetValue()) {
+                $this-><?php echo $entity->getName(); ?>->clean();
+            }
+            
+<?php endforeach; ?>
+            return $this;
+        }
+
+        if (is_array($property) || $property instanceof Traversable) {
+            foreach ($property as $name) {
+                $this->clean($name);
+            }
+            return $this;
+        }
+<?php if ($this->children): ?>
+
+        if ($this->$name !== $this->_types[$name]->getUnsetValue() &&
+            $this->_types[$name] instanceof \Contain\Entity\Property\Type\EntityType) {
+            $this->$name->clean();
+        }
+<?php endif; ?>
+
+        if (isset($this->_dirty[$name])) {
+            unset($this->_dirty[$name]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns dirty, modified properties with their previous undirty
+     * value (or a recursive array for child entities).
+     *
+     * @return  array
+     */
+    public function getDirty()
+    {
+        $result = array_keys($this->_dirty);
+<?php foreach ($this->children as $entity): ?>
+
+        if ($this-><?php echo $entity->getName(); ?> !== $this->_types['<?php echo $entity->getName(); ?>']->getUnsetValue() &&
+            $this-><?php echo $entity->getName(); ?>->isDirty()) {
+            $result[] = '<?php echo $entity->getName(); ?>';
+        }
+<?php endforeach; ?>
+
+        return $result;
+    }
+
+    /**
+     * Marks a property as dirty.
+     *
+     * @param   string                      Property name
+     * @return  $this
+     */
+    public function setAsDirty($property)
+    {
+        if ($this->hasProperty($property)) {
+            $this->_dirty[$property] = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns true if dirty, modified properties exist.
+     *
+     * @return  boolean
+     */
+    public function isDirty()
+    {
+        return (bool) $this->getDirty();
     }
