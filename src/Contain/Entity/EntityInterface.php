@@ -69,5 +69,53 @@ interface EntityInterface
      *
      * @return  mixed
      */
-    public function getPrimary();
+    public function primary();
+
+    /**
+     * Unsets one, some or all properties.
+     *
+     * @param   string|array|Traversable|null       Propert(y|ies)
+     * @return  $this
+     */
+    public function clear($property = null);
+
+    /**
+     * Marks a changed property (or all properties by default) as clean, 
+     * or unmodified.
+     *
+     * @param   string|array|Traversable|null       Propert(y|ies)
+     * @return  $this
+     */
+    public function clean($property = null);
+
+    /**
+     * Returns dirty, modified properties with their previous undirty
+     * value (or a recursive array for child entities).
+     *
+     * @return  array
+     */
+    public function dirty();
+
+    /**
+     * Marks a property as dirty.
+     *
+     * @param   string                      Property name
+     * @return  $this
+     */
+    public function markDirty($property);
+
+    /**
+     * Returns true if dirty, modified properties exist.
+     *
+     * @return  boolean
+     */
+    public function isDirty();
+
+    /**
+     * Gets the property type for a given property.
+     *
+     * @param   string          Property name
+     * @return  Network\Entity\Property\Type\TypeInterface
+     */
+    public function type($property);
 }

@@ -23,6 +23,7 @@ use Contain\Entity\Definition\AbstractDefinition;
 use Contain\Exception\RuntimeException;
 use Contain\Exception\InvalidArgumentException;
 use Contain\Entity\Property\Type\EntityType;
+use Contain\Entity\Property\Type\ListType;
 use ReflectionMethod;
 
 /**
@@ -273,12 +274,16 @@ class Compiler
         }
 
         $v = array();
-        $children = array();
+        $listChildren = $children = array();
         
         foreach ($this->definition as $property) {
             $v[] = $property->getName();
             if ($property->getType() instanceof EntityType) {
                 $children[] = $property;
+            }
+            if ($property->getType() instanceof ListType &&
+                $property->getType()->getType() instanceof EntityType) {
+                $listChildren[] = $property;
             }
         }
 
@@ -288,6 +293,7 @@ class Compiler
             'init'        => $this->importMethods('init'),
             'primary'     => $primary,
             'children'    => $children,
+            'listChildren'=> $listChildren,
         ));
 
         $this->append('Entity/importExport', array(

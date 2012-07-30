@@ -165,7 +165,7 @@
      *
      * @return  mixed
      */
-    public function getPrimary()
+    public function primary()
     {
         return array(
 <?php foreach ($this->primary as $property): ?>
@@ -249,7 +249,7 @@
      *
      * @return  array
      */
-    public function getDirty()
+    public function dirty()
     {
         $result = array_keys($this->_dirty);
 <?php foreach ($this->children as $entity): ?>
@@ -257,6 +257,17 @@
         if ($this-><?php echo $entity->getName(); ?> !== $this->_types['<?php echo $entity->getName(); ?>']->getUnsetValue() &&
             $this-><?php echo $entity->getName(); ?>->isDirty()) {
             $result[] = '<?php echo $entity->getName(); ?>';
+        }
+<?php endforeach; ?>
+<?php foreach ($this->listChildren as $entity): ?>
+
+        if ($this-><?php echo $entity->getName(); ?> !== $this->_types['<?php echo $entity->getName(); ?>']->getUnsetValue()) {
+            foreach ($this-><?php echo $entity->getName(); ?> as $entity) {
+                if ($entity->isDirty()) {
+                    $result[] = '<?php echo $entity->getName(); ?>';
+                    break;
+                }
+            }
         }
 <?php endforeach; ?>
 
@@ -269,7 +280,7 @@
      * @param   string                      Property name
      * @return  $this
      */
-    public function setAsDirty($property)
+    public function markDirty($property)
     {
         if ($this->hasProperty($property)) {
             $this->_dirty[$property] = true;
@@ -285,5 +296,19 @@
      */
     public function isDirty()
     {
-        return (bool) $this->getDirty();
+        return (bool) $this->dirty();
     }
+
+    /**
+     * Gets the property type for a given property.
+     *
+     * @param   string          Property name
+     * @return  Network\Entity\Property\Type\TypeInterface
+     */
+    public function type($property)
+    {
+        return isset($this->_types[$property])
+            ? $this->_types[$property]
+            : null;
+    }
+

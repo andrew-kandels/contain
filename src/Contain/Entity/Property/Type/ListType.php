@@ -53,7 +53,7 @@ class ListType extends StringType
      *
      * @return  Entity\Property\AbstractType
      */
-    protected function getType()
+    public function getType()
     {
         if (!$type = $this->getOption('type')) {
             throw new RuntimeException('$value is invalid because no type has been set for '

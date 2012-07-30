@@ -23,6 +23,8 @@ use Contain\Mapper\Driver\ConnectionInterface;
 use Contain\Mapper\Driver\DriverInterface;
 use Contain\Exception\InvalidArgumentException;
 use Contain\Entity\EntityInterface;
+use Contain\Entity\Property\Type\EntityType;
+use Contain\Entity\Property\Type\ListType;
 use Exception;
 use RuntimeException;
 use MongoId;
@@ -231,7 +233,7 @@ class MongoDB implements DriverInterface
      */
     protected function setId(EntityInterface $entity)
     {
-        if ($properties = $entity->getPrimary()) {
+        if ($properties = $entity->primary()) {
             $primaryKeys = array_keys($properties);
             $properties  = $entity->export($primaryKeys, true);
 
@@ -344,7 +346,7 @@ class MongoDB implements DriverInterface
     }
 
     /**
-     * Rewrites the getDirty() output from an entity into something
+     * Rewrites the dirty() output from an entity into something
      * MongoDb can use in an update statement.
      *
      * @param   EntityInterface     Reference entity
@@ -355,11 +357,13 @@ class MongoDB implements DriverInterface
     {
         $result = array();
 
-        $dirty  = $entity->export($entity->getDirty());
+        $dirty  = $entity->export($entity->dirty());
 
         foreach ($dirty as $property => $value) {
             // child entity
-            if (is_array($value)) {
+            $type = $entity->type($property);
+
+            if ($type instanceof EntityType) {
                 $method = 'get' . ucfirst($property);
                 $child  = $entity->$method();
                 $sub    = $this->getUpdateCriteria($child);
