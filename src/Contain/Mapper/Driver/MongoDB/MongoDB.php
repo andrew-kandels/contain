@@ -25,6 +25,8 @@ use Contain\Exception\InvalidArgumentException;
 use Contain\Entity\EntityInterface;
 use Contain\Mapper\Selector;
 use Exception;
+use RuntimeException;
+use MongoId;
 
 /**
  * Contain's MongoDB Driver
@@ -233,7 +235,12 @@ class MongoDB implements DriverInterface
      */
     public function save(EntityInterface $entity)
     {
-        $primary = $entity->getPrimaryValue();
+        // use primary for id if set
+        try {
+            $primary = $entity->getPrimaryValue();
+        } catch (RuntimeException $e) {
+            $primary = null;
+        }
 
         // update
         if ($id = $entity->getExtendedProperty('_id')) {
@@ -268,6 +275,11 @@ class MongoDB implements DriverInterface
         $entity->getEventManager()->trigger('insert.pre', $entity);
 
         $data        = $entity->export();
+
+        if (!$primary) {
+            $primary = new MongoId();
+        }
+
         $data['_id'] = $primary;
         $entity->setExtendedProperty('_id', $primary);
 
