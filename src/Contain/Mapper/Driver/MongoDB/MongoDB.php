@@ -445,22 +445,21 @@ class MongoDB implements DriverInterface
         $defaultOptions = array();
 
         $options = $this->getOptions(array(
-            'limit' => 50,
+            'limit'  => 25,
+            'offset' => 0,
         ));
 
-        $cursor = $this->getCollection()->find(
-            $criteria,
-            $this->getSelect()
-        );
+        $cursor = $this->getCollection()
+            ->find(
+                $criteria,
+                $this->getSelect()
+            )
+            ->limit($options['limit'])
+            ->skip($options['offset']);
 
         $result = array();
 
-        $index = 0;
         foreach ($cursor as $data) {
-            if (++$index >= $options['limit']) {
-                break;
-            }
-
             $this->options = $defaultOptions;
             $result[] = $this->hydrateEntity($data);
         }
@@ -483,6 +482,30 @@ class MongoDB implements DriverInterface
             'timeout' => 60000, // 1 minute
         ));
         $result = $this->getCollection()->remove($criteria, $options);
+        return $this;
+    }
+
+    /**
+     * Limits the results to a specific number.
+     *
+     * @param   integer             Limit
+     * @return  $this
+     */
+    public function limit($limit)
+    {
+        $this->options['limit'] = $limit;
+        return $this;
+    }
+
+    /**
+     * Skips X number of rows.
+     *
+     * @param   integer             Rows to skip
+     * @return  $this
+     */
+    public function offset($offset)
+    {
+        $this->options['offset'] = $offset;
         return $this;
     }
 }
