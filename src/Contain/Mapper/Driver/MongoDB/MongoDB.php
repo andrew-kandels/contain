@@ -25,19 +25,20 @@ use Contain\Exception\InvalidArgumentException;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
+use Contain\AbstractQuery;
 use Exception;
 use RuntimeException;
 use MongoId;
 
 /**
- * Contain's MongoDB Driver
+ * MongoDB Driver
  *
  * @category    akandels
  * @package     contain
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class MongoDB implements DriverInterface
+class MongoDB extends AbstractQuery implements DriverInterface
 {
     /**
      * @var Contain\Mapper\Driver\ConnectionInterface
@@ -68,11 +69,6 @@ class MongoDB implements DriverInterface
      * @var array
      */
     protected $options = array();
-
-    /**
-     * @var array
-     */
-    protected $select = array();
 
     /**
      * Constructor
@@ -122,6 +118,8 @@ class MongoDB implements DriverInterface
             'autoExtend'   => false,
         ));
 
+        $this->clear();
+
         // Mongo specific primary/unique column
         $id = null;
         if (isset($data['_id'])) {
@@ -147,80 +145,6 @@ class MongoDB implements DriverInterface
         $entity->clean();
 
         return $entity;
-    }
-
-    /**
-     * Sets a driver option. Which are available depends on the operation.
-     *
-     * @param   string              Option Name
-     * @param   mixed               Option Value
-     * @return  $this
-     */
-    public function setOption($name, $value)
-    {
-        $this->options[$name] = $value;
-        return $this;
-    }
-
-    /**
-     * Retrieves options (if set) by available keys.
-     *
-     * @param   array           Options
-     * @return  array
-     */
-    protected function getOptions(array $defaults = array())
-    {
-        $result = array();
-        foreach ($defaults as $name => $value) {
-            $result[$name] = $value;
-            if (isset($this->options[$name])) {
-                $result[$name] = $this->options[$name];
-            }
-        }
-
-        // reset for the next call
-        $this->options = array();
-
-        return $result;
-    }
-
-    /**
-     * Selects which fields to query on the next call to a fetching
-     * method (findOne, find, etc.).
-     *
-     * @param   Traversable|array|string                Field(s)
-     * @return  $this
-     */
-    public function select($fields = array())
-    {
-        $this->select = array();
-
-        if (is_array($fields) || $fields instanceof Traversable) {
-            foreach ($fields as $field) {
-                $this->select[] = $field;
-            }
-        } elseif (is_string($fields)) {
-            $this->select[] = $fields;
-        } else {
-            throw new InvalidArgumentException('$fields should be an array, instance of '
-                . 'Traversable or a single property name.'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Returns a list of properties to retrieve when querying for
-     * an entity.
-     *
-     * @return  array
-     */
-    protected function getSelect()
-    {
-        $select = $this->select;
-        $this->select = array();
-        return $select;
     }
 
     /**
@@ -344,6 +268,8 @@ class MongoDB implements DriverInterface
             $this->insert($entity);
         }
 
+        $this->clear();
+
         // mark as properties as unmodified
         $entity->clean();
 
@@ -456,14 +382,18 @@ class MongoDB implements DriverInterface
     {
         $result = $this->getCollection()->findOne(
             $criteria,
-            $this->getSelect()
+            $this->getProperties()
         );
 
         if (!$result) {
             return false;
         }
 
-        return $this->hydrateEntity($result);
+        $result = $this->hydrateEntity($result);
+
+        $this->clear();
+
+        return $result;
     }
 
     /**
@@ -478,18 +408,19 @@ class MongoDB implements DriverInterface
         // save for hydration
         $defaultOptions = array();
 
-        $options = $this->getOptions(array(
-            'limit'  => 25,
-            'offset' => 0,
-        ));
-
         $cursor = $this->getCollection()
             ->find(
                 $criteria,
-                $this->getSelect()
-            )
-            ->limit($options['limit'])
-            ->skip($options['offset']);
+                $this->getProperties()
+            );
+
+        if ($this->limit !== null) {
+            $cursor->limit($this->limit);
+        }
+
+        if ($this->skip !== null) {
+            $cursor->skip($this->skip);
+        }
 
         $result = array();
 
@@ -497,6 +428,8 @@ class MongoDB implements DriverInterface
             $this->options = $defaultOptions;
             $result[] = $this->hydrateEntity($data);
         }
+
+        $this->clear();
 
         return $result;
     }
@@ -515,31 +448,11 @@ class MongoDB implements DriverInterface
             'fsync'   => false,
             'timeout' => 60000, // 1 minute
         ));
+
+        $this->clear();
+
         $result = $this->getCollection()->remove($criteria, $options);
-        return $this;
-    }
 
-    /**
-     * Limits the results to a specific number.
-     *
-     * @param   integer             Limit
-     * @return  $this
-     */
-    public function limit($limit)
-    {
-        $this->options['limit'] = $limit;
-        return $this;
-    }
-
-    /**
-     * Skips X number of rows.
-     *
-     * @param   integer             Rows to skip
-     * @return  $this
-     */
-    public function offset($offset)
-    {
-        $this->options['offset'] = $offset;
         return $this;
     }
 }
