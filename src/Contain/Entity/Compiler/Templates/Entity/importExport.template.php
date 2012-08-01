@@ -74,9 +74,11 @@
 
 <?php endforeach; ?>
                 default:
-                    throw new InvalidArgumentException("'$key' is not a valid property of "
-                        . "the <?php echo $this->name; ?> entity."
-                    );
+                    if (!$ignoreErrors) {
+                        throw new InvalidArgumentException("'$key' is not a valid property of "
+                            . "the <?php echo $this->name; ?> entity."
+                        );
+                    }
                     break;
             }
         }
