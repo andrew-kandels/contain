@@ -54,4 +54,17 @@ class DoubleType extends IntegerType
 
         throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
     }
+
+    /**
+     * Returns the internal value represented as an floating point value
+     * for purposes of debugging or export.
+     *
+     * @param   mixed       Internal value
+     * @return  string
+     * @throws  Contain\Exception\InvalidArgumentException
+     */
+    public function parseString($value)
+    {
+        return (double) $this->parse($value);
+    }
 }

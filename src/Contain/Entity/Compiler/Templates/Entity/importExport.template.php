@@ -122,9 +122,10 @@
             }
 
             $method       = 'get' . ucfirst($property);
+            $hasMethod    = 'has' . ucfirst($property);
             $unsetValue   = $this->_types[$property]->getUnsetValue();
             $defaultValue = $this->_types[$property]->getOption('defaultValue') ?: $unsetValue;
-            $value        = $this->$method() ?: $defaultValue;
+            $value        = $this->$hasMethod() ? $this->$method() : $defaultValue;
             if ($includeUnset || $unsetValue !== $value) {
                 $result[$property] = $this->_types[$property]->parseString($value);
             }

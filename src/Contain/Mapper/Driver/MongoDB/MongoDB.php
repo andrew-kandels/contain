@@ -297,6 +297,40 @@ class MongoDB implements DriverInterface
     }
 
     /**
+     * Increments a numerical property.
+     *
+     * @param   EntityInterface                 Entity to persist
+     * @param   array                           array('column' => (int) $incrementBy)
+     * @return  $this
+     */
+    public function increment(EntityInterface $entity, array $values)
+    {
+        if (!$this->isPersisted($entity)) {
+            throw new InvalidArgumentException('Cannot increment properties as $entity '
+                . 'has not been persisted.'
+            );
+        }
+
+        $entity->getEventManager()->trigger('update.pre', $entity);
+
+        $this->getCollection()->update(
+            array('_id' => $this->getId($entity)),
+            array('$inc' => $values),
+            $this->getOptions(array(
+                'upsert' => false,
+                'multiple' => false,
+                'safe' => false,
+                'fsync' => false,
+                'timeout' => 60000, // 1 minute
+            ))
+        );
+  
+        $entity->getEventManager()->trigger('update.post', $entity);
+
+        return $this;
+    }
+
+    /**
      * Persists an entity in MongoDB.
      *
      * @param   EntityInterface                 Entity to persist

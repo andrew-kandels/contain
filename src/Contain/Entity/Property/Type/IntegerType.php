@@ -40,6 +40,10 @@ class IntegerType extends StringType
      */
     public function parse($value = null)
     {
+        if ($value === 0) {
+            return 0;
+        }
+
         if (!$value) {
             return $this->getUnsetValue();
         }
@@ -53,6 +57,19 @@ class IntegerType extends StringType
         }
 
         throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+    }
+
+    /**
+     * Returns the internal value represented as an integer value
+     * for purposes of debugging or export.
+     *
+     * @param   mixed       Internal value
+     * @return  string
+     * @throws  Contain\Exception\InvalidArgumentException
+     */
+    public function parseString($value)
+    {
+        return (integer) $this->parse($value);
     }
 
     /**
