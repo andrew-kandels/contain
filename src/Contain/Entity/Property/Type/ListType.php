@@ -105,6 +105,10 @@ class ListType extends StringType
      */
     public function parse($value)
     {
+        if (!$value && is_array($value)) {
+            return array();
+        }
+
         if (!$value) {
             return $this->getUnsetValue();
         }

@@ -42,7 +42,10 @@
         );
 <?php endif; ?>
         $value = $this->_types['<?php echo $this->property->getName(); ?>']->parse($value);
-<?php if (!$this->property->getType() instanceof \Contain\Entity\Property\Type\EntityType): ?>
+<?php if ($this->property->getType() instanceof \Contain\Entity\Property\Type\ListType): ?>
+        // @todo list type with entity needs a better solution
+        $this->_dirty['<?php echo $this->property->getName(); ?>'] = true;
+<?php elseif (!$this->property->getType() instanceof \Contain\Entity\Property\Type\EntityType): ?>
         if (!isset($this->_dirty['<?php echo $this->property->getName(); ?>']) && $value !== $this-><?php echo $this->property->getName(); ?>) {
             $this->_dirty['<?php echo $this->property->getName(); ?>'] = true;
         }
