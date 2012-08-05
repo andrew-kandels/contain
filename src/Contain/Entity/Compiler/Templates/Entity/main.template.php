@@ -230,22 +230,21 @@
         }
 <?php if ($this->children): ?>
 
-        if ($this->$name !== $this->_types[$name]->getUnsetValue() &&
-            $this->_types[$name] instanceof \Contain\Entity\Property\Type\EntityType) {
-            $this->$name->clean();
+        if ($this->$property !== $this->_types[$property]->getUnsetValue() &&
+            $this->_types[$property] instanceof \Contain\Entity\Property\Type\EntityType) {
+            $this->$property->clean();
         }
 <?php endif; ?>
 
-        if (isset($this->_dirty[$name])) {
-            unset($this->_dirty[$name]);
+        if (isset($this->_dirty[$property])) {
+            unset($this->_dirty[$property]);
         }
 
         return $this;
     }
 
     /**
-     * Returns dirty, modified properties with their previous undirty
-     * value (or a recursive array for child entities).
+     * Returns dirty, modified properties.
      *
      * @return  array
      */

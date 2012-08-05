@@ -21,7 +21,6 @@ namespace Contain\Entity\Property\Type;
 
 use Contain\Exception\InvalidArgumentException;
 use Contain\Exception\RuntimeException;
-use Traversable;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
 
@@ -93,6 +92,12 @@ class ListType extends StringType
             $type->setOption('className', $className);
         }
 
+        if ($type instanceof ListType) {
+            throw new InvalidArgumentException('$type may not be a nested instance of '
+                . 'Contain\Entity\Property\Type\ListType.'
+            );
+        }
+
         return $type;
     }
 
@@ -115,14 +120,12 @@ class ListType extends StringType
 
         $type = $this->getType();
 
-        if (is_array($value) || $value instanceof Traversable) {
-            $return = array();
-            foreach ($value as $val) {
-                $return[] = $type->parse($val);
-            }
-            $value = $return;
-        } else {
-            throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+        if (!is_array($value)) {
+            $value = array($value);
+        }
+
+        foreach ($value as $index => $innerValue) {
+            $value[$index] = $type->parse($innerValue);
         }
 
         return $value;

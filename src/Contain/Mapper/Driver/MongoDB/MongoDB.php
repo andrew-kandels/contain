@@ -24,6 +24,7 @@ use Contain\Mapper\Driver\DriverInterface;
 use Contain\Exception\InvalidArgumentException;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
+use Contain\Entity\Property\Type\IntegerType;
 use Contain\Entity\Property\Type\ListType;
 use Contain\AbstractQuery;
 use Exception;
@@ -107,11 +108,21 @@ class MongoDB extends AbstractQuery implements DriverInterface
     /**
      * Hydrates an array of data into an entity object.
      *
-     * @param   array                   Data key/value pairs
+     * @param   array|Traversable       Data key/value pairs
      * @return  EntityInterface
      */
-    protected function hydrateEntity(array $data = array())
+    public function hydrateEntity($data = array())
     {
+        if ($data instanceof Traversable) {
+            $data = iterator_to_array($data);
+        }
+
+        if (!is_array($data)) {
+            throw new InvalidArgumentException('$data must be an array or an instance of '
+                . 'Traversable.'
+            );
+        }
+
         // default options
         $options = $this->getOptions(array(
             'ignoreErrors' => true,
@@ -223,11 +234,12 @@ class MongoDB extends AbstractQuery implements DriverInterface
     /**
      * Increments a numerical property.
      *
-     * @param   EntityInterface                 Entity to persist
-     * @param   array                           array('column' => (int) $incrementBy)
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve path to numeric property
+     * @param   integer                         Amount to increment by
      * @return  $this
      */
-    public function increment(EntityInterface $entity, array $values)
+    public function increment(EntityInterface $entity, $query, $inc)
     {
         if (!$this->isPersisted($entity)) {
             throw new InvalidArgumentException('Cannot increment properties as $entity '
@@ -235,11 +247,22 @@ class MongoDB extends AbstractQuery implements DriverInterface
             );
         }
 
+        list($targetEntity, $property, $type, $targetValue) = array_values($this->resolve($entity, $query));
+        if (!$type instanceof IntegerType) {
+            throw new InvalidArgumentException('$entity property targeted by \'' . $query . '\' '
+                . 'does not implement Contain\Entity\Property\Type\IntegerType and therefore cannot '
+                . 'be incremented.'
+            );
+        }
+
+        $setter = 'set' . ucfirst($property);
+        $targetEntity->$setter((int) $targetValue + (int) $inc);
+
         $entity->getEventManager()->trigger('update.pre', $entity);
 
         $this->getCollection()->update(
             array('_id' => $this->getId($entity)),
-            array('$inc' => $values),
+            array('$inc' => array($query => $inc)),
             $this->getOptions(array(
                 'upsert' => false,
                 'multiple' => false,
@@ -248,8 +271,166 @@ class MongoDB extends AbstractQuery implements DriverInterface
                 'timeout' => 60000, // 1 minute
             ))
         );
-  
+
         $entity->getEventManager()->trigger('update.post', $entity);
+
+        $targetEntity->clean($property);
+
+        return $this;
+    }
+
+    /**
+     * Converts a property query to something the mapper can use to work with 
+     * various levels of sub-properties and further descendents using the 
+     * dot notation.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query
+     * @param   string                          Original query (for recursion debugging)
+     * @return  stdclass                        Access points (internal)
+     */
+    protected function resolve(EntityInterface $entity, $query, $original = null)
+    {
+        if (!$query || !is_string($query)) {
+            throw new InvalidArgumentException(__METHOD__ . ' failed with invalid or non-existent query.');
+        }
+
+        if (!$original) {
+            $original = $query;
+        }
+
+        $parts    = explode('.', $query);
+        $property = array_shift($parts);
+        $method   = 'get' . ucfirst($property);
+
+        if (!$type = $entity->type($property)) {
+            throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
+                . 'at: \'' . $property . '\' property. No such property \'' . $property . '\'.'
+            );
+        }
+
+        $value = $entity->$method();
+
+        $return = array(
+            'entity'    => $entity,
+            'property'  => $property,
+            'type'      => $type,
+            'value'     => $value,
+        );
+
+        if (!$parts) {
+            return $return;
+        }
+
+        if ($type instanceof ListType) {
+            $part    = array_shift($parts);
+            $subType = $type->getType();
+
+            if (!preg_match('/^[0-9]+$/', $part)) {
+                throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
+                    . 'because \'' . $property . '\' descends Contain\Entity\Property\Type\ListType '
+                    . 'and may only be traversed with numeric indexes.'
+                );
+            }
+
+            $index = (int) $part;
+
+            if (!isset($value[$index])) {
+                throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
+                    . 'because index ' . $index . ' is not set in \'' . $property . '\'.'
+                );
+            }
+
+            $nestedValue = $value[$index];
+
+            if ($parts && $subType instanceof EntityType) {
+                return $this->resolve($nestedValue, implode('.', $parts), $original);
+            } elseif ($parts) {
+                throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\', '
+                    . 'cannot descend into a list unless it contains elements that implement '
+                    . 'Contain\Entity\Property\Type\EntityType.'
+                );
+            }
+
+            $return['type'] = $type->getType(); // sub-type of list item
+            $return['value'] = $nestedValue;
+
+            return $return;
+        }
+
+        if ($type instanceof EntityType) {
+            return $this->resolve($value, implode('.', $parts), $original);
+        }
+
+        throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
+            . 'at: \'' . $part . '\' because \'' . $property . '\' is not a type that can be '
+            . 'traversed.'
+        );
+    }
+
+    /**
+     * Appends one value to the end of a ListType, optionally if it doesn't 
+     * exist only. In MongoDB this is an atomic operation.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve which should point to a ListType
+     * @param   mixed|array                     Value(s) to append
+     * @param   boolean                         Only add if it doesn't exist
+     * @return  $this
+     */
+    public function append(EntityInterface $entity, $query, $value, $ifNotExists = false)
+    {
+        if (!$this->isPersisted($entity)) {
+            throw new InvalidArgumentException('Cannot append to $entity as this is an update operation '
+                . 'and $entity has not been persisted.'
+            );
+        }
+
+        list($targetEntity, $property, $type, $targetValue) = array_values($this->resolve($entity, $query));
+        if (!$targetValue) {
+            $targetValue = array();
+        }
+
+        if (!$type instanceof ListType) {
+            throw new InvalidArgumentException("\$query '$query' does not "
+                . 'reference a property that implements Contain\Entity\Property\Type\ListType.'
+            );
+        }
+
+        if (count($value = $type->parseString($value)) != 1) {
+            throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
+        }
+
+        $value  = $value[0];
+        $method = $ifNotExists ? '$addToSet' : '$push';
+
+        // append the values to the entity's property to reflect state
+        if ($ifNotExists) {
+            if (!in_array($value, $targetValue, true)) {
+                $targetValue[] = $value;
+            }
+        } else {
+            $targetValue[] = $value;
+        }
+        $targetEntity->fromArray(array($property => $targetValue));
+
+        $entity->getEventManager()->trigger('update.pre', $entity);
+
+        $this->getCollection()->update(
+            array('_id' => $this->getId($entity)),
+            array($method => array($query => $value)),
+            $this->getOptions(array(
+                'upsert' => false,
+                'multiple' => false,
+                'safe' => false,
+                'fsync' => false,
+                'timeout' => 60000, // 1 minute
+            ))
+        );
+
+        $entity->getEventManager()->trigger('update.post', $entity);
+
+        $targetEntity->clean($property);
 
         return $this;
     }
@@ -435,15 +616,47 @@ class MongoDB extends AbstractQuery implements DriverInterface
     }
 
     /**
+     * Deletes an entity.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @return  $this
+     */
+    public function delete(EntityInterface $entity)
+    {
+        if (!$this->isPersisted($entity)) {
+            throw new InvalidArgumentException('Cannot delete $entity '
+                . 'as $entity has not been persisted.'
+            );
+        }
+
+        $options = $this->getOptions(array(
+            'justOne' => true,
+            'safe'    => false,
+            'fsync'   => false,
+            'timeout' => 60000, // 1 minute
+        ));
+
+        $criteria = array(
+            '_id' => $this->getId($entity),
+        );
+
+        $this->clear();
+
+        $result = $this->getCollection()->remove($criteria, $options);
+
+        return $this;
+    }
+
+    /**
      * Deletes a row by a condition.
      *
      * @param   array                   Search criteria
      * @return  $this
      */
-    public function delete(array $criteria)
+    public function deleteBy(array $criteria)
     {
         $options = $this->getOptions(array(
-            'justOne' => true,
+            'justOne' => false,
             'safe'    => false,
             'fsync'   => false,
             'timeout' => 60000, // 1 minute

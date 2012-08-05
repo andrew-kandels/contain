@@ -19,6 +19,8 @@
 
 namespace Contain\Mapper\Driver;
 
+use Contain\Entity\EntityInterface;
+
 /**
  * Contain Mapper Driver Interface
  *
@@ -29,4 +31,83 @@ namespace Contain\Mapper\Driver;
  */
 interface DriverInterface
 {
+    /**
+     * Hydrates an array of data into an entity object.
+     *
+     * @param   array                   Data key/value pairs
+     * @return  EntityInterface
+     */
+    public function hydrateEntity($data = array());
+
+    /**
+     * Returns true if the object has been persisted to the data store 
+     * at some point (though it may be dirty now).
+     *
+     * @param   EntityInterface                 Entity to persist
+     * @return  boolean
+     */
+    public function isPersisted(EntityInterface $entity);
+
+    /**
+     * Increments a numerical property.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve path to numeric property
+     * @param   integer                         Amount to increment by
+     * @return  $this
+     */
+    public function increment(EntityInterface $entity, $query, $inc);
+
+    /**
+     * Appends one or more values to the end of a ListType, optionally if they do or 
+     * don't exist. In MongoDB this is an atomic operation.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve which should point to a ListType
+     * @param   mixed|array|Traversable         Value(s) to append
+     * @param   boolean                         Only add if it doesn't exist
+     * @return  $this
+     */
+    public function append(EntityInterface $entity, $query, $value, $ifNotExists = false);
+
+    /**
+     * Persists an entity in MongoDB.
+     *
+     * @param   EntityInterface                 Entity to persist
+     * @return  $this
+     */
+    public function persist(EntityInterface $entity);
+
+    /**
+     * Finds and hydrates a single entity from a search criteria.
+     *
+     * @param   array                   Search criteria
+     * @return  Contain\Entity\EntityInterface|false
+     */
+    public function findOne(array $criteria = array());
+
+    /**
+     * Finds a subset of entities by some condition and returns them in a 
+     * array of hydrated entity objects.
+     *
+     * @param   array                   Search criteria
+     * @return  EntityInterface[]
+     */
+    public function find(array $criteria = array());
+
+    /**
+     * Deletes a row by a condition.
+     *
+     * @param   array                   Search criteria
+     * @return  $this
+     */
+    public function deleteBy(array $criteria);
+
+    /**
+     * Deletes an entity.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @return  $this
+     */
+    public function delete(EntityInterface $entity);
 }
