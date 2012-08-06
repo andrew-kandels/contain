@@ -64,11 +64,11 @@ interface DriverInterface
      *
      * @param   Contain\Entity\EntityInterface  Entity to persist
      * @param   string                          Query to resolve which should point to a ListType
-     * @param   mixed|array|Traversable         Value(s) to append
+     * @param   mixed|array|Traversable         Value(s) to push
      * @param   boolean                         Only add if it doesn't exist
      * @return  $this
      */
-    public function append(EntityInterface $entity, $query, $value, $ifNotExists = false);
+    public function push(EntityInterface $entity, $query, $value, $ifNotExists = false);
 
     /**
      * Persists an entity in MongoDB.

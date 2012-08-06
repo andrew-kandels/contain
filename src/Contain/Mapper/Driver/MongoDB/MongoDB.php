@@ -251,14 +251,14 @@ class MongoDB extends AbstractQuery implements DriverInterface
      *
      * @param   Contain\Entity\EntityInterface  Entity to persist
      * @param   string                          Query to resolve which should point to a ListType
-     * @param   mixed|array                     Value(s) to append
+     * @param   mixed|array                     Value to append
      * @param   boolean                         Only add if it doesn't exist
      * @return  $this
      */
-    public function append(EntityInterface $entity, $query, $value, $ifNotExists = false)
+    public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
     {
         if (!$this->isPersisted($entity)) {
-            throw new InvalidArgumentException('Cannot append to $entity as this is an update operation '
+            throw new InvalidArgumentException('Cannot push to $entity as this is an update operation '
                 . 'and $entity has not been persisted.'
             );
         }
@@ -273,18 +273,6 @@ class MongoDB extends AbstractQuery implements DriverInterface
         $value  = $value[0];
         $method = $ifNotExists ? '$addToSet' : '$push';
 
-        // append the values to the entity's property to reflect state
-        if ($ifNotExists) {
-            if (!in_array($value, $targetValue, true)) {
-                $targetValue[] = $value;
-            }
-        } else {
-            $targetValue[] = $value;
-        }
-        $resolver->getEntity()->fromArray(array($resolver->getProperty() => $targetValue));
-
-        $entity->getEventManager()->trigger('update.pre', $entity);
-
         $this->getCollection()->update(
             array('_id' => $this->getId($entity)),
             array($method => array($query => $value)),
@@ -297,7 +285,45 @@ class MongoDB extends AbstractQuery implements DriverInterface
             ))
         );
 
-        $entity->getEventManager()->trigger('update.post', $entity);
+        return $this;
+    }
+
+    /**
+     * Removes a value from a ListType. In MongoDB this is an atomic operation.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve which should point to a ListType
+     * @param   mixed|array                     Value to remove
+     * @return  $this
+     */
+    public function pull(EntityInterface $entity, $query, $value)
+    {
+        if (!$this->isPersisted($entity)) {
+            throw new InvalidArgumentException('Cannot remove from $entity as this is an update operation '
+                . 'and $entity has not been persisted.'
+            );
+        }
+
+        $resolver = $this->resolve($entity, $query);
+        $resolver->assertType('Contain\Entity\Property\Type\ListType');
+
+        if (count($value = $resolver->getType()->parseString($value)) != 1) {
+            throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
+        }
+
+        $value = $value[0];
+
+        $this->getCollection()->update(
+            array('_id' => $this->getId($entity)),
+            array('$pull' => array($query => $value)),
+            $this->getOptions(array(
+                'upsert' => false,
+                'multiple' => false,
+                'safe' => false,
+                'fsync' => false,
+                'timeout' => 60000, // 1 minute
+            ))
+        );
 
         return $this;
     }
