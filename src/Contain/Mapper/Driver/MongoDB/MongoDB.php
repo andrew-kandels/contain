@@ -159,52 +159,6 @@ class MongoDB extends AbstractQuery implements DriverInterface
     }
 
     /**
-     * Generates and sets a unique primary id for the entity, either
-     * by using properties flagged as primary or simply generating a new 
-     * MongoId object.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  $this
-     */
-    protected function setId(EntityInterface $entity)
-    {
-        if ($properties = $entity->primary()) {
-            $primaryKeys = array_keys($properties);
-            $properties  = $entity->export($primaryKeys, true);
-
-            foreach ($properties as $key => $value) {
-                if (!is_scalar($value)) {
-                    throw new RuntimeException('Primary id could not be generated '
-                        . 'from \'' . $key . '\' property because the exported value '
-                        .' is not a scalar.'
-                    );
-                }
-            }
-
-            if (count($properties) == 1) {
-                $properties = array_values($properties);
-                $primary = $properties[0];
-            } else {
-                $primary = implode('', array_values($properties));
-            }
-        } else {
-            $primary = new MongoId();
-            $primary = $primary->{'$id'};
-        }
-
-        if (!$primary) {
-            throw new RuntimeException(
-                'Primary id could not be established for $entity. Propert(y|ies) '
-                . implode(', ', $primaryKeys) . ' are either empty or unset.'
-            );
-        }
-
-        $entity->setExtendedProperty('_id', $primary);
-
-        return $this;
-    }
-
-    /**
      * Gets the interal MongoId value for an entity (if set).
      *
      * @param   EntityInterface                 Entity to persist
@@ -289,7 +243,7 @@ class MongoDB extends AbstractQuery implements DriverInterface
      * @param   string                          Original query (for recursion debugging)
      * @return  stdclass                        Access points (internal)
      */
-    protected function resolve(EntityInterface $entity, $query, $original = null)
+    public function resolve(EntityInterface $entity, $query, $original = null)
     {
         if (!$query || !is_string($query)) {
             throw new InvalidArgumentException(__METHOD__ . ' failed with invalid or non-existent query.');
@@ -458,102 +412,6 @@ class MongoDB extends AbstractQuery implements DriverInterface
     }
 
     /**
-     * Inserts an entity into MongoDb and generates a unique id if 
-     * one isn't set or can't be resolved.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  $this
-     */
-    protected function insert(EntityInterface $entity)
-    {
-        $entity->getEventManager()->trigger('insert.pre', $entity);
-
-        $this->setId($entity);
-        $data        = $entity->export();
-        $data['_id'] = $entity->getExtendedProperty('_id');
-
-        $this->getCollection()->insert(
-            $data,
-            $this->getOptions(array(
-                'safe'    => false,
-                'fsync'   => false,
-                'timeout' => 60000, // 1 minute
-            ))
-        );
-
-        $entity->getEventManager()->trigger('insert.post', $entity);
-
-        return $this;
-    }
-
-    /**
-     * Rewrites the dirty() output from an entity into something
-     * MongoDb can use in an update statement.
-     *
-     * @param   EntityInterface     Reference entity
-     * @param   array               Dirty output
-     * @return  array
-     */
-    protected function getUpdateCriteria(EntityInterface $entity)
-    {
-        $result = array();
-
-        $dirty  = $entity->export($entity->dirty());
-
-        foreach ($dirty as $property => $value) {
-            // child entity
-            $type = $entity->type($property);
-
-            if ($type instanceof EntityType) {
-                $method = 'get' . ucfirst($property);
-                $child  = $entity->$method();
-                $sub    = $this->getUpdateCriteria($child);
-
-                foreach ($sub as $subProperty => $subValue) {
-                    $result[$property . '.' . $subProperty] = $subValue;
-                }
-            } else {
-                $result[$property] = $value;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Updates a document already in MongoDb by running $sets for 
-     * dirty properties.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  $this
-     */
-    protected function update(EntityInterface $entity)
-    {
-        $entity->getEventManager()->trigger('update.pre', $entity);
-
-        // if nothing is dirty, there's nothing to do
-        if (!$update = $this->getUpdateCriteria($entity)) {
-            return $this;
-        }
-
-        $this->getCollection()->update(
-            array('_id' => $this->getId($entity)),
-            array('$set' => $update),
-            $this->getOptions(array(
-                'upsert' => false,
-                'multiple' => false,
-                'safe' => false,
-                'fsync' => false,
-                'timeout' => 60000, // 1 minute
-            ))
-        );
-
-        $entity->getEventManager()->trigger('update.post', $entity);
-
-        return $this;
-    }
-
-    /**
      * Finds and hydrates a single entity from a search criteria.
      *
      * @param   array                   Search criteria
@@ -668,4 +526,148 @@ class MongoDB extends AbstractQuery implements DriverInterface
 
         return $this;
     }
+
+    /**
+     * Rewrites the dirty() output from an entity into something
+     * MongoDb can use in an update statement.
+     *
+     * @param   EntityInterface     Reference entity
+     * @param   array               Dirty output
+     * @return  array
+     */
+    protected function getUpdateCriteria(EntityInterface $entity)
+    {
+        $result = array();
+
+        $dirty  = $entity->export($entity->dirty());
+
+        foreach ($dirty as $property => $value) {
+            // child entity
+            $type = $entity->type($property);
+
+            if ($type instanceof EntityType) {
+                $method = 'get' . ucfirst($property);
+                $child  = $entity->$method();
+                $sub    = $this->getUpdateCriteria($child);
+
+                foreach ($sub as $subProperty => $subValue) {
+                    $result[$property . '.' . $subProperty] = $subValue;
+                }
+            } else {
+                $result[$property] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Generates and sets a unique primary id for the entity, either
+     * by using properties flagged as primary or simply generating a new 
+     * MongoId object.
+     *
+     * @param   EntityInterface                 Entity to persist
+     * @return  $this
+     */
+    protected function setId(EntityInterface $entity)
+    {
+        if ($properties = $entity->primary()) {
+            $primaryKeys = array_keys($properties);
+            $properties  = $entity->export($primaryKeys, true);
+
+            foreach ($properties as $key => $value) {
+                if (!is_scalar($value)) {
+                    throw new RuntimeException('Primary id could not be generated '
+                        . 'from \'' . $key . '\' property because the exported value '
+                        .' is not a scalar.'
+                    );
+                }
+            }
+
+            if (count($properties) == 1) {
+                $properties = array_values($properties);
+                $primary = $properties[0];
+            } else {
+                $primary = implode('', array_values($properties));
+            }
+        } else {
+            $primary = new MongoId();
+            $primary = $primary->{'$id'};
+        }
+
+        if (!$primary) {
+            throw new RuntimeException(
+                'Primary id could not be established for $entity. Propert(y|ies) '
+                . implode(', ', $primaryKeys) . ' are either empty or unset.'
+            );
+        }
+
+        $entity->setExtendedProperty('_id', $primary);
+
+        return $this;
+    }
+
+    /**
+     * Inserts an entity into MongoDb and generates a unique id if 
+     * one isn't set or can't be resolved.
+     *
+     * @param   EntityInterface                 Entity to persist
+     * @return  $this
+     */
+    protected function insert(EntityInterface $entity)
+    {
+        $entity->getEventManager()->trigger('insert.pre', $entity);
+
+        $this->setId($entity);
+        $data        = $entity->export();
+        $data['_id'] = $entity->getExtendedProperty('_id');
+
+        $this->getCollection()->insert(
+            $data,
+            $this->getOptions(array(
+                'safe'    => false,
+                'fsync'   => false,
+                'timeout' => 60000, // 1 minute
+            ))
+        );
+
+        $entity->getEventManager()->trigger('insert.post', $entity);
+
+        return $this;
+    }
+
+    /**
+     * Updates a document already in MongoDb by running $sets for 
+     * dirty properties.
+     *
+     * @param   EntityInterface                 Entity to persist
+     * @return  $this
+     */
+    protected function update(EntityInterface $entity)
+    {
+        $entity->getEventManager()->trigger('update.pre', $entity);
+
+        // if nothing is dirty, there's nothing to do
+        if (!$update = $this->getUpdateCriteria($entity)) {
+            return $this;
+        }
+
+        $this->getCollection()->update(
+            array('_id' => $this->getId($entity)),
+            array('$set' => $update),
+            $this->getOptions(array(
+                'upsert' => false,
+                'multiple' => false,
+                'safe' => false,
+                'fsync' => false,
+                'timeout' => 60000, // 1 minute
+            ))
+        );
+
+        $entity->getEventManager()->trigger('update.post', $entity);
+
+        return $this;
+    }
+
+
 }

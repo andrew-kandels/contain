@@ -110,4 +110,16 @@ interface DriverInterface
      * @return  $this
      */
     public function delete(EntityInterface $entity);
+
+    /**
+     * Converts a property query to something the mapper can use to work with 
+     * various levels of sub-properties and further descendents using the 
+     * dot notation.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query
+     * @param   string                          Original query (for recursion debugging)
+     * @return  stdclass                        Access points (internal)
+     */
+    public function resolve(EntityInterface $entity, $query, $original = null);
 }
