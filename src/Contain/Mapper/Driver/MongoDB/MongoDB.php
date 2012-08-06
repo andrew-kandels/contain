@@ -441,6 +441,30 @@ class MongoDB extends AbstractQuery implements DriverInterface
     }
 
     /**
+     * Runs a raw update statement outside the scope of entities.
+     *
+     * @param   array               Criteria
+     * @param   array               Fields to update
+     * @return  $this
+     */
+    public function updateBy($criteria, $updates)
+    {
+        $this->getCollection()->update(
+            $criteria,
+            $updates,
+            $this->getOptions(array(
+                'upsert' => false,
+                'multiple' => true,
+                'safe' => false,
+                'fsync' => false,
+                'timeout' => 60000, // 1 minute
+            ))
+        );
+
+        return $this;
+    }
+
+    /**
      * Rewrites the dirty() output from an entity into something
      * MongoDb can use in an update statement.
      *
@@ -581,6 +605,4 @@ class MongoDB extends AbstractQuery implements DriverInterface
 
         return $this;
     }
-
-
 }
