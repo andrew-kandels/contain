@@ -118,8 +118,7 @@ interface DriverInterface
      *
      * @param   Contain\Entity\EntityInterface  Entity to persist
      * @param   string                          Query
-     * @param   string                          Original query (for recursion debugging)
-     * @return  stdclass                        Access points (internal)
+     * @return  Contain\Entity\Property\Resolver
      */
-    public function resolve(EntityInterface $entity, $query, $original = null);
+    public function resolve(EntityInterface $entity, $query);
 }

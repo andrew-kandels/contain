@@ -105,23 +105,20 @@ class Resolver
             return $this;
         }
 
-        if ($type instanceof ListType) {
+        if ($this->type instanceof ListType) {
             $part    = array_shift($parts);
             $subType = $this->type->getType();
 
             if (!preg_match('/^[0-9]+$/', $part)) {
-                throw new InvalidArgumentException('Resolve failed with \'' . $this->query . '\' '
-                    . 'because \'' . $this->property . '\' descends Contain\Entity\Property\Type\ListType '
-                    . 'and may only be traversed with numeric indexes.'
+                $this->throwException("Property '{$this->property}' of Contain\Entity\Property\Type\ListType "
+                    . "can only be traversed numerically."
                 );
             }
 
             $index = (int) $part;
 
             if (!isset($this->value[$index])) {
-                throw new InvalidArgumentException('Resolve failed with \'' . $this->query . '\' '
-                    . 'because index ' . $index . ' is not set in \'' . $this->property . '\'.'
-                );
+                $this->throwException("Index $index not set");
             }
 
             $nestedValue = $this->value[$index];
@@ -134,9 +131,8 @@ class Resolver
             }
             
             if ($parts) {
-                throw new InvalidArgumentException('Resolve failed with \'' . $this->query . '\', '
-                    . 'cannot descend into a list unless it contains elements that implement '
-                    . 'Contain\Entity\Property\Type\EntityType.'
+                $this->throwException('Cannot descend into a list unless it contains elements '
+                    . 'that implement Contain\Entity\Property\Type\EntityType.'
                 );
             }
 
@@ -146,16 +142,15 @@ class Resolver
             return $this;
         }
 
-        if ($type instanceof EntityType) {
+        if ($this->type instanceof EntityType) {
             $loggedStep = clone $this;
             $loggedStep->clearSteps();
             $this->steps[] = $loggedStep;
             return $this->scan($value, implode('.', $parts));
         }
 
-        throw new InvalidArgumentException('Resolve failed with \'' . $this->query . '\' '
-            . 'at: \'' . $part . '\' because \'' . $this->property . '\' is not a type that can be '
-            . 'traversed.'
+        $this->throwException($entity, "Part '$part', property '{$this->property}' cannot be "
+            . "traversed."
         );
     }
 
@@ -168,16 +163,50 @@ class Resolver
      */
     protected function lookupProperty(EntityInterface $entity, $property)
     {
-        if (!$entity->hasProperty($property)) {
-            throw new InvalidArgumentException('Resolve failed with query \'' 
-                . $this->query . '\', $entity '
-                . 'does not have a \'' . $property . '\' property.'
-            );
+        if (!$entity->propertyExists($property)) {
+            $this->throwException("No such property: '$property'.");
         }
 
         $method = 'get' . ucfirst($property);
 
         return $entity->$method();
+    }
+
+    /**
+     * Throws an exception with a consistent message for debugging.
+     *
+     * @param   string                                      Message
+     * @param   string                                      Exception class
+     * @return  $this
+     */
+    protected function throwException($message = null, $e = '\InvalidArgumentException')
+    {
+        throw new $e(sprintf('Resolver query \'%s\' failed on %s.%s',
+            $this->query,
+            $this->entity ? get_class($this->entity) : '(no entity)',
+            $message ? ' ' . $message : 'No details'
+        ));
+    }
+
+    /**
+     * Ensures the matched item from scan() is an instance of a given type
+     * or throws an exception.
+     *
+     * @param   string                      Class
+     * @throws  InvalidArgumentException
+     * @return  $this
+     */
+    public function assertType($type)
+    {
+        if (!$this->getEntity()) {
+            $this->throwException('No matched entity');
+        }
+
+        if (!$this->getType() instanceof $type) {
+            $this->throwException("Element does not extend $type");
+        }
+
+        return $this;
     }
 
     /**

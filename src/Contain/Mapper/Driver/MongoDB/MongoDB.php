@@ -30,6 +30,7 @@ use Contain\AbstractQuery;
 use Exception;
 use RuntimeException;
 use MongoId;
+use Contain\Entity\Property\Resolver;
 
 /**
  * MongoDB Driver
@@ -201,16 +202,11 @@ class MongoDB extends AbstractQuery implements DriverInterface
             );
         }
 
-        list($targetEntity, $property, $type, $targetValue) = array_values($this->resolve($entity, $query));
-        if (!$type instanceof IntegerType) {
-            throw new InvalidArgumentException('$entity property targeted by \'' . $query . '\' '
-                . 'does not implement Contain\Entity\Property\Type\IntegerType and therefore cannot '
-                . 'be incremented.'
-            );
-        }
+        $resolver = $this->resolve($entity, $query)
+                         ->assertType('Contain\Entity\Property\Type\IntegerType');
 
-        $setter = 'set' . ucfirst($property);
-        $targetEntity->$setter((int) $targetValue + (int) $inc);
+        $setter = 'set' . ucfirst($resolver->getProperty());
+        $resolver->getEntity()->$setter((int) $resolver->getValue() + (int) $inc);
 
         $entity->getEventManager()->trigger('update.pre', $entity);
 
@@ -228,7 +224,7 @@ class MongoDB extends AbstractQuery implements DriverInterface
 
         $entity->getEventManager()->trigger('update.post', $entity);
 
-        $targetEntity->clean($property);
+        $resolver->getEntity()->clean($resolver->getProperty());
 
         return $this;
     }
@@ -241,85 +237,12 @@ class MongoDB extends AbstractQuery implements DriverInterface
      * @param   Contain\Entity\EntityInterface  Entity to persist
      * @param   string                          Query
      * @param   string                          Original query (for recursion debugging)
-     * @return  stdclass                        Access points (internal)
+     * @return  Network\Entity\Property\Resolver
      */
-    public function resolve(EntityInterface $entity, $query, $original = null)
+    public function resolve(EntityInterface $entity, $query)
     {
-        if (!$query || !is_string($query)) {
-            throw new InvalidArgumentException(__METHOD__ . ' failed with invalid or non-existent query.');
-        }
-
-        if (!$original) {
-            $original = $query;
-        }
-
-        $parts    = explode('.', $query);
-        $property = array_shift($parts);
-        $method   = 'get' . ucfirst($property);
-
-        if (!$type = $entity->type($property)) {
-            throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
-                . 'at: \'' . $property . '\' property. No such property \'' . $property . '\'.'
-            );
-        }
-
-        $value = $entity->$method();
-
-        $return = array(
-            'entity'    => $entity,
-            'property'  => $property,
-            'type'      => $type,
-            'value'     => $value,
-        );
-
-        if (!$parts) {
-            return $return;
-        }
-
-        if ($type instanceof ListType) {
-            $part    = array_shift($parts);
-            $subType = $type->getType();
-
-            if (!preg_match('/^[0-9]+$/', $part)) {
-                throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
-                    . 'because \'' . $property . '\' descends Contain\Entity\Property\Type\ListType '
-                    . 'and may only be traversed with numeric indexes.'
-                );
-            }
-
-            $index = (int) $part;
-
-            if (!isset($value[$index])) {
-                throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
-                    . 'because index ' . $index . ' is not set in \'' . $property . '\'.'
-                );
-            }
-
-            $nestedValue = $value[$index];
-
-            if ($parts && $subType instanceof EntityType) {
-                return $this->resolve($nestedValue, implode('.', $parts), $original);
-            } elseif ($parts) {
-                throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\', '
-                    . 'cannot descend into a list unless it contains elements that implement '
-                    . 'Contain\Entity\Property\Type\EntityType.'
-                );
-            }
-
-            $return['type'] = $type->getType(); // sub-type of list item
-            $return['value'] = $nestedValue;
-
-            return $return;
-        }
-
-        if ($type instanceof EntityType) {
-            return $this->resolve($value, implode('.', $parts), $original);
-        }
-
-        throw new InvalidArgumentException(__METHOD__ . ' failed with \'' . $original . '\' '
-            . 'at: \'' . $part . '\' because \'' . $property . '\' is not a type that can be '
-            . 'traversed.'
-        );
+        $resolver = new Resolver($query);
+        return $resolver->scan($entity);
     }
 
     /**
@@ -340,18 +263,10 @@ class MongoDB extends AbstractQuery implements DriverInterface
             );
         }
 
-        list($targetEntity, $property, $type, $targetValue) = array_values($this->resolve($entity, $query));
-        if (!$targetValue) {
-            $targetValue = array();
-        }
+        $resolver = $this->resolve($entity, $query);
+        $resolver->assertType('Contain\Entity\Property\Type\ListType');
 
-        if (!$type instanceof ListType) {
-            throw new InvalidArgumentException("\$query '$query' does not "
-                . 'reference a property that implements Contain\Entity\Property\Type\ListType.'
-            );
-        }
-
-        if (count($value = $type->parseString($value)) != 1) {
+        if (count($value = $resolver->getType()->parseString($value)) != 1) {
             throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
 
@@ -366,7 +281,7 @@ class MongoDB extends AbstractQuery implements DriverInterface
         } else {
             $targetValue[] = $value;
         }
-        $targetEntity->fromArray(array($property => $targetValue));
+        $resolver->getEntity()->fromArray(array($resolver->getProperty() => $targetValue));
 
         $entity->getEventManager()->trigger('update.pre', $entity);
 
@@ -383,8 +298,6 @@ class MongoDB extends AbstractQuery implements DriverInterface
         );
 
         $entity->getEventManager()->trigger('update.post', $entity);
-
-        $targetEntity->clean($property);
 
         return $this;
     }

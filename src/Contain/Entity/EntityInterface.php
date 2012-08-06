@@ -35,7 +35,16 @@ interface EntityInterface
      * @param   boolean             Include unset properties
      * @return  array
      */
-    public function getProperties($includeUnset = false);
+    public function properties($includeUnset = false);
+
+    /**
+     * Returns true if a property exists for the entity (property does 
+     * not need to be set however).
+     *
+     * @param   string                      Property name
+     * @return  boolean
+     */
+    public function propertyExists($property);
 
     /**
      * Returns an array of all the entity properties

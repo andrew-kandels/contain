@@ -4,7 +4,7 @@
      * @param   boolean             Include unset properties
      * @return  array
      */
-    public function getProperties($includeUnset = false)
+    public function properties($includeUnset = false)
     {
         $result = array();
 <?php foreach ($this->v as $property): ?>
@@ -15,6 +15,18 @@
 
         return $result;
     }
+    
+    /**
+     * Returns true if a property exists for the entity (property does 
+     * not need to be set however).
+     *
+     * @param   string                      Property name
+     * @return  boolean
+     */
+    public function propertyExists($property)
+    {
+        return in_array($property, array('<?php echo implode("', '", array_values($this->v)); ?>'));
+    }
 
     /**
      * Returns an array of all the entity properties.
@@ -24,7 +36,7 @@
      */
     public function toArray($includeUnset = false)
     {
-        $properties = $this->getProperties($includeUnset);
+        $properties = $this->properties($includeUnset);
         $result     = array();
 
         foreach ($properties as $property) {
@@ -53,7 +65,7 @@
         }
 
         foreach ($properties as $key => $value) {
-            if ($autoExtended && !$this->hasProperty($key)) {
+            if ($autoExtended && !$this->propertyExists($key)) {
                 $this->setExtendedProperty($key, $value);
                 continue;
             }
@@ -96,7 +108,7 @@
      */
     public function export($includeProperties = null, $includeUnset = false)
     {
-        $properties = $this->getProperties($includeUnset);
+        $properties = $this->properties($includeUnset);
         $result     = array();
 
         if ($includeProperties) {

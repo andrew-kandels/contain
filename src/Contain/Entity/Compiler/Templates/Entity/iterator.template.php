@@ -15,7 +15,7 @@
      */
     public function current()
     {
-        $properties = $this->getProperties();
+        $properties = $this->properties();
         $getter     = 'get' . ucfirst($properties[$this->_iterator]);
         return $this->$getter();
     }
@@ -27,7 +27,7 @@
      */
     public function key()
     {
-        $properties = $this->getProperties();
+        $properties = $this->properties();
         return $properties[$this->_iterator];
     }
 
@@ -48,7 +48,7 @@
      */
     public function valid()
     {
-        $properties = $this->getProperties();
+        $properties = $this->properties();
         return isset($properties[$this->_iterator]);
     }
 

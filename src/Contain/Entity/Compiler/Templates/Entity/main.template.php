@@ -183,7 +183,7 @@
     public function clear($property = null)
     {
         if (!$property) {
-            $property = $this->getProperties();
+            $property = $this->properties();
         }
 
         if (is_array($property) || $property instanceof Traversable) {
@@ -281,7 +281,7 @@
      */
     public function markDirty($property)
     {
-        if ($this->hasProperty($property)) {
+        if ($this->propertyExists($property)) {
             $this->_dirty[$property] = true;
         }
 
