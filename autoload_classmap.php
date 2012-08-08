@@ -14,6 +14,7 @@ return array(
     'Contain\Exception\InvalidArgumentException'   => __DIR__ . '/src/Contain/Entity/Exception/InvalidArgumentException.php',
     'Contain\Exception\RuntimeException'           => __DIR__ . '/src/Contain/Entity/Exception/RuntimeException.php',
     'Contain\Entity\Property\Property'             => __DIR__ . '/src/Contain/Entity/Property/Property.php',
+    'Contain\Entity\Property\Resolver'             => __DIR__ . '/src/Contain/Entity/Property/Resolver.php',
     'Contain\Entity\Property\Type\EnumType'        => __DIR__ . '/src/Contain/Entity/Property/Type/EnumType.php',
     'Contain\Entity\Property\Type\StringType'      => __DIR__ . '/src/Contain/Entity/Property/Type/StringType.php',
     'Contain\Entity\Property\Type\DateTimeType'    => __DIR__ . '/src/Contain/Entity/Property/Type/DateTimeType.php',
