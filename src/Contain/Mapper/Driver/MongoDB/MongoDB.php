@@ -502,12 +502,12 @@ class MongoDB extends AbstractQuery implements DriverInterface
     {
         $result = array();
 
-        $dirty  = $entity->export($entity->dirty());
+        $dirty  = $entity->export($entity->dirty(), true);
 
         foreach ($dirty as $property => $value) {
-            // child entity
             $type = $entity->type($property);
 
+            // child entity
             if ($type instanceof EntityType) {
                 $method = 'get' . ucfirst($property);
                 $child  = $entity->$method();

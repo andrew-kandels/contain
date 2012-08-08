@@ -84,7 +84,7 @@ class Property
     public function setType($type)
     {
         if (!$type instanceof TypeInterface) {
-            if (is_string($type) && strpos('\\', $type) === false) {
+            if (is_string($type) && strpos($type, '\\') === false) {
                 $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
             }
 

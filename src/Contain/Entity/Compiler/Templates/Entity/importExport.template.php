@@ -58,7 +58,7 @@
      * @param   boolean             Set undefined keys as extended properties
      * @return  $this
      */
-    public function fromArray($properties, $ignoreErrors = false, $autoExtended = false)
+    public function fromArray($properties, $ignoreErrors = true, $autoExtended = true)
     {
         if (!is_array($properties) && !$properties instanceof Traversable) {
             throw new InvalidArgumentException('$properties must be an array or an instance of Traversable.');
