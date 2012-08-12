@@ -84,7 +84,7 @@ class Resolver
      * constructor by parsing the dot notation and scanning properties
      * and sub-properties.
      *
-     * @param   Network\Entity\EntityInterface              Entity
+     * @param   Contain\Entity\EntityInterface              Entity
      * @param   string                                      Recursive query
      * @return  $this
      * @throws  InvalidArgumentException
@@ -157,7 +157,7 @@ class Resolver
     /**
      * Verifies a property exists and returns the value.
      *
-     * @param   Network\Entity\EntityInterface              Entity
+     * @param   Contain\Entity\EntityInterface              Entity
      * @param   string                                      Property
      * @return  mixed
      */

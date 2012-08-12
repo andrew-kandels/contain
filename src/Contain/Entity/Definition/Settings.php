@@ -46,8 +46,9 @@ class Settings extends AbstractDefinition
              ->registerMethod('removeSetting')
              ->registerMethod('setSetting');
 
-        $this->setProperty('name', 'string')->setOptions(array('required' => true));
-        $this->setProperty('value', 'mixed');
+        $this->setProperty('settings', 'list')
+            ->getType()
+            ->setOptions(array('type' => 'entity', 'className' => 'Contain\Entity\Setting'));
     }
 
     /**
@@ -101,7 +102,7 @@ class Settings extends AbstractDefinition
             $settings = array();
         }
 
-        $setting = new \Network\Entity\Setting(array(
+        $setting = new \Contain\Entity\Setting(array(
             'name' => $name,
             'value' => $value,
         ));

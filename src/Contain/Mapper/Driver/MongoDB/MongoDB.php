@@ -237,7 +237,7 @@ class MongoDB extends AbstractQuery implements DriverInterface
      * @param   Contain\Entity\EntityInterface  Entity to persist
      * @param   string                          Query
      * @param   string                          Original query (for recursion debugging)
-     * @return  Network\Entity\Property\Resolver
+     * @return  Contain\Entity\Property\Resolver
      */
     public function resolve(EntityInterface $entity, $query)
     {

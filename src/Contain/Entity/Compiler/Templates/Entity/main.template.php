@@ -302,7 +302,7 @@
      * Gets the property type for a given property.
      *
      * @param   string          Property name
-     * @return  Network\Entity\Property\Type\TypeInterface
+     * @return  Contain\Entity\Property\Type\TypeInterface
      */
     public function type($property)
     {
