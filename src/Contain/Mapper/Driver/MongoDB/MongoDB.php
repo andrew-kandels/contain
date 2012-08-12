@@ -266,7 +266,7 @@ class MongoDB extends AbstractQuery implements DriverInterface
         $resolver = $this->resolve($entity, $query);
         $resolver->assertType('Contain\Entity\Property\Type\ListType');
 
-        if (count($value = $resolver->getType()->parseString($value)) != 1) {
+        if (count($value = $resolver->getType()->export($value)) != 1) {
             throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
 
@@ -307,7 +307,7 @@ class MongoDB extends AbstractQuery implements DriverInterface
         $resolver = $this->resolve($entity, $query);
         $resolver->assertType('Contain\Entity\Property\Type\ListType');
 
-        if (count($value = $resolver->getType()->parseString($value)) != 1) {
+        if (count($value = $resolver->getType()->export($value)) != 1) {
             throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
 

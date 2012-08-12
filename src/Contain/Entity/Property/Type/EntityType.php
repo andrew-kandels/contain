@@ -91,7 +91,7 @@ class EntityType extends StringType
      * @return  mixed
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseString($value)
+    public function export($value)
     {
         if ($entity = $this->parse($value)) {
             return $value->export();

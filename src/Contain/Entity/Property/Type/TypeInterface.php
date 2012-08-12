@@ -46,7 +46,7 @@ interface TypeInterface
      * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseString($value);
+    public function export($value);
 
     /**
      * The value to compare the internal value to which translates to empty or null.

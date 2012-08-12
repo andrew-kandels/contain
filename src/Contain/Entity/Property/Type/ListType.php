@@ -139,7 +139,7 @@ class ListType extends StringType
      * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseString($value)
+    public function export($value)
     {
         $type = $this->getType();
 
@@ -151,7 +151,7 @@ class ListType extends StringType
             if ($item instanceof EntityInterface) {
                 $value[$index] = $item->export();
             } else {
-                $value[$index] = $type->parseString($item);
+                $value[$index] = $type->export($item);
             }
         }
 

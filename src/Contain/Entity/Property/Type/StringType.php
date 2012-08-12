@@ -76,7 +76,7 @@ class StringType implements TypeInterface
      * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseString($value)
+    public function export($value)
     {
         return (string) $this->parse($value);
     }

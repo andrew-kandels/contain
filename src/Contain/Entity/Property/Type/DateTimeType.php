@@ -80,7 +80,7 @@ class DateTimeType extends StringType
      * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseString($value)
+    public function export($value)
     {
         if (!$when = $this->parse($value)) {
             return $this->getUnsetValue();

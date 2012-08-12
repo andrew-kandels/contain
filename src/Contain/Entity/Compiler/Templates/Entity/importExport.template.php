@@ -141,7 +141,7 @@
             $defaultValue = $this->_types[$property]->getOption('defaultValue') ?: $unsetValue;
             $value        = $this->$hasMethod() ? $this->$method() : $defaultValue;
             if ($includeUnset || $unsetValue !== $value) {
-                $result[$property] = $this->_types[$property]->parseString($value);
+                $result[$property] = $this->_types[$property]->export($value);
             }
         }
 

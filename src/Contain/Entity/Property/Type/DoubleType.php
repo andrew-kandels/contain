@@ -63,7 +63,7 @@ class DoubleType extends IntegerType
      * @return  string
      * @throws  Contain\Exception\InvalidArgumentException
      */
-    public function parseString($value)
+    public function export($value)
     {
         return (double) $this->parse($value);
     }

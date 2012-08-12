@@ -17,43 +17,31 @@
  * @link        http://andrewkandels.com/contain
  */
 
-namespace Contain\Entity\Property\Type;
+namespace Contain\Entity\Definition;
 
-use Contain\Exception\InvalidArgumentException;
+use Contain\Entity\Definition\AbstractDefinition;
 
 /**
- * String Data Type
+ * A single setting name/value pair.
  *
  * @category    akandels
  * @package     contain
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class BooleanType extends StringType
+class Setting extends AbstractDefinition
 {
     /**
-     * Parse a given input into a suitable value for the current data type.
+     * Sets up the meta-data for the entity.
      *
-     * @param   mixed               Value to be set
-     * @return  string              Internal value
-     * @throws  Contain\Exception\InvalidArgumentException
+     * @return  void
      */
-    public function parse($value)
+    public function setUp()
     {
-        $value = (bool) $value;
-        return $value ? '1' : '0';
-    }
+        $this->setName('Setting')
+             ->registerTarget(AbstractDefinition::ENTITY, __DIR__ . '/..');
 
-    /**
-     * Returns the internal value represented as a string value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
-     */
-    public function export($value)
-    {
-        return $this->parse($value);
+        $this->setProperty('name', 'string')->setOptions(array('required' => true));
+        $this->setProperty('value', 'mixed');
     }
 }

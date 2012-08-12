@@ -20,43 +20,36 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Exception\InvalidArgumentException;
+use Traversable;
 
 /**
- * Integer Data Type
+ * Mixed/native Data Type
  *
  * @category    akandels
  * @package     contain
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class IntegerType extends StringType
+class MixedType extends StringType
 {
     /**
      * Parse a given input into a suitable value for the current data type.
      *
      * @param   mixed               Value to be set
-     * @return  integer             Internal value
+     * @return  mixed
      * @throws  Contain\Exception\InvalidArgumentException
      */
     public function parse($value = null)
     {
-        if ($value === 0) {
-            return 0;
+        if ($value instanceof Traversable) {
+            $value = iterator_to_array($value);
         }
 
-        if (!$value) {
-            return $this->getUnsetValue();
+        if (is_object($value)) {
+            throw new InvalidArgumentException('$value cannot be an object for mixed type.');
         }
 
-        if (is_string($value)) {
-            return intval($value);
-        }
-
-        if (is_numeric($value)) {
-            return (int) $value;
-        }
-
-        throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+        return $value;
     }
 
     /**
@@ -69,7 +62,7 @@ class IntegerType extends StringType
      */
     public function export($value)
     {
-        return (integer) $this->parse($value);
+        return $this->parse($value);
     }
 
     /**
