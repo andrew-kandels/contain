@@ -115,8 +115,8 @@ class Compiler
             );
         }
 
-        if (preg_match('!module/([^/]+)/src/(.*)!', $path, $matches)) {
-            $path = $matches[2];
+        if (preg_match('!(module|vendor|library)/([^/]+)/src/(.*)!', $path, $matches)) {
+            $path = $matches[3];
         }
 
         return str_replace('/', '\\', $path);

@@ -17,7 +17,7 @@
  * @link        http://andrewkandels.com/contain
  */
 
-namespace \var\www\platform\vendor\Contain\src\Contain\Entity;
+namespace Contain\Entity;
 
 use Contain\Exception\InvalidArgumentException;
 use Iterator;
