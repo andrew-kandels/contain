@@ -41,21 +41,21 @@ abstract class AbstractService extends AbstractQuery implements ServiceInterface
      * @param   boolean                     Clears the query properties after prepping
      * @return  Contain\Mapper\Driver
      */
-    protected function prepare(DriverInterface $mapper, $clearProperties = true)
+    protected function prepare(AbstractQuery $query, $clearProperties = true)
     {
         if ($this->limit !== null) {
-            $mapper->limit($this->limit);
+            $query->limit($this->limit);
         }
 
         if ($this->skip !== null) {
-            $mapper->skip($this->skip);
+            $query->skip($this->skip);
         }
 
         if ($this->sort !== null) {
-            $mapper->sort($this->sort);
+            $query->sort($this->sort);
         }
 
-        $mapper->setOptions($this->getOptions())
+        $query->setOptions($this->getOptions())
                ->properties($this->getProperties());
 
         // reset above options to a blank state
@@ -63,6 +63,6 @@ abstract class AbstractService extends AbstractQuery implements ServiceInterface
             $this->clear();
         }
 
-        return $mapper;
+        return $query;
     }
 }

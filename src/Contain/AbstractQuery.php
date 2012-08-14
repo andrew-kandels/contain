@@ -119,6 +119,17 @@ class AbstractQuery
     }
 
     /**
+     * Returns how the results should be sorted in the next
+     * find/search query.
+     *
+     * @return  array
+     */
+    public function getSort()
+    {
+        return $this->sort;
+    }
+
+    /**
      * Sets a mapper level option that will be passed to the next 
      * mapper method invokation.
      *
