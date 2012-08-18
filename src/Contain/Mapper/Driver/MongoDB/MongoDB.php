@@ -367,10 +367,6 @@ class MongoDB extends AbstractQuery implements DriverInterface
             return false;
         }
 
-        if ($this->sort !== null) {
-            $cursor->sort($this->sort);
-        }
-
         $result = $this->hydrateEntity($result);
 
         $this->clear();
