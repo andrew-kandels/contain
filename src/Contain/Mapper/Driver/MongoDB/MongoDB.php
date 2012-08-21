@@ -171,6 +171,25 @@ class MongoDB extends AbstractQuery implements DriverInterface
             return $id;
         }
 
+        if ($properties = $entity->primary()) {
+            $primaryKeys = array_keys($properties);
+            $isSet       = true;
+
+            foreach ($primaryKeys as $primaryKey) {
+                $method = 'has' . ucfirst($primaryKey);
+                if (!$entity->$method()) {
+                    $isSet = false;
+                }
+            }
+
+            if ($isSet) {
+                $this->setId($entity);
+
+                return $entity->getExtendedProperty('_id');
+            }
+        }
+ 
+
         return null;
     }
 
