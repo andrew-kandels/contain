@@ -22,7 +22,6 @@ namespace Contain\Entity\Definition;
 use Contain\Exception\InvalidArgumentException;
 use Contain\Exception\RuntimeException;
 use Contain\Entity\Property\Property;
-use Iterator;
 
 /**
  * Defines the behavior of an entity.
@@ -32,7 +31,7 @@ use Iterator;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-abstract class AbstractDefinition implements Iterator
+abstract class AbstractDefinition
 {
     /**
      * @var string
@@ -161,6 +160,16 @@ abstract class AbstractDefinition implements Iterator
     }
 
     /**
+     * Returns all of the entity's properties.
+     *
+     * @return  Contain\Entity\Property[]
+     */
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    /**
      * Finds a property object by its registered name.
      *
      * @param   string              Name of the property
@@ -270,56 +279,6 @@ abstract class AbstractDefinition implements Iterator
     }
 
     /**
-     * Rewinds the internal position counter (iterator).
-     *
-     * @return  void
-     */
-    public function rewind()
-    {
-        $this->position = 0;
-    }
-
-    /**
-     * Returns the property of the current iterator position.
-     *
-     * @return  Contain\Entity\Property
-     */
-    public function current()
-    {
-        return $this->properties[$this->position];
-    }
-
-    /**
-     * Returns the current iterator property position.
-     *
-     * @return  integer
-     */
-    public function key()
-    {
-        return $this->position;
-    }
-
-    /**
-     * Advances the iterator to the next property.
-     *
-     * @return  void
-     */
-    public function next()
-    {
-        $this->position++;
-    }
-
-    /**
-     * Is the iterator in a valid position.
-     *
-     * @return  boolean
-     */
-    public function valid()
-    {
-        return isset($this->properties[$this->position]);
-    }
-
-    /**
      * Imports the properties and most behaviors from another definition.
      *
      * @param   Contain\Entity\Definition\AbstractDefinition
@@ -347,7 +306,7 @@ abstract class AbstractDefinition implements Iterator
             }
         }
 
-        foreach ($definition as $property) {
+        foreach ($definition->getProperties() as $property) {
             $this->setProperty($property);
         }
 

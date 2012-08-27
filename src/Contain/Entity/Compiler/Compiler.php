@@ -248,7 +248,7 @@ class Compiler
         }
 
         $v = array();
-        foreach ($this->definition as $property) {
+        foreach ($this->definition->getProperties() as $property) {
             $v[$property->getName()] = get_class($property->getType());
         }
 
@@ -263,7 +263,7 @@ class Compiler
         ));
 
         $primary = array();
-        foreach ($this->definition as $property) {
+        foreach ($this->definition->getProperties() as $property) {
             if ($property->getOption('primary')) {
                 $primary[] = $property;
             }
@@ -276,7 +276,7 @@ class Compiler
         $v = array();
         $listChildren = $children = array();
         
-        foreach ($this->definition as $property) {
+        foreach ($this->definition->getProperties() as $property) {
             $v[] = $property->getName();
             if ($property->getType() instanceof EntityType) {
                 $children[] = $property;
@@ -301,7 +301,7 @@ class Compiler
             'name'        => $this->definition->getName(),
         ));
 
-        foreach ($this->definition as $property) {
+        foreach ($this->definition->getProperties() as $property) {
             $type = get_class($property->getType());
 
             if (preg_match('!([A-Za-z]+)Type$!', $type, $matches)) {
@@ -346,7 +346,7 @@ class Compiler
         }
 
         $v = array();
-        foreach ($this->definition as $property) {
+        foreach ($this->definition->getProperties() as $property) {
             $v[$property->getName()] = get_class($property->getType());
         }
 
@@ -355,7 +355,7 @@ class Compiler
             'name'         => $this->definition->getName(),
         ));
 
-        foreach ($this->definition as $property) {
+        foreach ($this->definition->getProperties() as $property) {
             $this->append('Filter/properties', array(
                 'name'       => $property->getName(),
                 'required'   => $property->getOption('required'),
