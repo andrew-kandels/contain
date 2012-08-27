@@ -92,6 +92,15 @@ class ListType extends StringType
             $type->setOption('className', $className);
         }
 
+        if ($type instanceof ObjectType) {
+            if (!$className = $this->getOption('className')) {
+                throw new InvalidArgumentException('$type of object must specify a className '
+                    . 'option.'
+                );
+            }
+            $type->setOption('className', $className);
+        }
+
         if ($type instanceof ListType) {
             throw new InvalidArgumentException('$type may not be a nested instance of '
                 . 'Contain\Entity\Property\Type\ListType.'
@@ -142,6 +151,11 @@ class ListType extends StringType
     public function export($value)
     {
         $type = $this->getType();
+
+        // cannot reliably serialize this type
+        if ($type instanceof ObjectType) {
+            return $this->getUnsetValue();
+        }
 
         if (!$value = $this->parse($value)) {
             return $this->getUnsetValue();
