@@ -73,6 +73,20 @@ class AbstractQuery
     }
 
     /**
+     * Adds a limit (if not set).
+     *
+     * @param   integer             Number of Hydrated Entities
+     * @return  $this
+     */
+    public function setDefaultLimit($num)
+    {
+        if (!$this->limit) {
+            $this->limit($num);
+        }
+        return $this;
+    }
+
+    /**
      * Returns the maximum number of results to hydrate in a find/search
      * call.
      *
@@ -115,6 +129,21 @@ class AbstractQuery
     public function sort(array $criteria)
     {
         $this->sort = $criteria;
+        return $this;
+    }
+
+    /**
+     * Adds a sort (if not set).
+     *
+     * @param   array                Sort criteria
+     * @return  $this
+     */
+    public function setDefaultSort(array $criteria)
+    {
+        if (!$this->sort) {
+            $this->sort($criteria);
+        }
+
         return $this;
     }
 
