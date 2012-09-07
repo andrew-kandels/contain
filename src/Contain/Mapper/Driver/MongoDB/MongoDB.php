@@ -495,6 +495,18 @@ class MongoDB extends AbstractQuery implements DriverInterface
     }
 
     /**
+     * Runs a MongoDB count query to determine the number of documents
+     * that match the given criteria.
+     *
+     * @param   array               Criteria
+     * @return  integer
+     */
+    public function count($criteria)
+    {
+        return $this->getCollection()->count($criteria);
+    }
+
+    /**
      * Rewrites the dirty() output from an entity into something
      * MongoDb can use in an update statement.
      *
