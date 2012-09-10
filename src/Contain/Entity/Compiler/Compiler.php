@@ -247,77 +247,15 @@ class Compiler
             );
         }
 
-        $v = array();
+        $properties = array();
         foreach ($this->definition->getProperties() as $property) {
-            $v[$property->getName()] = get_class($property->getType());
+            $properties[$property->getName()] = $property;
         }
 
-        $this->append('Entity/construct', array(
-            'hasEvents'    => $this->definition->getOption('events'),
-            'namespace'    => $this->getTargetNamespace('entity'),
-            'name'         => $this->definition->getName(),
-            'v'            => $v,
-            'hasIteration' => $this->definition->getOption('iteration'),
+        $this->append('Entity/open', array(
+            'properties'   => $properties,
             'implementors' => $this->definition->getImplementors(),
-            'extends'      => $this->definition->getParentClass(),
         ));
-
-        $primary = array();
-        foreach ($this->definition->getProperties() as $property) {
-            if ($property->getOption('primary')) {
-                $primary[] = $property;
-            }
-
-            $this->append('Entity/properties', array(
-                'property'  => $property,
-            ));
-        }
-
-        $v = array();
-        $listChildren = $children = array();
-        
-        foreach ($this->definition->getProperties() as $property) {
-            $v[] = $property->getName();
-            if ($property->getType() instanceof EntityType) {
-                $children[] = $property;
-            }
-            if ($property->getType() instanceof ListType &&
-                $property->getType()->getType() instanceof EntityType) {
-                $listChildren[] = $property;
-            }
-        }
-
-        $this->append('Entity/main', array(
-            'hasEvents'   => $this->definition->getOption('events'),
-            'name'        => $this->definition->getName(),
-            'init'        => $this->importMethods('init'),
-            'primary'     => $primary,
-            'children'    => $children,
-            'listChildren'=> $listChildren,
-        ));
-
-        $this->append('Entity/importExport', array(
-            'v'           => $v,
-            'name'        => $this->definition->getName(),
-        ));
-
-        foreach ($this->definition->getProperties() as $property) {
-            $type = get_class($property->getType());
-
-            if (preg_match('!([A-Za-z]+)Type$!', $type, $matches)) {
-                $type = strtolower($matches[1]);
-            }
-
-            $this->append('Entity/accessors', array(
-                'property'  => $property,
-                'type'      => $type,
-                'hasEvents' => $this->definition->getOption('events'),
-            ));
-        }
-
-        if ($this->definition->getOption('iteration')) {
-            $this->append('Entity/iterator');
-        }
 
         foreach ($this->definition->getRegisteredMethods() as $method) {
             fputs($this->handle, $this->importMethod($method[0], $method[1], true) . PHP_EOL);

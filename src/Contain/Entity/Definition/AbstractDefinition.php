@@ -128,18 +128,8 @@ abstract class AbstractDefinition
      * @param   string              Data type (string, integer, etc.)
      * @return  Contain\Entity\Property
      */
-    public function setProperty($property, $type = null)
+    public function setProperty($name, $type)
     {
-        if ($property instanceof Property) {
-            $name = $property->getName();
-        } else {
-            $name = $property;
-
-            if (!$type) {
-                throw new InvalidArgumentException('$type must be specified if $property is not an object.');
-            }
-        }
-
         if (!preg_match(self::PROPERTY_NAME_VALID, $name)) {
             throw new InvalidArgumentException('Property $name does not match allowed: '
                 . self::PROPERTY_NAME_VALID . '.'
@@ -148,13 +138,8 @@ abstract class AbstractDefinition
 
         $this->removeProperty($name);
 
-        if ($property instanceof Property) {
-            $this->properties[] = $obj = $property;
-        } else {
-            $obj = new Property($property);
-            $obj->setType($type);
-            $this->properties[] = $obj;
-        }
+        $obj = new Property($type);
+        $this->properties[$name] = $obj;
 
         return $obj;
     }
@@ -177,10 +162,8 @@ abstract class AbstractDefinition
      */
     public function getProperty($name)
     {
-        foreach ($this->properties as $property) {
-            if (!strcasecmp($property->getName(), $name)) {
-                return $property;
-            }
+        if (isset($this->properties[$name])) {
+            return $this->properties[$name];
         }
 
         throw new InvalidArgumentException('$name is not a registered property');
@@ -194,13 +177,7 @@ abstract class AbstractDefinition
      */
     public function hasProperty($name)
     {
-        foreach ($this->properties as $property) {
-            if (!strcasecmp($property->getName(), $name)) {
-                return true;
-            }
-        }
-
-        return false;
+        return isset($this->properties[$name]);
     }
 
     /**
@@ -211,14 +188,7 @@ abstract class AbstractDefinition
      */
     public function removeProperty($name)
     {
-        foreach ($this->properties as $index => $property) {
-            if (!strcasecmp($property->getName(), $name)) {
-                unset($this->properties[$index]);
-                $this->properties = array_merge(array(), $this->properties);
-                break;
-            }
-        }
-
+        unset($this->properties[$name]);
         return $this;
     }
 

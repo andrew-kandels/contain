@@ -46,6 +46,24 @@ class EntityType extends StringType
     }
 
     /**
+     * Gets a new instance of the entity in a clean state.
+     *
+     * @param   array|Traversable                       Optional properties
+     * @return  Contain\Entity\EntityInterface
+     */
+    public function getInstance($properties = null)
+    {
+        if (!$type = $this->getOption('className')) {
+            throw new \Contain\Entity\Exception\InvalidArgumentException('$value is invalid '
+                . 'because no type has been set for '
+                . 'the ' . __CLASS__ . ' data type.'
+            );
+        }
+
+        return new $type($properties);
+    }
+
+    /**
      * Parse a given input into a suitable value for the current data type.
      *
      * @param   mixed               Value to be set
@@ -64,23 +82,17 @@ class EntityType extends StringType
             );
         }
 
-        // can't use traversable here because entities are Traversable, so it would
-        // wipe them out and recreate them which can be annoying
-        if (is_array($value)) {
-            $value = new $type($value);
+        if ($value instanceof $type) {
+            return $value;
         }
 
-        if (!is_object($value)) {
-            throw new RuntimeException('$value is invalid, must be an entity object.'); 
+        if (is_array($value) || $value instanceof Traversable) {
+            return $this->getInstance($value);
         }
 
-        if (!$value instanceof $type) {
-            throw new InvalidArgumentException('Class \'' . get_class($value) . '\' is not of '
-                . 'type \'' . $type . '\'.'
-            );
-        }
-
-        return $value;
+        throw new InvalidArgumentException('$value is not of '
+            . 'type Contain\Property\Type\EntityType, an array, or an instance of Traversable.'
+        );
     }
 
     /**
@@ -107,6 +119,16 @@ class EntityType extends StringType
      */
     public function getEmptyValue()
     {
-        return false;
+        return $this->getInstance();
+    }
+
+    /**
+     * The value to compare the internal value to which translates to not being set.
+     *
+     * @return  mixed
+     */
+    public function getUnsetValue()
+    {
+        return $this->getInstance();
     }
 }

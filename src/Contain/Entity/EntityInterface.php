@@ -38,15 +38,6 @@ interface EntityInterface
     public function properties($includeUnset = false);
 
     /**
-     * Returns true if a property exists for the entity (property does 
-     * not need to be set however).
-     *
-     * @param   string                      Property name
-     * @return  boolean
-     */
-    public function propertyExists($property);
-
-    /**
      * Returns an array of all the entity properties
      *
      * @param   boolean             Include unset properties
@@ -112,13 +103,6 @@ interface EntityInterface
      * @return  $this
      */
     public function markDirty($property);
-
-    /**
-     * Returns true if dirty, modified properties exist.
-     *
-     * @return  boolean
-     */
-    public function isDirty();
 
     /**
      * Gets the property type for a given property.

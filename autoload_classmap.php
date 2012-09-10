@@ -33,4 +33,5 @@ return array(
     'Contain\Entity\EntityInterface'               => __DIR__ . '/src/Contain/Entity/EntityInterface.php',
     'Contain\Entity\Setting'                       => __DIR__ . '/src/Contain/Entity/Setting.php',
     'Contain\Entity\Compiler\Compiler'             => __DIR__ . '/src/Contain/Entity/Compiler/Compiler.php',
+    'Contain\Entity\AbstractEntity'                => __DIR__ . '/src/Contain/Entity/AbstractEntity.php',
 );
