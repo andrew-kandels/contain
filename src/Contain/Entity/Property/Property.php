@@ -80,12 +80,16 @@ class Property
      * Constructs the property which needs be associated with a name 
      * and a data type.
      *
-     * @param   string                  Name of the property
      * @param   Contain\Entity\Property\Type\AbstractType|string
+     * @param   array|Traversable                                   Options
      * @return  $this
      */
-    public function __construct($type)
+    public function __construct($type, $options = null)
     {
+        if ($options) {
+            $this->setOptions($options);
+        }
+
         $this->setType($type);
 
         $this->unsetValue   = $this->getType()->getUnsetValue();
@@ -124,12 +128,8 @@ class Property
      */
     public function isUnset()
     {
-        if ($this->getType() instanceof EntityType) {
-            return $this->getType()->export($this->currentValue) ===
-                   $this->getType()->export($this->getType()->getUnsetValue());
-        }
-
-        return $this->currentValue === $this->unsetValue;
+        return $this->getType()->export($this->currentValue) ===
+               $this->getType()->export($this->getType()->getUnsetValue());
     }
 
     /**
@@ -139,12 +139,8 @@ class Property
      */
     public function isEmpty()
     {
-        if ($this->getType() instanceof EntityType) {
-            return $this->getType()->export($this->currentValue) ===
-                   $this->getType()->export($this->getType()->getEmptyValue());
-        }
-
-        return $this->currentValue === $this->emptyValue;
+        return $this->getType()->export($this->currentValue) ===
+               $this->getType()->export($this->getType()->getEmptyValue());
     }
 
     /**
@@ -221,12 +217,7 @@ class Property
      */
     public function getPersistedValue()
     {
-        if ($this->getType() instanceof EntityType) {
-            $className = $this->getType()->getOption('className');
-            return new $className($this->persistedValue);
-        }
-
-        return $this->persistedValue;
+        return $this->getType()->parse($this->persistedValue);
     }
 
     /**
@@ -252,6 +243,12 @@ class Property
                 $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
             }
 
+            if (!class_exists($type)) {
+                throw new \Contain\Entity\Exception\InvalidArgumentException('Type \''
+                    . $type . '\' does not exist.'
+                );
+            }
+
             $type = new $type();
 
             if (!$type instanceof TypeInterface) {
@@ -262,6 +259,8 @@ class Property
         }
 
         $this->type = $type;
+
+        $this->type->setOptions($this->options);
 
         return $this;
     }
@@ -307,12 +306,6 @@ class Property
      */
     public function setOption($name, $value)
     {
-        if (!in_array($name, $this->validOptions)) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException(
-                '$name is not a valid option.'
-            );
-        }
-
         $this->options[$name] = $value;
 
         return $this;
@@ -336,12 +329,6 @@ class Property
      */
     public function getOption($name)
     {
-        if (!in_array($name, $this->validOptions)) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException(
-                '$name is not a valid option.'
-            );
-        }
-
         return isset($this->options[$name]) ? $this->options[$name] : null;
     }
 }

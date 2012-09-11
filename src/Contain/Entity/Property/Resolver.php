@@ -163,7 +163,7 @@ class Resolver
      */
     protected function lookupProperty(EntityInterface $entity, $property)
     {
-        if (!$entity->propertyExists($property)) {
+        if (!$entity->property($property)) {
             $this->throwException("No such property: '$property'.");
         }
 

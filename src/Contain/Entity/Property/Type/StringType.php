@@ -19,7 +19,7 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception\InvalidArgumentException;
+use Contain\Entity\Exception\InvalidArgumentException;
 
 /**
  * String Data Type
@@ -153,13 +153,24 @@ class StringType implements TypeInterface
      */
     public function setOption($name, $value)
     {
-        if (!isset($this->options[$name])) {
-            throw new InvalidArgumentException("'$name' is not a valid option, valid "
-                . 'options are: ' . implode(', ', array_keys($this->options)) . '.'
-            );
+        if (isset($this->options[$name])) {
+            $this->options[$name] = $value;
         }
 
-        $this->options[$name] = $value;
+        return $this;
+    }
+
+    /**
+     * Unsets an option.
+     *
+     * @param   string                  Option name
+     * @return  $this
+     */
+    public function removeOption($name)
+    {
+        if (isset($this->options[$name])) {
+            unset($this->options[$name]);
+        }
 
         return $this;
     }

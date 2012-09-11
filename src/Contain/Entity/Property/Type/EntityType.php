@@ -19,8 +19,8 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception\InvalidArgumentException;
-use Contain\Exception\RuntimeException;
+use Contain\Entity\Exception\InvalidArgumentException;
+use Contain\Entity\Exception\RuntimeException;
 use Traversable;
 
 /**
@@ -57,6 +57,18 @@ class EntityType extends StringType
             throw new \Contain\Entity\Exception\InvalidArgumentException('$value is invalid '
                 . 'because no type has been set for '
                 . 'the ' . __CLASS__ . ' data type.'
+            );
+        }
+
+        // @todo find a better way to deal with interfaces and uncompiled entity references
+        if ($type == 'Contain\Entity\EntityInterface') {
+            return null;
+        }
+
+        // dependency may not have been compiled yet
+        if (!class_exists($type)) {
+            throw new \Contain\Entity\Exception\InvalidArgumentException('$value is invalid '
+                . 'because class \'' . $type . '\' does not exist.'
             );
         }
 

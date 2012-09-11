@@ -220,6 +220,18 @@ class Compiler
     {
         $this->setDefinition($definition);
 
+        foreach ($this->definition->getProperties() as $name => $property) {
+            // dependency must be compiled first
+            if ($property->getType() instanceof EntityType &&
+                $property->getOption('className') != 'Contain\Entity\EntityInterface') {
+                $className = $property->getType()->getOption('className');
+                if (!class_exists($className)) {
+                    $className = str_replace('Entity\\', 'Entity\Definition\\', $className);
+                    $this->compile($className);
+                }
+            }
+        }
+
         $targets = $this->definition->getTargets();
 
         if (!empty($targets['entity'])) {
@@ -248,13 +260,16 @@ class Compiler
         }
 
         $properties = array();
-        foreach ($this->definition->getProperties() as $property) {
-            $properties[$property->getName()] = $property;
+        foreach ($this->definition->getProperties() as $name => $property) {
+            $properties[$name] = $property;
         }
 
         $this->append('Entity/open', array(
+            'namespace'    => $this->getTargetNamespace('entity'),
+            'name'         => $this->definition->getName(),
             'properties'   => $properties,
             'implementors' => $this->definition->getImplementors(),
+            'init'         => $this->importMethods('init'),
         ));
 
         foreach ($this->definition->getRegisteredMethods() as $method) {
@@ -284,8 +299,8 @@ class Compiler
         }
 
         $v = array();
-        foreach ($this->definition->getProperties() as $property) {
-            $v[$property->getName()] = get_class($property->getType());
+        foreach ($this->definition->getProperties() as $name => $property) {
+            $v[$name] = get_class($property->getType());
         }
 
         $this->append('Filter/construct', array(
@@ -293,9 +308,9 @@ class Compiler
             'name'         => $this->definition->getName(),
         ));
 
-        foreach ($this->definition->getProperties() as $property) {
+        foreach ($this->definition->getProperties() as $name => $property) {
             $this->append('Filter/properties', array(
-                'name'       => $property->getName(),
+                'name'       => $name,
                 'required'   => $property->getOption('required'),
                 'filters'    => $property->getOption('filters'),
                 'validators' => $property->getOption('validators'),

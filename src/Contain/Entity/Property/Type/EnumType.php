@@ -19,7 +19,7 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception\InvalidArgumentException;
+use Contain\Entity\Exception\InvalidArgumentException;
 
 /**
  * Enumerated List Data Type
@@ -60,6 +60,6 @@ class EnumType extends StringType
             return $value;
         }
 
-        throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+        return $this->getUnsetValue();
     }
 }

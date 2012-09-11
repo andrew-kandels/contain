@@ -124,16 +124,6 @@ class PropertyTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->firstName->getOption('primary'));
     }
 
-    public function testSetOptionWithInvalid()
-    {
-        $this->setExpectedException(
-            'Contain\Entity\Exception\InvalidArgumentException',
-            '$name is not a valid option.'
-        );
-
-        $this->firstName->setOption('invalidOptionName', 'something');
-    }
-
     public function testSetOption()
     {
         $this->firstName->setOption('primary', true);
@@ -147,16 +137,6 @@ class PropertyTest extends \PHPUnit_Framework_TestCase
             array('primary' => true),
             $this->firstName->getOptions()
         );
-    }
-
-    public function testGetOptionWithInvalid()
-    {
-        $this->setExpectedException(
-            'Contain\Entity\Exception\InvalidArgumentException',
-            '$name is not a valid option.'
-        );
-
-        $this->firstName->getOption('invalidOptionName');
     }
 
     public function testEntityIsOfEntityType()

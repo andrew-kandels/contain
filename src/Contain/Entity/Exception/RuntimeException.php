@@ -17,7 +17,7 @@
  * @link        http://andrewkandels.com/contain
  */
 
-namespace Contain\Exception;
+namespace Contain\Entity\Exception;
 
 /**
  * Contain specific exception mimics the SPL core exception.

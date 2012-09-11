@@ -126,9 +126,10 @@ abstract class AbstractDefinition
      *
      * @param   string              Name of the property
      * @param   string              Data type (string, integer, etc.)
+     * @param   array|Traversable   Options
      * @return  Contain\Entity\Property
      */
-    public function setProperty($name, $type)
+    public function setProperty($name, $type, $options = null)
     {
         if (!preg_match(self::PROPERTY_NAME_VALID, $name)) {
             throw new InvalidArgumentException('Property $name does not match allowed: '
@@ -138,10 +139,25 @@ abstract class AbstractDefinition
 
         $this->removeProperty($name);
 
-        $obj = new Property($type);
+        $obj = new Property($type, $options);
         $this->properties[$name] = $obj;
 
         return $obj;
+    }
+
+    /**
+     * Clones an instantiated property presumably from another entity.
+     *
+     * @param   string              Name of the property
+     * @param   Contain\Entity\Property\Property
+     * @return  Contain\Entity\Property\Property
+     */
+    public function cloneProperty($name, Property $property)
+    {
+        $this->removeProperty($name);
+        $this->properties[$name] = clone $property;
+
+        return $property;
     }
 
     /**
@@ -276,8 +292,8 @@ abstract class AbstractDefinition
             }
         }
 
-        foreach ($definition->getProperties() as $property) {
-            $this->setProperty($property);
+        foreach ($definition->getProperties() as $name => $property) {
+            $this->cloneProperty($name, $property);
         }
 
         $this->import[] = $definition;
@@ -412,16 +428,7 @@ abstract class AbstractDefinition
      */
     public function getImplementors()
     {
-        $result = array_merge(
-            array('\Contain\Entity\EntityInterface'),
-            $this->implementors
-        );
-
-        if ($this->getOption('iteration') && !in_array('Iterator', $this->implementors)) {
-            $result[] = '\Iterator';
-        }
-
-        return $result;
+        return $this->implementors;
     }
 
     /**

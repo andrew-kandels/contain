@@ -19,8 +19,8 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception\InvalidArgumentException;
-use Contain\Exception\RuntimeException;
+use Contain\Entity\Exception\InvalidArgumentException;
+use Contain\Entity\Exception\RuntimeException;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
 
@@ -55,9 +55,11 @@ class ListType extends StringType
     public function getType()
     {
         if (!$type = $this->getOption('type')) {
-            throw new RuntimeException('$value is invalid because no type has been set for '
-                . 'the ' . __CLASS__ . ' data type.'
-            );
+            throw new RuntimeException('$value is invalid because no type has been set.');
+        }
+
+        if ($type == 'Contain\Entity\EntityInterface') {
+            return $type;
         }
 
         if (is_object($type) && !$type instanceof TypeInterface) {
@@ -78,8 +80,6 @@ class ListType extends StringType
                     . 'Contain\Entity\Property\Type\TypeInterface.'
                 );
             }
-
-            $this->options['type'] = $type;
         }
 
         if ($type instanceof EntityType) {
@@ -87,15 +87,6 @@ class ListType extends StringType
                 throw new InvalidArgumentException('$type of entity must specify a className '
                     . 'option that points to a class that implements '
                     . 'Contain\Entity\EntityInterface.'
-                );
-            }
-            $type->setOption('className', $className);
-        }
-
-        if ($type instanceof ObjectType) {
-            if (!$className = $this->getOption('className')) {
-                throw new InvalidArgumentException('$type of object must specify a className '
-                    . 'option.'
                 );
             }
             $type->setOption('className', $className);
@@ -119,15 +110,22 @@ class ListType extends StringType
      */
     public function parse($value)
     {
-        if (!$value && is_array($value)) {
-            return array();
-        }
-
         if (!$value) {
             return $this->getUnsetValue();
         }
 
         $type = $this->getType();
+
+        // @todo find a better way to deal with interfaces?
+        if ($type == 'Contain\Entity\EntityInterface') {
+            if (!$value instanceof $type) {
+                throw new InvalidArgumentException('$value must implement '
+                    . 'Contain\Entity\EntityInterface.'
+                );
+            } else {
+                return $value;
+            }
+        }
 
         if (!is_array($value)) {
             $value = array($value);
@@ -152,9 +150,15 @@ class ListType extends StringType
     {
         $type = $this->getType();
 
-        // cannot reliably serialize this type
-        if ($type instanceof ObjectType) {
-            return $this->getUnsetValue();
+        // @todo find a better way to deal with interfaces?
+        if ($type == 'Contain\Entity\EntityInterface') {
+            if (!$value instanceof $type) {
+                throw new InvalidArgumentException('$value must implement '
+                    . 'Contain\Entity\EntityInterface.'
+                );
+            } else {
+                return $value->export();
+            }
         }
 
         if (!$value = $this->parse($value)) {
@@ -173,9 +177,19 @@ class ListType extends StringType
     }
 
     /**
+     * The value assigned when the property is unset.
+     *
+     * @return  array
+     */
+    public function getUnsetValue()
+    {
+        return array();
+    }
+
+    /**
      * The value to compare the internal value to which translates to empty or null.
      *
-     * @return  mixed
+     * @return  array
      */
     public function getEmptyValue()
     {

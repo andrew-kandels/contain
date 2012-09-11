@@ -46,9 +46,10 @@ class Settings extends AbstractDefinition
              ->registerMethod('removeSetting')
              ->registerMethod('setSetting');
 
-        $this->setProperty('settings', 'list')
-            ->getType()
-            ->setOptions(array('type' => 'entity', 'className' => 'Contain\Entity\Setting'));
+        $this->setProperty('settings', 'list', array(
+            'type' => 'entity', 
+            'className' => 'Contain\Entity\Setting',
+        ));
     }
 
     /**

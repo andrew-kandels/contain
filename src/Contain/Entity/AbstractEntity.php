@@ -494,7 +494,8 @@ abstract class AbstractEntity implements EntityInterface
                 !$property->isUnset()
             );
 
-            return $property->setValue($value);
+            $property->setValue($value);
+            return $this;
         }
 
         return $this;
@@ -510,10 +511,18 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function __call($method, $args)
     {
-        if (preg_match('/^(get|set)(.+)$/', $method, $matches)) {
+        if (preg_match('/^(has|get|set)(.+)$/', $method, $matches)) {
             $property = strtolower($matches[2][0]) . substr($matches[2], 1);
 
-            if ($this->property($property)) {
+            if ($prop = $this->property($property)) {
+                if ($matches[1] == 'has') {
+                    if ($prop->isUnset() || $prop->isEmpty()) {
+                        return false;
+                    }
+
+                    return true;
+                }
+
                 if ($matches[1] == 'get') {
                     return $this->get($property);
                 }
