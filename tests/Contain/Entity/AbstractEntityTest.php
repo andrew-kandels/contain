@@ -290,4 +290,47 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->entity->clean('child');
         $this->assertEquals(array(), $this->entity->dirty());
     }
+
+    public function testGetProperty()
+    {
+        $this->assertEquals(
+            $this->entity->type('firstName')->getUnsetValue(),
+            $this->entity->getFirstName()
+        );
+    }
+
+    public function testSetProperty()
+    {
+        $this->assertEquals(
+            $name = 'Andrew',
+            $this->entity->setFirstName($name)->getFirstName()
+        );
+    }
+
+    public function testHasProperty()
+    {
+        $this->assertFalse($this->entity->hasFirstName());
+        $this->entity->setFirstName('Andrew');
+        $this->assertTrue($this->entity->hasFirstName());
+    }
+
+    public function testInvalidMethod()
+    {
+        $this->setExpectedException(
+            'Contain\Entity\Exception\InvalidArgumentException',
+            '\'invalidMethod\' is not a valid method for ContainTest\Entity\SampleEntity.'
+        );
+
+        $this->entity->invalidMethod();
+    }
+
+    public function testInvalidProperty()
+    {
+         $this->setExpectedException(
+            'Contain\Entity\Exception\InvalidArgumentException',
+            '\'invalidProperty\' is not a valid property of ContainTest\Entity\SampleEntity.'
+        );
+
+        $this->entity->setInvalidProperty();
+    }
 }

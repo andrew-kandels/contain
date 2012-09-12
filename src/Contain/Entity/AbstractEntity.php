@@ -19,7 +19,7 @@
 
 namespace Contain\Entity;
 
-use Contain\Exception\InvalidArgumentException;
+use Contain\Entity\Exception\InvalidArgumentException;
 use Iterator;
 use Traversable;
 use Zend\EventManager\Event;
@@ -531,9 +531,15 @@ abstract class AbstractEntity implements EntityInterface
                     array($property),
                     $args
                 ));
+            } else {
+                throw new InvalidArgumentException("'$property' is not a valid "
+                    . 'property of ' . get_class($this) . '.'
+                );
             }
         }
 
-        return null;
+        throw new InvalidArgumentException("'$method' is not a valid "
+            . 'method for ' . get_class($this) . '.'
+        );
     }
 }

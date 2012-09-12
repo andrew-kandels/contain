@@ -20,7 +20,7 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testEmptyValue()
     {
-        $this->entity->setEmpty('list');
+        $this->entity->property('list')->setEmpty();
         $this->assertEquals($this->entity->type('list')->getEmptyValue(), $this->entity->getList());
         $this->assertEquals(array(), $this->entity->type('list')->getEmptyValue());
     }
