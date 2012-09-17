@@ -55,6 +55,21 @@ class PropertyTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->firstName->isDirty());
     }
 
+    public function testClear()
+    {
+        $this->firstName->setValue('andrew');
+        $this->firstName->clear();
+        $this->assertEquals($this->firstName->getType()->getUnsetValue(), $this->firstName->getValue());
+    }
+
+    public function testClearMarksDirty()
+    {
+        $this->firstName->setValue('andrew');
+        $this->firstName->clean();
+        $this->firstName->clear();
+        $this->assertTrue($this->firstName->isDirty());
+    }
+
     public function testExport()
     {
         $this->firstName->setValue($name = 'andrew');
