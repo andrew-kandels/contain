@@ -13,9 +13,12 @@
     },
     "autoload": {
         "psr-0": {
-            "Contain\\": "src/",
-            "ContainTest\\": "tests/"
-        }
+            "Contain": "src/",
+            "ContainTest": "tests/"
+        },
+        "classmap": [
+            "./"
+        ]
     },
     "config": {
         "bin-dir": "bin"
