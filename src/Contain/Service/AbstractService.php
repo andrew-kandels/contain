@@ -21,6 +21,8 @@ namespace Contain\Service;
 
 use Contain\Mapper\Driver\DriverInterface;
 use Contain\AbstractQuery;
+use Zend\EventManager\Event;
+use Zend\EventManager\EventManager;
 
 /**
  * Abstract Service
@@ -32,6 +34,11 @@ use Contain\AbstractQuery;
  */
 abstract class AbstractService extends AbstractQuery implements ServiceInterface
 {
+    /**
+     * @var Zend\EventManager\EventManager
+     */
+    protected $eventManager;
+
     /**
      * Prepares a mapper for a method's invokation. Passes along 
      * options, sort, limiting and other query specific 
@@ -64,5 +71,33 @@ abstract class AbstractService extends AbstractQuery implements ServiceInterface
         }
 
         return $query;
+    }
+
+    /** 
+     * Retrieves an instance of the Zend Framework event manager in order to 
+     * register or trigger events.
+     *
+     * @return  Zend\EventManager\EventManager
+     */
+    public function getEventManager()
+    {
+        if (!$this->eventManager) {
+            $this->setEventManager(new EventManager());
+        }
+
+        return $this->eventManager;
+    }
+
+    /**
+     * Retrieves an instance of the Zend Framework event manager in order to 
+     * register or trigger events.
+     *
+     * @param   Zend\EventManager\EventManager
+     * @return  $this
+     */
+    public function setEventManager(EventManager $eventManager)
+    {
+        $this->eventManager = $eventManager;
+        return $this;
     }
 }

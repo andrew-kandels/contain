@@ -525,9 +525,8 @@ class MongoDB extends AbstractQuery implements DriverInterface
 
             // child entity
             if ($type instanceof EntityType) {
-                $method = 'get' . ucfirst($property);
-                $child  = $entity->$method();
-                $sub    = $this->getUpdateCriteria($child);
+                $child = $entity->property($property)->getValue();
+                $sub   = $this->getUpdateCriteria($child);
 
                 foreach ($sub as $subProperty => $subValue) {
                     $result[$property . '.' . $subProperty] = $subValue;
