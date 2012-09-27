@@ -1,5 +1,5 @@
 <?php
-namespace \var\www\platform\vendor\contain\contain\src\Contain\Entity;
+namespace Contain\Entity;
 
 use Contain\Entity\AbstractEntity;
 use Contain\Entity\Property\Property;
