@@ -146,7 +146,7 @@ class Resolver
             $loggedStep = clone $this;
             $loggedStep->clearSteps();
             $this->steps[] = $loggedStep;
-            return $this->scan($value, implode('.', $parts));
+            return $this->scan($this->value, implode('.', $parts));
         }
 
         $this->throwException($entity, "Part '$part', property '{$this->property}' cannot be "
