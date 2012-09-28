@@ -115,7 +115,9 @@ class Compiler
             );
         }
 
-        if (preg_match('!(module|vendor|library)/([^/]+)/src/(.*)!', $path, $matches)) {
+        if (preg_match('!(module|vendor|library)/([^/]+)/([^/]+)/src/(.*)!', $path, $matches)) {
+            $path = $matches[4];
+        } elseif (preg_match('!(module|vendor|library)/([^/]+)/src/(.*)!', $path, $matches)) {
             $path = $matches[3];
         }
 
