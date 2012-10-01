@@ -345,4 +345,15 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($entity->property('boolean')->isEmpty());
         $this->assertFalse($entity->property('boolean')->isUnset());
     }
+
+    public function testCleanParentCleansChildren()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $entity->getEntity()->setFirstName('hi');
+        $this->assertEquals(array('entity'), $entity->dirty());
+        $this->assertEquals(array('firstName'), $entity->getEntity()->dirty());
+        $entity->clean();
+        $this->assertEquals(array(), $entity->dirty());
+        $this->assertEquals(array(), $entity->getEntity()->dirty());
+    }
 }

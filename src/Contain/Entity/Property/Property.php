@@ -195,6 +195,11 @@ class Property
     public function clean()
     {
         $this->persistedValue = $this->getType()->export($this->currentValue);
+
+        if ($this->getType() instanceof EntityType) {
+            $this->currentValue->clean();
+        }
+
         return $this;
     }
 
