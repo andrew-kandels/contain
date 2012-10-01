@@ -196,7 +196,7 @@ class Property
     {
         $this->persistedValue = $this->getType()->export($this->currentValue);
 
-        if ($this->getType() instanceof EntityType) {
+        if ($this->getType() instanceof EntityType && $this->currentValue) {
             $this->currentValue->clean();
         }
 
