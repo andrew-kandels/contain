@@ -21,6 +21,7 @@ namespace Contain\Entity\Property;
 
 use Contain\Entity\Property\Type\AbstractType;
 use Contain\Entity\Property\Type\EntityType;
+use Contain\Entity\Property\Type\BooleanType;
 use Contain\Entity\Property\Type\TypeInterface;
 use Contain\Entity\EntityInterface;
 use Traversable;
@@ -128,6 +129,10 @@ class Property
      */
     public function isUnset()
     {
+        if ($this->getType() instanceof BooleanType) {
+            return $this->currentValue === $this->getType()->getUnsetValue();
+        }
+
         return $this->getType()->export($this->currentValue) ===
                $this->getType()->export($this->getType()->getUnsetValue());
     }
@@ -139,6 +144,10 @@ class Property
      */
     public function isEmpty()
     {
+        if ($this->getType() instanceof BooleanType) {
+            return $this->currentValue === $this->getType()->getEmptyValue();
+        }
+
         return $this->getType()->export($this->currentValue) ===
                $this->getType()->export($this->getType()->getEmptyValue());
     }

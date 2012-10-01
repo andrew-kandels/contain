@@ -11,8 +11,8 @@ class SampleMultiTypeEntity extends AbstractEntity
         $this->properties['string']  = new Property('string');
         $this->properties['entity']  = new Property('\ContainTest\Entity\SampleChildEntity');
         $this->properties['boolean'] = new Property('boolean');
-        $this->properties['dateTime'] = new Property('boolean');
-        $this->properties['date'] = new Property('boolean');
+        $this->properties['dateTime'] = new Property('dateTime');
+        $this->properties['date'] = new Property('date');
         $this->properties['double'] = new Property('double');
         $this->properties['enum'] = new Property('enum');
         $this->properties['integer'] = new Property('integer');

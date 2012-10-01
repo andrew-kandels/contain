@@ -2,6 +2,7 @@
 namespace ContainTest\Entity;
 
 use ContainTest\Entity\SampleEntity;
+use ContainTest\Entity\SampleMultiTypeEntity;
 
 class AbstractEntityTest extends \PHPUnit_Framework_TestCase
 {
@@ -332,5 +333,16 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->entity->setInvalidProperty();
+    }
+
+    public function testSettingBooleanFalseShowsDirty()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $entity->setBoolean(true)->clean();
+        $this->assertFalse($entity->property('boolean')->isDirty());
+        $entity->setBoolean(false);
+        $this->assertTrue($entity->property('boolean')->isDirty());
+        $this->assertFalse($entity->property('boolean')->isEmpty());
+        $this->assertFalse($entity->property('boolean')->isUnset());
     }
 }
