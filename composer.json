@@ -7,9 +7,23 @@
     ],
     "homepage": "http://andrewkandels.com/contain",
     "license": "BSD",
+    "authors": [
+        {
+            "name": "Andrew Kandels",
+            "email": "akandels@gmail.com",
+            "role": "lead"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/andrew-kandels/contain/issues",
+        "irc": "irc://irc.freenode.net/contain"
+    },
     "require": {
         "php": ">=5.3.3",
         "zendframework/zendframework": ">=2.0.0"
+    },
+    "suggest": {
+        "phpunit/phpunit": ">=3.7.0"
     },
     "autoload": {
         "psr-0": {
