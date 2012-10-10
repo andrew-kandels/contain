@@ -21,14 +21,14 @@ namespace Contain\Mapper\Driver\MongoDB;
 
 use Contain\Mapper\Driver\ConnectionInterface;
 use Contain\Mapper\Driver\DriverInterface;
-use Contain\Exception\InvalidArgumentException;
+use Contain\Mapper\Exception\InvalidArgumentException;
+use Contain\Mapper\Exception\RuntimeException;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\IntegerType;
 use Contain\Entity\Property\Type\ListType;
 use Contain\AbstractQuery;
 use Exception;
-use RuntimeException;
 use MongoId;
 use Contain\Entity\Property\Resolver;
 
