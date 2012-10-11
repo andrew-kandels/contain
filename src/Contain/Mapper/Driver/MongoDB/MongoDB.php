@@ -105,6 +105,29 @@ class MongoDB extends AbstractQuery implements DriverInterface
 
         return $this->collection;
     }
+    
+    /**
+     * Retrieves the MongoDB instance from Mongo.
+     *
+     * @return  MongoDB
+     */
+    public function getDatabase()
+    {
+        return $this->connection
+            ->getConnection()
+            ->{$this->databaseName};
+    }
+
+    /**
+     * Retrieves the Mongo instance from Mongo.
+     *
+     * @return  Mongo
+     */
+    public function getConnection()
+    {
+        return $this->connection
+            ->getConnection();
+    }
 
     /**
      * Hydrates an array of data into an entity object.
