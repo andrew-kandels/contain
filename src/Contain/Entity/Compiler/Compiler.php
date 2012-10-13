@@ -20,8 +20,8 @@
 namespace Contain\Entity\Compiler;
 
 use Contain\Entity\Definition\AbstractDefinition;
-use Contain\Exception\RuntimeException;
-use Contain\Exception\InvalidArgumentException;
+use Contain\Entity\Exception\RuntimeException;
+use Contain\Entity\Exception\InvalidArgumentException;
 use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
 use ReflectionMethod;
