@@ -1,5 +1,5 @@
 {
-    "name": "contain/contain",
+    "name": "akandels/contain",
     "description": "Zend Framework 2 library for a rich data entity layer.",
     "type": "library",
     "keywords": [
