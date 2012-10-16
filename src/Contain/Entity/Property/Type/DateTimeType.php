@@ -59,6 +59,10 @@ class DateTimeType extends StringType
             return $value;
         }
 
+        if ($value instanceof \MongoDate) {
+            return new DateTime(strtotime($value));
+        }
+
         if (is_string($value)) {
             return new DateTime($value);
         }
