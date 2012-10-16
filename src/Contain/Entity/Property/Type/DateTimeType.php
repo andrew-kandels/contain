@@ -60,7 +60,10 @@ class DateTimeType extends StringType
         }
 
         if ($value instanceof \MongoDate) {
-            return new DateTime(strtotime($value));
+            list($microseconds, $seconds) = explode(' ', (string) $value);
+            $result = new DateTime();
+            $result->setTimestamp($seconds);
+            return $result;
         }
 
         if (is_string($value)) {
