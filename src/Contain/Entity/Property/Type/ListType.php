@@ -131,6 +131,7 @@ class ListType extends StringType
             $value = array($value);
         }
 
+        if (defined('FUCK')) die(var_dump($value));
         foreach ($value as $index => $innerValue) {
             $value[$index] = $type->parse($innerValue);
         }
