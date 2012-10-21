@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -36,7 +36,7 @@ use ReflectionMethod;
  */
 class Compiler
 {
-    /** 
+    /**
      * @var Contain\Entity\Definition\AbstractDefinition
      */
     protected $definition;
@@ -176,7 +176,7 @@ class Compiler
         $result  = array();
 
         foreach ($imports as $import) {
-            $result[] = str_repeat(' ', 8) . trim($this->importMethod($import, $method)); 
+            $result[] = str_repeat(' ', 8) . trim($this->importMethod($import, $method));
         }
 
         return implode(PHP_EOL . PHP_EOL, $result);
@@ -196,7 +196,7 @@ class Compiler
         $contents   = file($func->getFileName());
         $startLine  = $func->getStartLine() - ($withDefinition ? 1 : 0);
         $endLine    = $func->getEndLine();
-        $content    = implode('', array_slice($contents, $startLine, $endLine - $startLine)); 
+        $content    = implode('', array_slice($contents, $startLine, $endLine - $startLine));
         $result     = array();
 
         if ($withDefinition) {
@@ -236,23 +236,30 @@ class Compiler
 
         $targets = $this->definition->getTargets();
 
-        if (!empty($targets['entity'])) {
-            $this->compileEntity();
-        }
-
+        $filter = null;
         if (!empty($targets['filter'])) {
             $this->compileFilter();
+
+            $filter = sprintf('%s\%s',
+                $this->getTargetNamespace('filter'),
+                $this->definition->getName()
+            );
         }
-        
+
+        if (!empty($targets['entity'])) {
+            $this->compileEntity($filter);
+        }
+
         return $this;
     }
 
     /*
      * Compiles the entity object target.
      *
+     * @param   string              FQDN to the filter class
      * @return  $this
      */
-    protected function compileEntity()
+    protected function compileEntity($filter = null)
     {
         $outputFile = $this->getTargetFile('entity');
         if (!$this->handle = fopen($outputFile, 'wt')) {
@@ -272,6 +279,7 @@ class Compiler
             'properties'   => $properties,
             'implementors' => $this->definition->getImplementors(),
             'init'         => $this->importMethods('init'),
+            'filter'       => $filter,
         ));
 
         foreach ($this->definition->getRegisteredMethods() as $method) {
@@ -286,7 +294,7 @@ class Compiler
     }
 
     /*
-     * Compiles the entity filter target, an instance of 
+     * Compiles the entity filter target, an instance of
      * Zend\InputFilter\InputFilter.
      *
      * @return  $this
@@ -311,11 +319,30 @@ class Compiler
         ));
 
         foreach ($this->definition->getProperties() as $name => $property) {
+            $validators = $property->getType()->getValidators();
+
+            if ($extra = $property->getOption('validators')) {
+                foreach ($validators as $index => $validator) {
+                    foreach ($extra as $subIndex => $subValidator) {
+                        if ($validator['name'] == $subValidator['name']) {
+                            unset($validators[$index]);
+                            break;
+                        }
+                    }
+                }
+
+                foreach ($extra as $subIndex => $subValidator) {
+                    $validators[] = $subValidator;
+                }
+
+                $validators = array_merge(array(), $validators); // fix zero-indexing
+            }
+
             $this->append('Filter/properties', array(
                 'name'       => $name,
                 'required'   => $property->getOption('required'),
                 'filters'    => $property->getOption('filters'),
-                'validators' => $property->getOption('validators'),
+                'validators' => $validators,
             ));
         }
 

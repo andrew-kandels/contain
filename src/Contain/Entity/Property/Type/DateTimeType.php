@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -19,7 +19,7 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception\InvalidArgumentException;
+use Contain\Entity\Exception;
 use DateTime;
 
 /**
@@ -56,10 +56,10 @@ class DateTimeType extends StringType
         }
 
         if ($value instanceof DateTime) {
-            return $value;
+            return clone $value;
         }
 
-        if ($value instanceof \MongoDate) {
+        if (class_exists('MongoDate') && $value instanceof \MongoDate) {
             list($microseconds, $seconds) = explode(' ', (string) $value);
             $result = new DateTime();
             $result->setTimestamp($seconds);
@@ -76,7 +76,7 @@ class DateTimeType extends StringType
             return $obj;
         }
 
-        throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+        throw new Exception\InvalidArgumentException('$value is invalid for date type');
     }
 
     /**

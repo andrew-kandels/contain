@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -19,7 +19,7 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Entity\Exception\InvalidArgumentException;
+use Contain\Entity\Exception;
 
 /**
  * String Data Type
@@ -57,15 +57,11 @@ class StringType implements TypeInterface
             return (string) $value;
         }
 
-        if (is_object($value) && method_exists($value, 'toString')) {
-            return (string) $value->toString();
-        }
-
-        if (is_object($value)) {
+        if (is_object($value) && method_exists($value, '__toString')) {
             return (string) $value;
         }
 
-        throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+        throw new Exception\InvalidArgumentException('$value is invalid for string type');
     }
 
     /**
@@ -173,5 +169,15 @@ class StringType implements TypeInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Validator configuration array to automatically include when building filters.
+     *
+     * @return  array
+     */
+    public function getValidators()
+    {
+        return array();
     }
 }

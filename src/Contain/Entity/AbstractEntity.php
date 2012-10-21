@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -19,7 +19,7 @@
 
 namespace Contain\Entity;
 
-use Contain\Entity\Exception\InvalidArgumentException;
+use Contain\Entity\Exception;
 use Iterator;
 use Traversable;
 use Zend\EventManager\Event;
@@ -83,8 +83,8 @@ abstract class AbstractEntity implements EntityInterface
         return $this;
     }
 
-    /** 
-     * Retrieves an instance of the Zend Framework event manager in order to 
+    /**
+     * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
      * @return  Zend\EventManager\EventManager
@@ -99,7 +99,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Retrieves an instance of the Zend Framework event manager in order to 
+     * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
      * @param   Zend\EventManager\EventManager
@@ -111,14 +111,14 @@ abstract class AbstractEntity implements EntityInterface
         return $this;
     }
 
-    /** 
+    /**
      * 'property.get' event that is fired when a property is accessed.
-     *   
+     *
      * @param   string              Property name
      * @param   mixed               Current Value
      * @param   boolean             Is the value presently set?
      * @return  mixed|null
-     */  
+     */
     public function onEventGetter($property, $currentValue, $isValueSet)
     {
         $eventManager = $this->getEventManager();
@@ -344,14 +344,14 @@ abstract class AbstractEntity implements EntityInterface
         return null;
     }
 
-    /** 
+    /**
      * Gets an array of all the entity's properties.
-     *   
+     *
      * @param   boolean             Include unset properties
      * @return  array
-     */  
+     */
     public function properties($includeUnset = false)
-    {   
+    {
         $result = array();
 
         foreach ($this->properties as $name => $property) {
@@ -361,16 +361,16 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         return $result;
-    }   
-      
-    /** 
+    }
+
+    /**
      * Returns an array of all the entity properties.
-     *   
+     *
      * @param   boolean             Include unset properties
      * @return  array
-     */  
+     */
     public function toArray($includeUnset = false)
-    {   
+    {
         $result = array();
 
         foreach ($this->properties as $name => $property) {
@@ -391,7 +391,7 @@ abstract class AbstractEntity implements EntityInterface
     public function fromArray($properties)
     {
         if (!is_array($properties) && !$properties instanceof Traversable) {
-            throw new InvalidArgumentException('$properties must be an array or an instance of Traversable.');
+            throw new Exception\InvalidArgumentException('$properties must be an array or an instance of Traversable.');
         }
 
         foreach ($properties as $key => $value) {
@@ -425,7 +425,7 @@ abstract class AbstractEntity implements EntityInterface
             } elseif (is_string($includeProperties)) {
                 $includeProperties = array($includeProperties);
             } elseif (!is_array($includeProperties)) {
-                throw new InvalidArgumentException('$includeProperties must be null, '
+                throw new Exception\InvalidArgumentException('$includeProperties must be null, '
                     . 'a single property, or an array or Traversable object of '
                     . 'properties to export.'
                 );
@@ -502,8 +502,11 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Magic method for handling get and set methods on an entity that 
+     * Magic method for handling get and set methods on an entity that
      * aren't explicitly defined (which would be ideal).
+     *
+     * If compiled (recommended), the methods will be declared explicitly leaving this
+     * method unused for better performance / code completion support.
      *
      * @param   string              Method
      * @param   array               Variable arguments
@@ -532,14 +535,75 @@ abstract class AbstractEntity implements EntityInterface
                     $args
                 ));
             } else {
-                throw new InvalidArgumentException("'$property' is not a valid "
+                throw new Exception\InvalidArgumentException("'$property' is not a valid "
                     . 'property of ' . get_class($this) . '.'
                 );
             }
         }
 
-        throw new InvalidArgumentException("'$method' is not a valid "
+        throw new Exception\InvalidArgumentException("'$method' is not a valid "
             . 'method for ' . get_class($this) . '.'
         );
+    }
+
+    /**
+     * Retrieves messages with property indexes for validation errors
+     * from the last invokation of the isValid method.
+     *
+     * @return  array
+     */
+    public function messages()
+    {
+        return !empty($this->messages) ? $this->messages : array();
+    }
+
+    /**
+     * Filters and validates some or all properties of the entity. If false,
+     * additional messages can be retrieved by invoking the messages method.
+     *
+     * @param   string|array|Traversable            Properties to filter/validate (omit for all)
+     * @return  boolean
+     */
+    public function isValid($properties = array())
+    {
+        $this->messages = array();
+
+        if (empty($this->inputFilter)) {
+            throw new Exception\RuntimeException('validate failed as no filter class is set in the entity');
+        }
+
+        if (!class_exists($this->inputFilter)) {
+            throw new Exception\RuntimeException('validate failed as filter class "' . $this->filter . '" does not exist');
+        }
+
+        if (is_string($properties)) {
+            $properties = array($properties);
+        } elseif ($properties instanceof Traversable) {
+            $properties = iterator_to_array($properties);
+        } elseif (!is_array($properties)) {
+            throw new Exception\InvalidArgumentException('$properties must be an array, string, or instance of Traversable');
+        }
+
+        $filter = new $this->inputFilter();
+        $filter->setData($this->export($properties ? $properties : null));
+
+        $filter->isValid();
+
+        $this->messages = $filter->getMessages();
+        $values         = $filter->getValues();
+
+        foreach ($this->messages as $index => $values) {
+            if ($properties && !in_array($index, $properties)) {
+                unset($this->messages[$index]);
+                unset($values[$index]);
+            }
+        }
+
+        // update properties with filtered values
+        foreach ($values as $index => $value) {
+            $this->set($index, $value);
+        }
+
+        return !(boolean) $this->messages;
     }
 }

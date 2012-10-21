@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -40,15 +40,15 @@ abstract class AbstractService extends AbstractQuery implements ServiceInterface
     protected $eventManager;
 
     /**
-     * Prepares a mapper for a method's invokation. Passes along 
-     * options, sort, limiting and other query specific 
+     * Prepares a mapper for a method's invokation. Passes along
+     * options, sort, limiting and other query specific
      * attributes.
      *
      * @param   Contain\Mapper\Driver       Mapper
      * @param   boolean                     Clears the query properties after prepping
      * @return  Contain\Mapper\Driver
      */
-    protected function prepare(AbstractQuery $query, $clearProperties = true)
+    public function prepare(AbstractQuery $query, $clearProperties = true)
     {
         if ($this->limit !== null) {
             $query->limit($this->limit);
@@ -63,7 +63,7 @@ abstract class AbstractService extends AbstractQuery implements ServiceInterface
         }
 
         $query->setOptions($this->getOptions())
-               ->properties($this->getProperties());
+              ->properties($this->getProperties());
 
         // reset above options to a blank state
         if ($clearProperties) {
@@ -73,8 +73,8 @@ abstract class AbstractService extends AbstractQuery implements ServiceInterface
         return $query;
     }
 
-    /** 
-     * Retrieves an instance of the Zend Framework event manager in order to 
+    /**
+     * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
      * @return  Zend\EventManager\EventManager
@@ -89,7 +89,7 @@ abstract class AbstractService extends AbstractQuery implements ServiceInterface
     }
 
     /**
-     * Retrieves an instance of the Zend Framework event manager in order to 
+     * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
      * @param   Zend\EventManager\EventManager

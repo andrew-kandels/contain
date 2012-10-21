@@ -3,13 +3,13 @@
 /**
  * Contain Project
  *
- * @note This needs to be rewritten to be more portable. This is a 
- * work in progress.
+ * Compiles a fully qualified namespace that points to an entity definition
+ * into a ready-to-use entity class with an optional filter class.
  *
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -25,23 +25,25 @@ use Zend\ServiceManager\ServiceManager;
 use Zend\Mvc\Service\ServiceManagerConfig;
 
 if (empty($argv[1])) {
-    fprintf(STDERR, "Syntax: compile FULL_ENTITY_NAMESPACE\n");
+    fprintf(STDERR, "Syntax: compile FULL_ENTITY_NAMESPACE (e.g.: Contain\Entity\Definition\Setting)\n"
+        . "Note: Your project must support autoloading for the specified class.\n"
+    );
     exit(1);
 }
 
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
-chdir(__DIR__ . '/../../../..');
+chdir(__DIR__ . '/../../../..'); // typical composer install, may need modification for non-standard setups
 
-require_once('./vendor/autoload.php');
+require_once('./vendor/autoload.php'); // composer
 
-$configuration = include './config/application.config.php';
+$configuration = include './config/application.config.php'; // standard zf2 location, may need modification for non-standard setups
 $serviceManager = new ServiceManager(new ServiceManagerConfig($configuration['service_manager']));
 $serviceManager->setService('ApplicationConfig', $configuration);
 $serviceManager->get('ModuleManager')->loadModules();
 
-$compiler = $serviceManager->get('di')->get('Contain\Entity\Compiler\Compiler');
+$compiler = $serviceManager->get('Contain\Entity\Compiler\Compiler');
 try {
     $compiler->compile($argv[1]);
 } catch (Exception $e) {

@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -77,4 +77,11 @@ interface TypeInterface
      * @return  $this
      */
     public function setOptions($options);
+
+    /**
+     * Validator configuration array to automatically include when building filters.
+     *
+     * @return  array
+     */
+    public function getValidators();
 }

@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -18,6 +18,8 @@
  */
 
 namespace Contain;
+
+use InvalidArgumentException;
 
 /**
  * Fetch/Query Unit of Work
@@ -159,7 +161,7 @@ class AbstractQuery
     }
 
     /**
-     * Sets a mapper level option that will be passed to the next 
+     * Sets a mapper level option that will be passed to the next
      * mapper method invokation.
      *
      * @param   string              Option Name
@@ -173,7 +175,7 @@ class AbstractQuery
     }
 
     /**
-     * Sets mapper level options that will be passed to the next 
+     * Sets mapper level options that will be passed to the next
      * mapper method invokation.
      *
      * @param   string              Option Name
@@ -197,13 +199,13 @@ class AbstractQuery
 
     /**
      * Pulls the mapper level options out of the stack in preparation
-     * for a mapper method invokation and then clears the stack for the 
+     * for a mapper method invokation and then clears the stack for the
      * next.
      *
      * @param   array           Options
      * @return  array
      */
-    protected function getOptions(array $defaults = array())
+    public function getOptions(array $defaults = array())
     {
         $result = array();
         foreach ($defaults as $name => $value) {
@@ -261,7 +263,7 @@ class AbstractQuery
      *
      * @return  array
      */
-    protected function getProperties()
+    public function getProperties()
     {
         return $this->properties;
     }

@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -19,8 +19,7 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Entity\Exception\InvalidArgumentException;
-use Contain\Entity\Exception\RuntimeException;
+use Contain\Entity\Exception;
 use Traversable;
 
 /**
@@ -54,10 +53,7 @@ class EntityType extends StringType
     public function getInstance($properties = null)
     {
         if (!$type = $this->getOption('className')) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException('$value is invalid '
-                . 'because no type has been set for '
-                . 'the ' . __CLASS__ . ' data type.'
-            );
+            throw new Exception\RuntimeException('$value is invalid because no type has been set for type entity');
         }
 
         // @todo find a better way to deal with interfaces and uncompiled entity references
@@ -67,9 +63,7 @@ class EntityType extends StringType
 
         // dependency may not have been compiled yet
         if (!class_exists($type)) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException('$value is invalid '
-                . 'because class \'' . $type . '\' does not exist.'
-            );
+            throw new Exception\InvalidArgumentException('getInstance attempting to create non-existing object "' . $type . '"');
         }
 
         return new $type($properties);
@@ -89,20 +83,18 @@ class EntityType extends StringType
         }
 
         if (!$type = $this->getOption('className')) {
-            throw new RuntimeException('$value is invalid because no type has been set for '
-                . 'the ' . __CLASS__ . ' data type.'
-            );
+            throw new Exception\RuntimeException('$value is invalid because no type has been set for type entity');
         }
 
         if ($value instanceof $type) {
-            return $value;
+            return clone $value;
         }
 
         if (is_array($value) || $value instanceof Traversable) {
             return $this->getInstance($value);
         }
 
-        throw new InvalidArgumentException('$value is not of '
+        throw new Exception\InvalidArgumentException('$value is not of '
             . 'type Contain\Property\Type\EntityType, an array, or an instance of Traversable.'
         );
     }

@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -78,7 +78,7 @@ class Property
     );
 
     /**
-     * Constructs the property which needs be associated with a name 
+     * Constructs the property which needs be associated with a name
      * and a data type.
      *
      * @param   Contain\Entity\Property\Type\AbstractType|string
@@ -186,8 +186,8 @@ class Property
         return $this;
     }
 
-    /** 
-     * Marks the current value as having been persisted for the sake of 
+    /**
+     * Marks the current value as having been persisted for the sake of
      * dirty tracking.
      *
      * @return  $this
@@ -214,7 +214,7 @@ class Property
     }
 
     /**
-     * Returns true if the current value of the property differs from its 
+     * Returns true if the current value of the property differs from its
      * last persisted value.
      *
      * @return  boolean
@@ -226,7 +226,7 @@ class Property
 
     /**
      * Returns the value of this property when it was last persisted.
-     * 
+     *
      * @return  mixed
      */
     public function getPersistedValue()

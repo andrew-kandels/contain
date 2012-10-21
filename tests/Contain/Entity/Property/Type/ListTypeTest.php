@@ -77,7 +77,7 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
     public function testParseEmptyGivesUnsetValue()
     {
         $this->assertEquals(
-            $this->entity->type('list')->getUnsetValue(), 
+            $this->entity->type('list')->getUnsetValue(),
             $this->entity->setList(false)->getList()
         );
     }
@@ -98,5 +98,10 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
         $value = $value[0];
         $this->assertInstanceOf('ContainTest\Entity\SampleChildEntity', $value);
         $this->assertEquals($value->export(), $values);
+    }
+
+    public function getValidators()
+    {
+        $this->assertEquals(array(), $this->type->getValidators());
     }
 }

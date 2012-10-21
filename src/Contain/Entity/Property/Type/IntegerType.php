@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -48,15 +48,11 @@ class IntegerType extends StringType
             return $this->getUnsetValue();
         }
 
-        if (is_string($value)) {
-            return intval($value);
-        }
-
         if (is_numeric($value)) {
             return (int) $value;
         }
 
-        throw new InvalidArgumentException('$value is invalid for type ' . __CLASS__);
+        return intval(parent::parse($value));
     }
 
     /**
@@ -64,12 +60,12 @@ class IntegerType extends StringType
      * for purposes of debugging or export.
      *
      * @param   mixed       Internal value
-     * @return  string
+     * @return  false|null|integer
      * @throws  Contain\Exception\InvalidArgumentException
      */
     public function export($value)
     {
-        return (integer) $this->parse($value);
+        return $this->parse($value);
     }
 
     /**
@@ -80,5 +76,17 @@ class IntegerType extends StringType
     public function getEmptyValue()
     {
         return false;
+    }
+
+    /**
+     * Validator configuration array to automatically include when building filters.
+     *
+     * @return  array
+     */
+    public function getValidators()
+    {
+        return array(
+            array('name' => 'Digits'),
+        );
     }
 }

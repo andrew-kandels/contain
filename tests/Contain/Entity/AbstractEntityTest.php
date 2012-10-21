@@ -174,7 +174,7 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
             array(
                 'firstName' => $this->entity->property('firstName')->getType()->getUnsetValue(),
                 'child'     => $this->entity->getChild(),
-            ), 
+            ),
             $this->entity->toArray(true)
         );
         $this->entity->setFirstName('Andrew');
@@ -197,7 +197,7 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
             array(
                 'firstName' => $this->entity->property('firstName')->getType()->getUnsetValue(),
                 'child'     => array(),
-            ), 
+            ),
             $this->entity->export(null, true)
         );
         $this->entity->fromArray(array(
@@ -249,10 +249,10 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         });
 
         $this->assertEquals(
-            'newvalue', 
+            'newvalue',
             $this->entity->onEventSetter(
-                'firstName', 
-                'old', 
+                'firstName',
+                'old',
                 'new',
                 true
             )
@@ -262,10 +262,10 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
     public function testOnEventSetterWithReplace()
     {
         $this->assertEquals(
-            'new', 
+            'new',
             $this->entity->onEventSetter(
-                'firstName', 
-                'old', 
+                'firstName',
+                'old',
                 'new',
                 true
             )
@@ -355,5 +355,51 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $entity->clean();
         $this->assertEquals(array(), $entity->dirty());
         $this->assertEquals(array(), $entity->getEntity()->dirty());
+    }
+
+    public function testIsValidWhenItIs()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => '1234'));
+        $this->assertTrue($entity->isValid());
+    }
+
+    public function testIsValid()
+    {
+        $entity = new SampleMultiTypeEntity();
+
+        $this->assertEquals(array(), $entity->messages());
+        $this->assertFalse($entity->setString('thisvalueiswaytoolongandwillfail')->isValid());
+        $this->assertEquals(array('string' => array('notDigits' => 'The input must contain only digits')), $entity->messages());
+    }
+
+    public function testIsValidString()
+    {
+        $entity = new SampleMultiTypeEntity();
+
+        $this->assertFalse($entity->setString('thisvalueiswaytoolongandwillfail')->isValid('string'));
+        $this->assertEquals(array('string' => array('notDigits' => 'The input must contain only digits')), $entity->messages());
+    }
+
+    public function testIsValidArray()
+    {
+        $entity = new SampleMultiTypeEntity();
+
+        $this->assertFalse($entity->setString('thisvalueiswaytoolongandwillfail')->isValid(array('string', 'test')));
+        $this->assertEquals(array('string' => array('notDigits' => 'The input must contain only digits')), $entity->messages());
+    }
+
+    public function testIsValidNotSpecified()
+    {
+        $entity = new SampleMultiTypeEntity();
+
+        $this->assertTrue($entity->setString('thisvalueiswaytoolongandwillfail')->isValid(array('test')));
+    }
+
+    public function testIsValidWhenFiltered()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => '   1234   '));
+        $this->assertEquals('   1234   ', $entity->getString());
+        $this->assertTrue($entity->isValid());
+        $this->assertEquals('1234', $entity->getString());
     }
 }
