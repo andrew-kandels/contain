@@ -1,11 +1,11 @@
 {
     "name": "akandels/contain",
-    "description": "Zend Framework 2 library providing compiled data entities with forms and filters.",
+    "description": "Zend Framework 2 library for the passing and handling of rich data entities.",
     "type": "library",
     "keywords": [
-        "zf2","entity","hydrator"
+        "zf2","entity","hydrator","contain"
     ],
-    "homepage": "http://andrewkandels.com/contain",
+    "homepage": "http://contain-project.org",
     "license": "BSD",
     "authors": [
         {
@@ -23,6 +23,7 @@
         "zendframework/zendframework": ">=2.0.0"
     },
     "suggest": {
+        "akandels/contain-mapper": "dev-master",
         "phpunit/phpunit": ">=3.7.7",
         "phpunit/php-file-iterator": ">=1.3.3",
         "phpunit/php-text-template": ">=1.1.3",

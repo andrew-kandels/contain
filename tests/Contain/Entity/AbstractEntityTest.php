@@ -402,4 +402,22 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($entity->isValid());
         $this->assertEquals('1234', $entity->getString());
     }
+
+    public function testIsPersisted()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $this->assertFalse($entity->isPersisted());
+    }
+
+    public function testPersisted()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $this->assertFalse($entity->isPersisted());
+        $entity->persisted();
+        $this->assertTrue($entity->isPersisted());
+        $entity->persisted(false);
+        $this->assertFalse($entity->isPersisted());
+        $entity->persisted(true);
+        $this->assertTrue($entity->isPersisted());
+    }
 }

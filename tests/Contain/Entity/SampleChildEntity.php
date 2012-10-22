@@ -8,6 +8,6 @@ class SampleChildEntity extends AbstractEntity
 {
     public function init()
     {
-        $this->properties['firstName'] = new Property('string');
+        $this->properties['firstName'] = new Property('string', array('primary' => true));
     }
 }

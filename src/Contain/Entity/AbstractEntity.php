@@ -54,6 +54,11 @@ abstract class AbstractEntity implements EntityInterface
     protected $extendedProperties = array();
 
     /**
+     * @var boolean
+     */
+    protected $isPersisted = false;
+
+    /**
      * Constructor
      *
      * @param   array|Traversable               Properties
@@ -605,5 +610,27 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         return !(boolean) $this->messages;
+    }
+
+    /**
+     * Returns true if the entity has been persisted into a data store.
+     *
+     * @return  boolean
+     */
+    public function isPersisted()
+    {
+        return $this->isPersisted;
+    }
+
+    /**
+     * Flags the entity as being persisted.
+     *
+     * @param   boolean                 Value
+     * @return  $this
+     */
+    public function persisted($value = true)
+    {
+        $this->isPersisted = (boolean) $value;
+        return $this;
     }
 }
