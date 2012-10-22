@@ -1,9 +1,9 @@
 {
     "name": "akandels/contain",
-    "description": "Zend Framework 2 library for a rich data entity layer.",
+    "description": "Zend Framework 2 library providing compiled data entities with forms and filters.",
     "type": "library",
     "keywords": [
-        "zf2"
+        "zf2","entity","hydrator"
     ],
     "homepage": "http://andrewkandels.com/contain",
     "license": "BSD",
@@ -23,18 +23,22 @@
         "zendframework/zendframework": ">=2.0.0"
     },
     "suggest": {
-        "phpunit/phpunit": ">=3.7.0"
-    },
+        "phpunit/phpunit": ">=3.7.7",
+        "phpunit/php-file-iterator": ">=1.3.3",
+        "phpunit/php-text-template": ">=1.1.3",
+        "phpunit/php-code-coverage": ">=1.2.3",
+        "phpunit/php-timer": ">=1.0.4",
+        "phpunit/phpunit-mock-objects": ">=1.2.1",
+        "phpunit/php-token-stream": ">=1.1.5",
+        "symfony/yaml": ">=2.1.0"
+    }
     "autoload": {
         "psr-0": {
             "Contain": "src/",
             "ContainTest": "tests/"
-        },
-        "classmap": [
-            "./"
-        ]
+        }
     },
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "scripts"
     }
 }
