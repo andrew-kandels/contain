@@ -3,8 +3,8 @@
 /**
  * Contain Project
  *
- * Recursively scans each module in the main project directory for entity
- * definitions and compiles them one-by-one.
+ * Recursively scans the Contain directory for internal entities and compiles
+ * them into the project tree.
  *
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available

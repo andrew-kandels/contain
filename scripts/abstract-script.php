@@ -28,6 +28,7 @@ use Zend\Mvc\Service\ServiceManagerConfig;
 
 define('ZF2_APPLICATION_PATH', realpath(__DIR__ . '/../../../..'));
 define('ZF2_MODULES_PATH', ZF2_APPLICATION_PATH . '/module');
+define('ZF2_FRAMEWORK_PATH', ZF2_APPLICATION_PATH . '/vendor/zendframework/zendframework');
 define('COMPOSER_AUTOLOADER', ZF2_APPLICATION_PATH . '/vendor/autoload.php');
 
 define('APPLICATION_CONFIG_FILE', ZF2_APPLICATION_PATH . '/config/application.config.php');
