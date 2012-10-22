@@ -38,11 +38,21 @@ class Setting extends AbstractDefinition
      */
     public function setUp()
     {
-        $this->setName('Setting')
-             ->registerTarget(AbstractDefinition::FILTER, __DIR__ . '/../Filter')
+        $this->registerTarget(AbstractDefinition::FILTER, __DIR__ . '/../Filter')
+             ->registerTarget(AbstractDefinition::FORM, __DIR__ . '/../Form')
              ->registerTarget(AbstractDefinition::ENTITY, __DIR__ . '/..');
 
-        $this->setProperty('name', 'string')->setOptions(array('required' => true));
-        $this->setProperty('value', 'mixed');
+        $this->setProperty('name', 'string', array(
+            'required' => true,
+            'options' => array(
+                'label' => 'Name',
+            ),
+        ));
+
+        $this->setProperty('value', 'mixed', array(
+            'options' => array(
+                'label' => 'Value',
+            ),
+        ));
     }
 }

@@ -14,7 +14,8 @@ use Zend\EventManager\EventManager;
  */
 class Setting extends AbstractEntity
 {
-    protected $filter = 'Contain\Entity\Filter\Setting';
+    protected $inputFilter = 'Contain\Entity\Filter\Setting';
+    protected $messages = array();
 
     /**
      * Initializes the properties of this entity.
@@ -25,8 +26,17 @@ class Setting extends AbstractEntity
     {
         $this->properties['name'] = new Property('\Contain\Entity\Property\Type\StringType', array (
   'required' => true,
+  'options' => 
+  array (
+    'label' => 'Name',
+  ),
 ));
-        $this->properties['value'] = new Property('\Contain\Entity\Property\Type\MixedType');
+        $this->properties['value'] = new Property('\Contain\Entity\Property\Type\MixedType', array (
+  'options' => 
+  array (
+    'label' => 'Value',
+  ),
+));
             }
 
     /**

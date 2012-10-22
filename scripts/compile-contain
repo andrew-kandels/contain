@@ -1,0 +1,57 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Contain Project
+ *
+ * Recursively scans each module in the main project directory for entity
+ * definitions and compiles them one-by-one.
+ *
+ * This source file is subject to the BSD license bundled with
+ * this package in the LICENSE.txt file. It is also available
+ * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
+ * If you are unable to receive a copy of the license or have
+ * questions concerning the terms, please send an email to
+ * me@andrewkandels.com.
+ *
+ * @category    akandels
+ * @package     contain
+ * @author      Andrew Kandels (me@andrewkandels.com)
+ * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
+ * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
+ * @link        http://andrewkandels.com/contain
+ */
+
+require_once(__DIR__ . '/abstract-script.php');
+
+$compiler = $serviceManager->get('Contain\Entity\Compiler\Compiler');
+$iterator = new \DirectoryIterator(CONTAIN_PATH . '/src/Contain/Entity/Definition');
+$exitCode = 0;
+
+foreach ($iterator as $entity) {
+    if ($entity->isFile() && $entity->getExtension() == 'php') {
+        $className = str_replace('/', '\\', preg_replace(
+            '!^' . preg_quote(CONTAIN_PATH) . '/src/(.*)\.php$!',
+            '$1',
+            $entity->getPathname()
+        ));
+
+        if (preg_match('/(Abstract|Interface)/', $className)) {
+            continue;
+        }
+
+        fprintf(STDERR, '%-60s ... ', sprintf("Compiling '%s'", $className));
+
+        try {
+            $compiler->compile($className);
+            fprintf(STDERR, "[ Ok ]\n");
+        } catch (Exception $e) {
+            $exitCode = 1;
+            fprintf(STDERR, "[ Failed ]\nException: %s\n--\n%s\n\n... continuing ...\n\n",
+                $e->getMessage(),
+                $e->getTraceAsString()
+            );
+        }
+    }
+}
+
+exit($exitCode);

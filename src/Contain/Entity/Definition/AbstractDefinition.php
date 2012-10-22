@@ -5,7 +5,7 @@
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
  * on the world-wide-web at http://www.opensource.org/licenses/bsd-license.php.
- * If you are unable to receive a copy of the license or have 
+ * If you are unable to receive a copy of the license or have
  * questions concerning the terms, please send an email to
  * me@andrewkandels.com.
  *
@@ -19,8 +19,8 @@
 
 namespace Contain\Entity\Definition;
 
-use Contain\Exception\InvalidArgumentException;
-use Contain\Exception\RuntimeException;
+use InvalidArgumentException;
+use RuntimeException;
 use Contain\Entity\Property\Property;
 
 /**
@@ -42,11 +42,8 @@ abstract class AbstractDefinition
      * @var string
      */
     const ENTITY = 'entity';
-
-    /**
-     * @var string
-     */
     const FILTER = 'filter';
+    const FORM   = 'form';
 
     /**
      * @var array
@@ -87,9 +84,10 @@ abstract class AbstractDefinition
     protected $targets = array(
         'entity' => '',
         'filter' => '',
+        'form'   => '',
     );
 
-    /** 
+    /**
      * @var string
      */
     protected $parentClass;
@@ -110,7 +108,7 @@ abstract class AbstractDefinition
     }
 
     /**
-     * Called when an entity itself is instantiated. Used to register 
+     * Called when an entity itself is instantiated. Used to register
      * events.
      *
      * @return  $this
@@ -120,7 +118,7 @@ abstract class AbstractDefinition
     }
 
     /**
-     * Registers a new property and returns the property object which can 
+     * Registers a new property and returns the property object which can
      * be invoked directly for additional options or passed as a third
      * argument.
      *
@@ -209,11 +207,11 @@ abstract class AbstractDefinition
     }
 
     /**
-     * Sets the target path for the compiler of a given item, of 
+     * Sets the target path for the compiler of a given item, of
      * which the valid options include:
      *
      * 1) entity: The compiled entity object
-     * 2) filter: The Zend\InputFilter\InputFilter implementation 
+     * 2) filter: The Zend\InputFilter\InputFilter implementation
      *            for validation and data sanitizing.
      *
      * @param   string                  Target key (see above, e.g.: entity)
@@ -329,7 +327,7 @@ abstract class AbstractDefinition
 
     /**
      * Returns all methods registered for the definition.
-     * 
+     *
      * @return  array
      */
     public function getRegisteredMethods()
@@ -375,7 +373,7 @@ abstract class AbstractDefinition
         return ($this->name = substr(__CLASS__, strrpos('\\', __CLASS__) + 1));
     }
 
-    /** 
+    /**
      * Sets the parent class the compiled entity will extend.
      *
      * @param   string
@@ -387,7 +385,7 @@ abstract class AbstractDefinition
         return $this;
     }
 
-    /** 
+    /**
      * Gets the parent class the compiled entity will extend.
      *
      * @return  string
@@ -397,7 +395,7 @@ abstract class AbstractDefinition
         return $this->parentClass;
     }
 
-    /** 
+    /**
      * Registers an interface the compiled entity will implement.
      *
      * @param   array
@@ -409,7 +407,7 @@ abstract class AbstractDefinition
         return $this;
     }
 
-    /** 
+    /**
      * Sets the interfaces the compiled entity will implement.
      *
      * @param   array
@@ -421,7 +419,7 @@ abstract class AbstractDefinition
         return $this;
     }
 
-    /** 
+    /**
      * Gets the interfaces the compiled entity will implement.
      *
      * @return  array
@@ -463,7 +461,7 @@ abstract class AbstractDefinition
     {
         if (!isset($this->options[$name])) {
             throw new InvalidArgumentException(
-                "'$name' is not a valid option. Valid options are: " 
+                "'$name' is not a valid option. Valid options are: "
                 . implode(', ', array_keys($this->options)) . '.'
             );
         }

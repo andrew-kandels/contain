@@ -21,8 +21,7 @@
  * @link        http://andrewkandels.com/contain
  */
 
-use Zend\ServiceManager\ServiceManager;
-use Zend\Mvc\Service\ServiceManagerConfig;
+require_once(__DIR__ . '/abstract-script.php');
 
 if (empty($argv[1])) {
     fprintf(STDERR, "Syntax: compile FULL_ENTITY_NAMESPACE (e.g.: Contain\Entity\Definition\Setting)\n"
@@ -30,18 +29,6 @@ if (empty($argv[1])) {
     );
     exit(1);
 }
-
-ini_set('display_errors', 1);
-ini_set('log_errors', 1);
-error_reporting(E_ALL);
-chdir(__DIR__ . '/../../../..'); // typical composer install, may need modification for non-standard setups
-
-require_once('./vendor/autoload.php'); // composer
-
-$configuration = include './config/application.config.php'; // standard zf2 location, may need modification for non-standard setups
-$serviceManager = new ServiceManager(new ServiceManagerConfig($configuration['service_manager']));
-$serviceManager->setService('ApplicationConfig', $configuration);
-$serviceManager->get('ModuleManager')->loadModules();
 
 $compiler = $serviceManager->get('Contain\Entity\Compiler\Compiler');
 try {

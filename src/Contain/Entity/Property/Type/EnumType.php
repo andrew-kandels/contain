@@ -38,7 +38,9 @@ class EnumType extends StringType
      */
     public function __construct()
     {
-        $this->options['options'] = array();
+        $this->options['options'] = array(
+            'value_options' => array(),
+        );
     }
 
     /**
@@ -46,7 +48,7 @@ class EnumType extends StringType
      *
      * @param   mixed               Value to be set
      * @return  mixed               Internal value
-     * @throws  COntain\Exception\InvalidArgumentException
+     * @throws  Contain\Exception\InvalidArgumentException
      */
     public function parse($value)
     {
@@ -56,7 +58,16 @@ class EnumType extends StringType
 
         $value = parent::parse($value);
 
-        if (in_array($value, $this->getOption('options'))) {
+        // @todo backwards compatibility fix for ZF2 2.0.2, to be removed to
+        // simply use value_options like ZF2 does
+        $options = $this->getOption('options');
+        if (!isset($options['value_options']) && $options) {
+            $valueOptions = $options;
+        } else {
+            $valueOptions = $options['value_options'];
+        }
+
+        if (in_array($value, $valueOptions)) {
             return $value;
         }
 

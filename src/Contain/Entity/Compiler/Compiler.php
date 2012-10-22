@@ -24,6 +24,7 @@ use Contain\Entity\Exception\RuntimeException;
 use Contain\Entity\Exception\InvalidArgumentException;
 use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
+use Contain\Entity\Property\Type;
 use ReflectionMethod;
 
 /**
@@ -237,17 +238,21 @@ class Compiler
         $targets = $this->definition->getTargets();
 
         $filter = null;
-        if (!empty($targets['filter'])) {
+        if (!empty($targets[AbstractDefinition::FILTER])) {
             $this->compileFilter();
 
             $filter = sprintf('%s\%s',
-                $this->getTargetNamespace('filter'),
+                $this->getTargetNamespace(AbstractDefinition::FILTER),
                 $this->definition->getName()
             );
         }
 
-        if (!empty($targets['entity'])) {
+        if (!empty($targets[AbstractDefinition::ENTITY])) {
             $this->compileEntity($filter);
+        }
+
+        if (!empty($targets[AbstractDefinition::FORM])) {
+            $this->compileForm($filter);
         }
 
         return $this;
@@ -261,7 +266,7 @@ class Compiler
      */
     protected function compileEntity($filter = null)
     {
-        $outputFile = $this->getTargetFile('entity');
+        $outputFile = $this->getTargetFile(AbstractDefinition::ENTITY);
         if (!$this->handle = fopen($outputFile, 'wt')) {
             throw new RuntimeException("Cannot open '$outputFile' for writing. Use "
                 . 'setTarget() in the definition to configure or set permissions.'
@@ -274,12 +279,12 @@ class Compiler
         }
 
         $this->append('Entity/open', array(
-            'namespace'    => $this->getTargetNamespace('entity'),
+            'namespace'    => $this->getTargetNamespace(AbstractDefinition::ENTITY),
             'name'         => $this->definition->getName(),
             'properties'   => $properties,
             'implementors' => $this->definition->getImplementors(),
             'init'         => $this->importMethods('init'),
-            'filter'       => $filter,
+            AbstractDefinition::FILTER       => $filter,
         ));
 
         foreach ($this->definition->getRegisteredMethods() as $method) {
@@ -293,7 +298,7 @@ class Compiler
         return $this;
     }
 
-    /*
+    /**
      * Compiles the entity filter target, an instance of
      * Zend\InputFilter\InputFilter.
      *
@@ -301,7 +306,7 @@ class Compiler
      */
     protected function compileFilter()
     {
-        $outputFile = $this->getTargetFile('filter');
+        $outputFile = $this->getTargetFile(AbstractDefinition::FILTER);
         if (!$this->handle = fopen($outputFile, 'wt')) {
             throw new RuntimeException("Cannot open '$outputFile' for writing. Use "
                 . 'setTarget() in the definition to configure or set permissions.'
@@ -314,7 +319,7 @@ class Compiler
         }
 
         $this->append('Filter/construct', array(
-            'namespace'    => $this->getTargetNamespace('filter'),
+            'namespace'    => $this->getTargetNamespace(AbstractDefinition::FILTER),
             'name'         => $this->definition->getName(),
         ));
 
@@ -353,4 +358,57 @@ class Compiler
         return $this;
     }
 
+    /**
+     * Compiles the entity form target, an instance of
+     * Zend\Form\Form.
+     *
+     * @return  $this
+     */
+    protected function compileForm($filter)
+    {
+        $outputFile = $this->getTargetFile(AbstractDefinition::FORM);
+        if (!$this->handle = fopen($outputFile, 'wt')) {
+            throw new RuntimeException("Cannot open '$outputFile' for writing. Use "
+                . 'setTarget() in the definition to configure or set permissions.'
+            );
+        }
+
+        $v = array();
+        foreach ($this->definition->getProperties() as $name => $property) {
+            $v[$name] = get_class($property->getType());
+        }
+
+        $this->append('Form/open', array(
+            'namespace'    => $this->getTargetNamespace(AbstractDefinition::FORM),
+            'name'         => $this->definition->getName(),
+            'filter'       => $filter,
+        ));
+
+        foreach ($this->definition->getProperties() as $name => $property) {
+            $attributes = $property->getOption('attributes') ?: array();
+            $options    = $property->getOption('options') ?: array();
+            $type       = $property->getOption('type');
+
+            if (!$type) {
+                if ($property->getType() instanceof Type\EnumType) {
+                    $type = 'Zend\Form\Element\Radio';
+                } else {
+                    $type = 'Zend\Form\Element\Text';
+                }
+            }
+
+            $this->append('Form/property', array(
+                'name'       => $name,
+                'type'       => $type,
+                'options'    => $options,
+                'attributes' => $attributes,
+            ));
+        }
+
+        $this->append('Form/close');
+
+        fclose($this->handle);
+
+        return $this;
+    }
 }
