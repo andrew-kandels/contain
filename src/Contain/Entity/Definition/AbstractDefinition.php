@@ -370,7 +370,10 @@ abstract class AbstractDefinition
             return $this->name;
         }
 
-        return ($this->name = substr(__CLASS__, strrpos('\\', __CLASS__) + 1));
+        $parts = explode('\\', get_class($this));
+        $this->name = $parts[count($parts) - 1];
+
+        return $this->name;
     }
 
     /**

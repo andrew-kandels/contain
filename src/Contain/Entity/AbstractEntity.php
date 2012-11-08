@@ -20,13 +20,9 @@
 namespace Contain\Entity;
 
 use Contain\Entity\Exception;
-use Iterator;
 use Traversable;
 use Zend\EventManager\Event;
 use Zend\EventManager\EventManager;
-use RuntimeException;
-use Contain\Entity\Property\Type\EntityType;
-use Contain\Entity\Property\Property;
 
 /**
  * Abstract Entity
@@ -229,7 +225,8 @@ abstract class AbstractEntity implements EntityInterface
     {
         $primary = array();
 
-        foreach ($this->properties as $name => $property) {
+        foreach ($this->properties as $name => $options) {
+            $property = $this->property($name);
             if ($property->getOption('primary')) {
                 $primary[$name] = $property->getValue();
             }
@@ -247,8 +244,8 @@ abstract class AbstractEntity implements EntityInterface
     public function clear($property = null)
     {
         if (!$property) {
-            foreach ($this->properties as $property) {
-                $property->clear();
+            foreach ($this->properties as $name => $options) {
+                $this->property($name)->clear();
             }
 
             return $this;
@@ -279,8 +276,8 @@ abstract class AbstractEntity implements EntityInterface
     public function clean($property = null)
     {
         if (!$property) {
-            foreach ($this->properties as $property) {
-                $property->clean();
+            foreach ($this->properties as $name => $options) {
+                $this->property($name)->clean();
             }
 
             return $this;
@@ -310,8 +307,8 @@ abstract class AbstractEntity implements EntityInterface
     {
         $dirty = array();
 
-        foreach ($this->properties as $name => $property) {
-            if ($property->isDirty()) {
+        foreach ($this->properties as $name => $options) {
+            if ($this->property($name)->isDirty()) {
                 $dirty[] = $name;
             }
         }
@@ -325,10 +322,10 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string                      Property name
      * @return  $this
      */
-    public function markDirty($property)
+    public function markDirty($name)
     {
-        if ($property = $this->property($property)) {
-            $property->setDirty($property);
+        if ($property = $this->property($name)) {
+            $property->setDirty();
         }
 
         return $this;
@@ -340,10 +337,10 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string|Contain\Entity\Property\Property
      * @return  Contain\Entity\Property\Type\TypeInterface
      */
-    public function type($property)
+    public function type($name)
     {
-        if ($property = $this->property($property)) {
-            return $property->getType();
+        if ($property = $this->property($name)) {
+            return $property->getType()->setOptions($property->getOptions());
         }
 
         return null;
@@ -359,8 +356,8 @@ abstract class AbstractEntity implements EntityInterface
     {
         $result = array();
 
-        foreach ($this->properties as $name => $property) {
-            if ($includeUnset || !$property->isUnset()) {
+        foreach ($this->properties as $name => $options) {
+            if ($includeUnset || !$this->property($name)->isUnset()) {
                 $result[] = $name;
             }
         }
@@ -378,7 +375,8 @@ abstract class AbstractEntity implements EntityInterface
     {
         $result = array();
 
-        foreach ($this->properties as $name => $property) {
+        foreach ($this->properties as $name => $options) {
+            $property = $this->property($name);
             if ($includeUnset || !$property->isUnset()) {
                 $result[$name] = $property->getValue();
             }
@@ -439,7 +437,8 @@ abstract class AbstractEntity implements EntityInterface
             $includeProperties = null;
         }
 
-        foreach ($this->properties as $name => $property) {
+        foreach ($this->properties as $name => $options) {
+            $property = $this->property($name);
             if ($includeProperties && !in_array($name, $includeProperties)) {
                 continue;
             }
@@ -450,19 +449,6 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         return $result;
-    }
-
-    /**
-     * Gets a property object by name.
-     *
-     * @param   string
-     * @return  Contain\Entity\Property\Property|null
-     */
-    public function property($property)
-    {
-        return isset($this->properties[$property])
-            ? $this->properties[$property]
-            : null;
     }
 
     /**
@@ -504,51 +490,6 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         return $this;
-    }
-
-    /**
-     * Magic method for handling get and set methods on an entity that
-     * aren't explicitly defined (which would be ideal).
-     *
-     * If compiled (recommended), the methods will be declared explicitly leaving this
-     * method unused for better performance / code completion support.
-     *
-     * @param   string              Method
-     * @param   array               Variable arguments
-     * @return  mixed
-     */
-    public function __call($method, $args)
-    {
-        if (preg_match('/^(has|get|set)(.+)$/', $method, $matches)) {
-            $property = strtolower($matches[2][0]) . substr($matches[2], 1);
-
-            if ($prop = $this->property($property)) {
-                if ($matches[1] == 'has') {
-                    if ($prop->isUnset() || $prop->isEmpty()) {
-                        return false;
-                    }
-
-                    return true;
-                }
-
-                if ($matches[1] == 'get') {
-                    return $this->get($property);
-                }
-
-                return call_user_func_array(array($this, 'set'), array_merge(
-                    array($property),
-                    $args
-                ));
-            } else {
-                throw new Exception\InvalidArgumentException("'$property' is not a valid "
-                    . 'property of ' . get_class($this) . '.'
-                );
-            }
-        }
-
-        throw new Exception\InvalidArgumentException("'$method' is not a valid "
-            . 'method for ' . get_class($this) . '.'
-        );
     }
 
     /**
@@ -632,5 +573,80 @@ abstract class AbstractEntity implements EntityInterface
     {
         $this->isPersisted = (boolean) $value;
         return $this;
+    }
+
+    /**
+     * Retrieve property meta-data ensuring indexes are set.
+     *
+     * @param   string          Property name
+     * @return  array|false
+     */
+    public function property($name)
+    {
+        $propertyName = '_' . $name;
+
+        if (isset($this->$propertyName)) {
+            return $this->$propertyName;
+        }
+
+        if (!isset($this->properties[$name])) {
+            return false;
+        }
+
+        $options = isset($this->properties[$name]['options'])
+            ? $this->properties[$name]['options']
+            : array();
+
+        $this->$propertyName = new Property\Property(
+            $this->properties[$name]['type'],
+            $options
+        );
+
+        return $this->$propertyName;
+    }
+
+    /**
+     * Magic method for handling get and set methods on an entity that
+     * aren't explicitly defined (which would be ideal).
+     *
+     * If compiled (recommended), the methods will be declared explicitly leaving this
+     * method unused for better performance / code completion support.
+     *
+     * @param   string              Method
+     * @param   array               Variable arguments
+     * @return  mixed
+     */
+    public function __call($method, $args)
+    {
+        if (preg_match('/^(has|get|set)(.+)$/', $method, $matches)) {
+            $property = strtolower($matches[2][0]) . substr($matches[2], 1);
+
+            if ($prop = $this->property($property)) {
+                if ($matches[1] == 'has') {
+                    if ($prop->isUnset() || $prop->isEmpty()) {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if ($matches[1] == 'get') {
+                    return $this->get($property);
+                }
+
+                return call_user_func_array(array($this, 'set'), array_merge(
+                    array($property),
+                    $args
+                ));
+            } else {
+                throw new Exception\InvalidArgumentException("'$property' is not a valid "
+                    . 'property of ' . get_class($this) . '.'
+                );
+            }
+        }
+
+        throw new Exception\InvalidArgumentException("'$method' is not a valid "
+            . 'method for ' . get_class($this) . '.'
+        );
     }
 }

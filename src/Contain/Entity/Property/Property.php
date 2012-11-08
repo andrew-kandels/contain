@@ -19,10 +19,6 @@
 
 namespace Contain\Entity\Property;
 
-use Contain\Entity\Property\Type\AbstractType;
-use Contain\Entity\Property\Type\EntityType;
-use Contain\Entity\Property\Type\BooleanType;
-use Contain\Entity\Property\Type\TypeInterface;
 use Contain\Entity\EntityInterface;
 use Traversable;
 
@@ -37,7 +33,7 @@ use Traversable;
 class Property
 {
     /**
-     * @var Contain\Entity\Property\Type\AbstractType
+     * @var Property\Type\AbstractType
      */
     protected $type;
 
@@ -129,7 +125,7 @@ class Property
      */
     public function isUnset()
     {
-        if ($this->getType() instanceof BooleanType) {
+        if ($this->getType() instanceof Type\BooleanType) {
             return $this->currentValue === $this->getType()->getUnsetValue();
         }
 
@@ -144,7 +140,7 @@ class Property
      */
     public function isEmpty()
     {
-        if ($this->getType() instanceof BooleanType) {
+        if ($this->getType() instanceof Type\BooleanType) {
             return $this->currentValue === $this->getType()->getEmptyValue();
         }
 
@@ -196,7 +192,7 @@ class Property
     {
         $this->persistedValue = $this->getType()->export($this->currentValue);
 
-        if ($this->getType() instanceof EntityType && $this->currentValue) {
+        if ($this->getType() instanceof Type\EntityType && $this->currentValue) {
             $this->currentValue->clean();
         }
 
@@ -244,7 +240,7 @@ class Property
     {
         if (is_string($type)) {
             if (is_subclass_of($type, '\Contain\Entity\EntityInterface')) {
-                $newType = new EntityType();
+                $newType = new Type\EntityType();
                 $newType->setOptions(array('className' => $type));
                 $type = $newType;
             } elseif (is_subclass_of($type, '\Contain\Entity\Property\Type\TypeInterface')) {
@@ -252,7 +248,7 @@ class Property
             }
         }
 
-        if (!$type instanceof TypeInterface) {
+        if (!$type instanceof Type\TypeInterface) {
             if (is_string($type) && strpos($type, '\\') === false) {
                 $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
             }
@@ -265,7 +261,7 @@ class Property
 
             $type = new $type();
 
-            if (!$type instanceof TypeInterface) {
+            if (!$type instanceof Type\TypeInterface) {
                 throw new \Contain\Entity\Exception\InvalidArgumentException('$type does not implement '
                     . 'Contain\Entity\Property\Type\TypeInterface.'
                 );

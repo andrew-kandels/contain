@@ -11,8 +11,7 @@ class EntityTypeTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $entity = new SampleMultiTypeEntity();
-        $property = $entity->property('entity');
-        $this->type = $property->getType();
+        $this->type = $entity->type('entity');
     }
 
     public function testGetInstanceNoClass()

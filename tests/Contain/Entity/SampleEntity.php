@@ -8,7 +8,7 @@ class SampleEntity extends AbstractEntity
 {
     public function init()
     {
-        $this->properties['firstName'] = new Property('string');
-        $this->properties['child']     = new Property('\ContainTest\Entity\SampleChildEntity');
+        $this->properties['firstName'] = array('type' => 'string');
+        $this->properties['child']     = array('type' => 'entity', 'options' => array('className' => '\ContainTest\Entity\SampleChildEntity'));
     }
 }

@@ -31,9 +31,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     {
 <?php foreach ($this->properties as $name => $property): ?>
 <?php if ($options = $property->getOptions() + $property->getType()->getOptions()): ?>
-        $this->properties['<?php echo $name; ?>'] = new Property('\<?php echo get_class($property->getType()); ?>', <?php var_export($options); ?>);
+        $this->properties['<?php echo $name; ?>'] = array('type' => '\<?php echo get_class($property->getType()); ?>', 'options' => <?php var_export($options); ?>);
 <?php else: ?>
-        $this->properties['<?php echo $name; ?>'] = new Property('\<?php echo get_class($property->getType()); ?>');
+        $this->properties['<?php echo $name; ?>'] = array('type' => '\<?php echo get_class($property->getType()); ?>');
 <?php endif; ?>
 <?php endforeach; ?>
 <?php echo $this->init; ?>

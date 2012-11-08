@@ -110,7 +110,7 @@ class EntityType extends StringType
     public function export($value)
     {
         if ($entity = $this->parse($value)) {
-            return $value->export();
+            return $entity->export();
         }
 
         return $this->getUnsetValue();

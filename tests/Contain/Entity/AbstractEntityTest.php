@@ -13,17 +13,17 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->entity = new SampleEntity();
     }
 
-    public function testConstruct()
-    {
-        $this->assertInstanceOf('Contain\Entity\EntityInterface', $this->entity);
-    }
-
     public function testConstructWithArray()
     {
         $entity = new SampleEntity($values = array(
             'firstName' => 'Andrew',
         ));
         $this->assertEquals($values, $entity->export());
+    }
+
+    public function testConstruct()
+    {
+        $this->assertInstanceOf('Contain\Entity\EntityInterface', $this->entity);
     }
 
     public function testConstructWithEntity()
@@ -221,7 +221,7 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
     public function testProperty()
     {
         $this->assertInstanceOf('Contain\Entity\Property\Property', $this->entity->property('firstName'));
-        $this->assertNull($this->entity->property('invalidPropertyName'));
+        $this->assertFalse($this->entity->property('invalidPropertyName'));
     }
 
     public function testOnEventGetter()

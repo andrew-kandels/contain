@@ -11,7 +11,7 @@ class SampleMultiTypeEntity extends AbstractEntity
 
     public function init()
     {
-        $this->properties['string']  = new Property('string', array(
+        $this->properties['string'] = array('type' => 'string', 'options' => array(
             'filters' => array(
                 array('name' => 'StringTrim'),
             ),
@@ -22,23 +22,25 @@ class SampleMultiTypeEntity extends AbstractEntity
                 )),
             ),
         ));
-        $this->properties['entity']  = new Property('\ContainTest\Entity\SampleChildEntity');
-        $this->properties['boolean'] = new Property('boolean');
-        $this->properties['dateTime'] = new Property('dateTime');
-        $this->properties['date'] = new Property('date');
-        $this->properties['double'] = new Property('double');
-        $this->properties['enum'] = new Property('enum', array(
+        $this->properties['entity']  = array('type' => 'entity', 'options' => array(
+            'className' => 'ContainTest\Entity\SampleChildEntity',
+        ));
+        $this->properties['boolean'] = array('type' => 'boolean');
+        $this->properties['dateTime'] = array('type' => 'dateTime');
+        $this->properties['date'] = array('type' => 'date');
+        $this->properties['double'] = array('type' => 'double');
+        $this->properties['enum'] = array('type' => 'enum', 'options' => array(
             'options' => array('one', 'two', 'three'),
         ));
-        $this->properties['integer'] = new Property('integer');
-        $this->properties['list'] = new Property('list', array(
+        $this->properties['integer'] = array('type' => 'integer');
+        $this->properties['list'] = array('type' => 'list', 'options' => array(
             'type' => 'integer'
         ));
-        $this->properties['listEntity'] = new Property('list', array(
+        $this->properties['listEntity'] = array('type' => 'list', 'options' => array(
             'type' => 'entity',
             'className' => '\ContainTest\Entity\SampleChildEntity',
         ));
-        $this->properties['mixed'] = new Property('mixed');
-        $this->properties['string'] = new Property('string');
+        $this->properties['mixed'] = array('type' => 'mixed');
+        $this->properties['string'] = array('type' => 'string');
     }
 }
