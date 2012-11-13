@@ -74,4 +74,25 @@ class MongoIdType extends StringType
 
         return $parsed;
     }
+
+    /**
+     * The value to compare the internal value to which translates to empty or null.
+     *
+     * @return  mixed
+     */
+    public function getEmptyValue()
+    {
+        return new \MongoId();
+    }
+
+    /**
+     * The value to compare the internal value to which translates to not being
+     * set during hydration.
+     *
+     * @return  mixed
+     */
+    public function getUnsetValue()
+    {
+        return new \MongoId();
+    }
 }

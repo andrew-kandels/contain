@@ -129,6 +129,16 @@ class Property
             return $this->currentValue === $this->getType()->getUnsetValue();
         }
 
+        // lists can never be unset, just empty arrays so we can push onto them
+        if ($this->getType() instanceof Type\ListType) {
+            return false;
+        }
+
+        // entities can never be unset, just empty hashes we can push into
+        if ($this->getType() instanceof Type\EntityType) {
+            return false;
+        }
+
         return $this->getType()->export($this->currentValue) ===
                $this->getType()->export($this->getType()->getUnsetValue());
     }
