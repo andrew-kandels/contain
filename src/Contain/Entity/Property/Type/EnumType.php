@@ -81,8 +81,17 @@ class EnumType extends StringType
      */
     public function getValidators()
     {
+        // @todo backwards compatibility fix for ZF2 2.0.2, to be removed to
+        // simply use value_options like ZF2 does
+        $options = $this->getOption('options');
+        if (!isset($options['value_options']) && $options) {
+            $valueOptions = $options;
+        } else {
+            $valueOptions = $options['value_options'];
+        }
+
         return array(
-            array('name' => 'InArray', 'options' => array('haystack' => $this->getOption('options'))),
+            array('name' => 'InArray', 'options' => array('haystack' => $valueOptions)),
         );
     }
 }
