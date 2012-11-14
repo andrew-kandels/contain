@@ -25,17 +25,6 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(), $this->entity->type('list')->getEmptyValue());
     }
 
-    public function testNoTypeSet()
-    {
-        $this->setExpectedException(
-            'Contain\Entity\Exception\RuntimeException',
-            '$value is invalid because no type has been set.'
-        );
-
-        $this->entity->type('list')->removeOption('type');
-        $this->entity->getList();
-    }
-
     public function testSetEntityWithInvalidEntity()
     {
         $this->setExpectedException(
