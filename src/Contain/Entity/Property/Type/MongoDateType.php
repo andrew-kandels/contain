@@ -49,7 +49,7 @@ class MongoDateType extends DateTimeType
             return $value;
         }
 
-        return parent::parse($value);
+        return new MongoDate(parent::parse($value)->getTimestamp());
     }
 
     /**
