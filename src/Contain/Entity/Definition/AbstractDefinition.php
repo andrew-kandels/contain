@@ -294,6 +294,10 @@ abstract class AbstractDefinition
             $this->cloneProperty($name, $property);
         }
 
+        foreach ($definition->getImplementors() as $implementor) {
+            $this->registerImplementor($implementor);
+        }
+
         $this->import[] = $definition;
 
         return $this;
@@ -406,7 +410,9 @@ abstract class AbstractDefinition
      */
     public function registerImplementor($implementor)
     {
-        $this->implementors[] = $implementor;
+        if (!in_array($implementor, $this->implementors)) {
+            $this->implementors[] = $implementor;
+        }
         return $this;
     }
 
