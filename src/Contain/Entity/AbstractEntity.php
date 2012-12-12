@@ -20,6 +20,7 @@
 namespace Contain\Entity;
 
 use Contain\Entity\Exception;
+use Contain\Entity\Property\Type;
 use Traversable;
 use Zend\EventManager\Event;
 use Zend\EventManager\EventManager;
@@ -603,6 +604,243 @@ abstract class AbstractEntity implements EntityInterface
         );
 
         return $this->$propertyName;
+    }
+
+    /**
+     * Searches for a value and returns its index or FALSE if not found.
+     *
+     * @param   string                          Property name
+     * @param   mixed                           Value to search for
+     * @param   boolean                         Strict type checking
+     * @return  integer|false
+     */
+    public function indexOf($name, $value, $strict = false)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('indexOf failed as property type is not a list');
+        }
+
+        $value = $property->getType()->getType()->parse($value);
+
+        return array_search($value, $property->getValue(), $strict);
+    }
+
+    /**
+     * Prepends a value to a list property.
+     *
+     * @param   string                          Property name
+     * @param   mixed                           Value to prepend
+     * @return  $this
+     */
+    public function unshift($name, $value)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('unshift failed as property type is not a list');
+        }
+
+        $value = $property->getType()->getType()->parse($value);
+        $arr   = $this->get($name) ?: array();
+
+        array_unshift($arr, $value);
+
+        $this->set($name, $arr);
+
+        return $this;
+    }
+
+    /**
+     * Appends a value to a list property.
+     *
+     * @param   string                          Property name
+     * @param   mixed                           Value to append
+     * @return  $this
+     */
+    public function push($name, $value)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('push failed as property type is not a list');
+        }
+
+        $value = $property->getType()->getType()->parse($value);
+        $arr   = $this->get($name) ?: array();
+
+        array_push($arr, $value);
+
+        $this->set($name, $arr);
+
+        return $this;
+    }
+  
+    /**
+     * Removes a property from the end of a list and returns it.
+     *
+     * @param   string                          Property name
+     * @return  mixed                           List item (now removed)
+     */
+    public function pop($name)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('pop failed as property type is not a list');
+        }
+
+        $arr    = $this->get($name) ?: array();
+        $return = array_pop($arr, $value);
+
+        $this->set($name, $arr);
+
+        return $return;
+    }
+
+    /**
+     * Removes a property from the beginning of a list and returns it.
+     *
+     * @param   string                          Property name
+     * @return  mixed                           List item (now removed)
+     */
+    public function shift($name)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('shift failed as property type is not a list');
+        }
+
+        $arr    = $this->get($name) ?: array();
+        $return = array_shift($arr, $value);
+
+        $this->set($name, $arr);
+
+        return $return;
+    }
+
+    /**
+     * Extracts a slice of the list.
+     *
+     * @param   string                          Property name
+     * @param   integer                         Offset
+     * @param   integer|null                    Length
+     * @return  array
+     */
+    public function slice($name, $offset, $length = null)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('slice failed as property type is not a list');
+        }
+
+        return array_slice($this->get($name) ?: array(), $offset, $length);
+    }
+
+    /**
+     * Merges the list with another array.
+     *
+     * @param   string                          Property name
+     * @param   array                           Array to merge with
+     * @param   boolean                         True if existing list is the source vs. target
+     * @return  $this
+     */
+    public function merge($name, $arr, $source = true)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('merge failed as property type is not a list');
+        }
+
+        $source = $this->get($name);
+        $target = $property->getType()->parse($arr);
+
+        if ($source) {
+            $arr = array_merge($source, $target);
+        } else {
+            $arr = array_merge($target, $source);
+        }
+
+        $this->set($name, $arr);
+
+        return $this;
+    }
+
+    /**
+     * Removes a single item from the list by value if it exists.
+     *
+     * @param   string                          Property name
+     * @param   mixed                           Value to remove
+     * @return  $this
+     */
+    public function remove($name, $value)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('remove failed as property type is not a list');
+        }
+
+        if (false === ($index = $this->indexOf($name, $value))) {
+            return $this;
+        }
+
+        $arr = $this->get($name);
+        unset($arr[$index]);
+        $this->set($name, $arr);
+
+        return $this;
+    }
+
+    /**
+     * Adds an item to the list if it doesn't already exist.
+     *
+     * @param   string                          Property name
+     * @param   mixed                           Value to add
+     * @param   boolean                         True for prepend, false for append
+     * @return  $this
+     */
+    public function add($name, $value, $prepend = true)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('add failed as property type is not a list');
+        }
+
+        if (false !== ($index = $this->indexOf($name, $value))) {
+            return $this;
+        }
+
+        if ($prepend) {
+            $this->push($name, $value);
+        } else {
+            $this->unshift($name, $value);
+        }
+
+        return $this;
     }
 
     /**

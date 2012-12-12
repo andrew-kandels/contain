@@ -39,6 +39,7 @@ class Setting extends AbstractEntity
 ));
             }
 
+
     /**
      * Accessor getter for the name property
      *
@@ -70,6 +71,7 @@ class Setting extends AbstractEntity
         $property = $this->property('name');
         return !($property->isUnset() || $property->isEmpty());
     }
+
     /**
      * Accessor getter for the value property
      *

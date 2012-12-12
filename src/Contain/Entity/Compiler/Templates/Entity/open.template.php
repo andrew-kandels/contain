@@ -40,6 +40,109 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     }
 
 <?php foreach ($this->properties as $name => $property): ?>
+<?php if ($property->getType() instanceof \Contain\Entity\Property\Type\ListType): ?>
+    /**
+     * Searches for a value and returns its index or FALSE if not found.
+     *
+     * @param   mixed                           Value to search for
+     * @param   boolean                         Strict type checking
+     * @return  integer|false
+     */
+    public function indexOf<?php echo ucfirst($name); ?>($value, $strict = false)
+    {
+        return $this->indexOf('<?php echo $name; ?>', $value, $strict);
+    }
+
+    /**
+     * Prepends a value to a list property.
+     *
+     * @param   mixed                           Value to prepend
+     * @return  $this
+     */
+    public function unshift<?php echo ucfirst($name); ?>($value)
+    {
+        return $this->unshift('<?php echo $name; ?>', $value);
+    }
+
+    /**
+     * Appends a value to a list property.
+     *
+     * @param   mixed                           Value to append
+     * @return  $this
+     */
+    public function push<?php echo ucfirst($name); ?>($value)
+    {
+        return $this->push('<?php echo $name; ?>', $value);
+    }
+  
+    /**
+     * Removes a property from the end of a list and returns it.
+     *
+     * @return  mixed                           List item (now removed)
+     */
+    public function pop<?php echo ucfirst($name); ?>($value)
+    {
+        return $this->pop('<?php echo $name; ?>', $value);
+    }
+
+    /**
+     * Removes a property from the beginning of a list and returns it.
+     *
+     * @return  mixed                           List item (now removed)
+     */
+    public function shift<?php echo ucfirst($name); ?>($value)
+    {
+        return $this->shift('<?php echo $name; ?>', $value);
+    }
+
+    /**
+     * Extracts a slice of the list.
+     *
+     * @param   integer                         Offset
+     * @param   integer|null                    Length
+     * @return  array
+     */
+    public function slice<?php echo ucfirst($name); ?>($offset, $length = null)
+    {
+        return $this->slice('<?php echo $name; ?>', $offset, $length);
+    }
+
+    /**
+     * Merges the list with another array.
+     *
+     * @param   array                           Array to merge with
+     * @param   boolean                         True if existing list is the source vs. target
+     * @return  array
+     */
+    public function merge<?php echo ucfirst($name); ?>($arr, $source = true)
+    {
+        return $this->merge('<?php echo $name; ?>', $arr, $source);
+    }
+
+    /**
+     * Removes a single item from the list by value if it exists.
+     *
+     * @param   mixed                           Value to remove
+     * @return  array
+     */
+    public function remove<?php echo ucfirst($name); ?>($value)
+    {
+        return $this->remove('<?php echo $name; ?>', $value);
+    }
+
+    /**
+     * Adds an item to the list if it doesn't already exist.
+     *
+     * @param   mixed                           Value to add
+     * @param   boolean                         True for prepend, false for append
+     * @return  $this
+     */
+    public function add<?php echo ucfirst($name); ?>($value, $prepend = true)
+    {
+        return $this->add('<?php echo $name; ?>', $value, $prepend);
+    }
+<?php endif; ?>
+
     /**
      * Accessor getter for the <?php echo $name; ?> property
      *

@@ -31,6 +31,107 @@ class Settings extends AbstractEntity
             }
 
     /**
+     * Searches for a value and returns its index or FALSE if not found.
+     *
+     * @param   mixed                           Value to search for
+     * @param   boolean                         Strict type checking
+     * @return  integer|false
+     */
+    public function indexOfSettings($value, $strict = false)
+    {
+        return $this->indexOf('settings', $value, $strict);
+    }
+
+    /**
+     * Prepends a value to a list property.
+     *
+     * @param   mixed                           Value to prepend
+     * @return  $this
+     */
+    public function unshiftSettings($value)
+    {
+        return $this->unshift('settings', $value);
+    }
+
+    /**
+     * Appends a value to a list property.
+     *
+     * @param   mixed                           Value to append
+     * @return  $this
+     */
+    public function pushSettings($value)
+    {
+        return $this->push('settings', $value);
+    }
+  
+    /**
+     * Removes a property from the end of a list and returns it.
+     *
+     * @return  mixed                           List item (now removed)
+     */
+    public function popSettings($value)
+    {
+        return $this->pop('settings', $value);
+    }
+
+    /**
+     * Removes a property from the beginning of a list and returns it.
+     *
+     * @return  mixed                           List item (now removed)
+     */
+    public function shiftSettings($value)
+    {
+        return $this->shift('settings', $value);
+    }
+
+    /**
+     * Extracts a slice of the list.
+     *
+     * @param   integer                         Offset
+     * @param   integer|null                    Length
+     * @return  array
+     */
+    public function sliceSettings($offset, $length = null)
+    {
+        return $this->slice('settings', $offset, $length);
+    }
+
+    /**
+     * Merges the list with another array.
+     *
+     * @param   array                           Array to merge with
+     * @param   boolean                         True if existing list is the source vs. target
+     * @return  array
+     */
+    public function mergeSettings($arr, $source = true)
+    {
+        return $this->merge('settings', $arr, $source);
+    }
+
+    /**
+     * Removes a single item from the list by value if it exists.
+     *
+     * @param   mixed                           Value to remove
+     * @return  array
+     */
+    public function removeSettings($value)
+    {
+        return $this->remove('settings', $value);
+    }
+
+    /**
+     * Adds an item to the list if it doesn't already exist.
+     *
+     * @param   mixed                           Value to add
+     * @param   boolean                         True for prepend, false for append
+     * @return  $this
+     */
+    public function addSettings($value, $prepend = true)
+    {
+        return $this->add('settings', $value, $prepend);
+    }
+
+    /**
      * Accessor getter for the settings property
      *
      * @return  See: Contain\Entity\Property\Type\ListType::getValue()
