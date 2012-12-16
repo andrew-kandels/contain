@@ -43,6 +43,18 @@ class Settings extends AbstractEntity
     }
 
     /**
+     * Fetches a list item by its numerical index position.
+     *
+     * @param   string                          Property name
+     * @param   integer                         Index
+     * @return  mixed|null                      Value or null if unset
+     */
+    public function atSettings($index)
+    {
+        return $this->at('settings', $index);
+    }
+
+    /**
      * Prepends a value to a list property.
      *
      * @param   mixed                           Value to prepend

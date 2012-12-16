@@ -607,6 +607,28 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
+     * Fetches a list item by its numerical index position.
+     *
+     * @param   string                          Property name
+     * @param   integer                         Index
+     * @return  mixed|null                      Value or null if unset
+     */
+    public function at($name, $index)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType) {
+            throw new Exception\RuntimeException('indexOf failed as property type is not a list');
+        }
+
+        $value = $this->get($name);
+
+        return (isset($value[$index]) ? $value[$index] : null);
+    }
+
+    /**
      * Searches for a value and returns its index or FALSE if not found.
      *
      * @param   string                          Property name
@@ -626,7 +648,7 @@ abstract class AbstractEntity implements EntityInterface
 
         $value = $property->getType()->getType()->parse($value);
 
-        return array_search($value, $property->getValue(), $strict);
+        return array_search($value, $this->get($name), $strict);
     }
 
     /**

@@ -54,6 +54,18 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     }
 
     /**
+     * Fetches a list item by its numerical index position.
+     *
+     * @param   string                          Property name
+     * @param   integer                         Index
+     * @return  mixed|null                      Value or null if unset
+     */
+    public function at<?php echo ucfirst($name); ?>($index)
+    {
+        return $this->at('<?php echo $name; ?>', $index);
+    }
+
+    /**
      * Prepends a value to a list property.
      *
      * @param   mixed                           Value to prepend
