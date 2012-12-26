@@ -45,6 +45,10 @@ class StringType implements TypeInterface
      */
     public function parse($value)
     {
+        if ($value === $this->getEmptyValue()) {
+            return $value;
+        }
+
         if (!$value) {
             return $this->getUnsetValue();
         }
@@ -74,7 +78,13 @@ class StringType implements TypeInterface
      */
     public function export($value)
     {
-        return (string) $this->parse($value);
+        $value = $this->parse($value);
+
+        if ($this->getUnsetValue() === $value) {
+            return $this->getUnsetValue();
+        }
+
+        return (string) $value;
     }
 
     /**

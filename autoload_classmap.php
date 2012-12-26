@@ -17,6 +17,7 @@ return array(
     'Contain\Entity\Property\Type\EntityType'           => __DIR__ . '/src/Contain/Entity/Property/Type/EntityType.php',
     'Contain\Entity\Property\Type\DoubleType'           => __DIR__ . '/src/Contain/Entity/Property/Type/DoubleType.php',
     'Contain\Entity\Property\Type\BooleanType'          => __DIR__ . '/src/Contain/Entity/Property/Type/BooleanType.php',
+    'Contain\Entity\Property\Type\HashType'             => __DIR__ . '/src/Contain/Entity/Property/Type/HashType.php',
     'Contain\Entity\Property\Type\MongoDateType'        => __DIR__ . '/src/Contain/Entity/Property/Type/MongoDateType.php',
     'Contain\Entity\Property\Type\StringType'           => __DIR__ . '/src/Contain/Entity/Property/Type/StringType.php',
     'Contain\Entity\Property\Type\DateTimeType'         => __DIR__ . '/src/Contain/Entity/Property/Type/DateTimeType.php',
