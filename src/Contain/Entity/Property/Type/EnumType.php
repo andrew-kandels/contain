@@ -67,7 +67,7 @@ class EnumType extends StringType
             $valueOptions = $options['value_options'];
         }
 
-        if (in_array($value, $valueOptions)) {
+        if (in_array($value, $valueOptions) || isset($valueOptions[$value])) {
             return $value;
         }
 
@@ -88,6 +88,11 @@ class EnumType extends StringType
             $valueOptions = $options;
         } else {
             $valueOptions = $options['value_options'];
+        }
+
+        // associative array / forms
+        if (!isset($valueOptions[0])) {
+            $valueOptions = array_keys($valueOptions);
         }
 
         return array(
