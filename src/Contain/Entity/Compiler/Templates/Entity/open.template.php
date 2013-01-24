@@ -40,7 +40,8 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     }
 
 <?php foreach ($this->properties as $name => $property): ?>
-<?php if ($property->getType() instanceof \Contain\Entity\Property\Type\ListType): ?>
+<?php if ($property->getType() instanceof \Contain\Entity\Property\Type\ListType ||
+          $property->getType() instanceof \Contain\Entity\Property\Type\HashType): ?>
     /**
      * Searches for a value and returns its index or FALSE if not found.
      *
@@ -65,6 +66,8 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
         return $this->at('<?php echo $name; ?>', $index);
     }
 
+<?php endif; ?>
+<?php if ($property->getType() instanceof \Contain\Entity\Property\Type\ListType): ?>
     /**
      * Prepends a value to a list property.
      *

@@ -619,7 +619,8 @@ abstract class AbstractEntity implements EntityInterface
             throw new Exception\RuntimeException('Specified $property does not exist');
         }
 
-        if (!$property->getType() instanceof Type\ListType) {
+        if (!$property->getType() instanceof Type\ListType &&
+            !$property->getType() instanceof Type\HashType) {
             throw new Exception\RuntimeException('indexOf failed as property type is not a list');
         }
 
@@ -642,7 +643,8 @@ abstract class AbstractEntity implements EntityInterface
             throw new Exception\RuntimeException('Specified $property does not exist');
         }
 
-        if (!$property->getType() instanceof Type\ListType) {
+        if (!$property->getType() instanceof Type\ListType &&
+            !$property->getType() instanceof Type\HashType) {
             throw new Exception\RuntimeException('indexOf failed as property type is not a list');
         }
 
