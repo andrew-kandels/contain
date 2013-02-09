@@ -21,14 +21,5 @@ class Settings extends \Zend\Form\Form
 
         $factory = new \Zend\Form\Factory();
 
-        $this->add($factory->createElement(array(
-            'name' => 'settings',
-            'type' => 'entity',
-            'options' => array (
-),
-            'attributes' => array (
-),
-        )));
-
     }
 }
