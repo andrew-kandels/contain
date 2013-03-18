@@ -233,8 +233,8 @@ Installation
 The Contain library and the optional mapper are both available on GitHub. Both projects are on Packagist, so if you're using Composer, just add them to your project's composer.json:
 
     "require": {
-        "akandels/contain",
-        "akandels/contain-mapper",
+        "akandels/contain": "@dev",
+        "akandels/contain-mapper": "@dev",
         ...
     }
 
