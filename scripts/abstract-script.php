@@ -27,7 +27,13 @@ use Zend\Mvc\Service\ServiceManagerConfig;
 // Configuration (defaults for a typical ZF2 application installing Contain via Composer)
 
 define('ZF2_APPLICATION_PATH', realpath(__DIR__ . '/../../../..'));
-define('ZF2_MODULES_PATH', ZF2_APPLICATION_PATH . '/module');
+define('ZF2_IS_MODULE', file_exists(ZF2_APPLICATION_PATH . '/Module.php'));
+if (ZF2_IS_MODULE) {
+    $modulesPath = dirname(ZF2_APPLICATION_PATH);
+} else {
+    $modulesPath = ZF2_APPLICATION_PATH . '/module';
+}
+define('ZF2_MODULES_PATH', $modulesPath);
 define('ZF2_FRAMEWORK_PATH', ZF2_APPLICATION_PATH . '/vendor/zendframework/zendframework');
 define('COMPOSER_AUTOLOADER', ZF2_APPLICATION_PATH . '/vendor/autoload.php');
 
@@ -47,8 +53,19 @@ error_reporting(E_ALL);
 chdir(ZF2_APPLICATION_PATH);
 
 require_once(COMPOSER_AUTOLOADER);
-
-$config = include(APPLICATION_CONFIG_FILE);
+if (ZF2_IS_MODULE) {
+    $moduleName = glob(ZF2_APPLICATION_PATH . '/src/*', GLOB_ONLYDIR);
+    $moduleName = basename(array_shift($moduleName));
+    $config = array(
+        'service_manager' => array(),
+        'module_listener_options' => array(
+            'module_paths' => array(dirname(ZF2_APPLICATION_PATH)),
+        ),  
+        'modules' => array($moduleName),
+    );  
+} else {
+    $config = include(APPLICATION_CONFIG_FILE);
+}
 $serviceManager = new ServiceManager(new ServiceManagerConfig($config['service_manager']));
 $serviceManager->setService('ApplicationConfig', $config);
 $serviceManager->get('ModuleManager')->loadModules();
