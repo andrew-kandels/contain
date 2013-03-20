@@ -24,7 +24,7 @@
 require_once(__DIR__ . '/abstract-script.php');
 
 if (empty($argv[1])) {
-    fprintf(STDERR, "Syntax: compile-directory (e.g.: Contain\Entity\Definition)\n"
+    fprintf(STDERR, "Syntax: compile-directory (e.g.: src/Contain/Entity/Definition)\n"
         . "Note: Your project must support autoloading for the specified classes.\n"
     );
     exit(1);
