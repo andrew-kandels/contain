@@ -520,7 +520,7 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         if (!class_exists($this->inputFilter)) {
-            throw new Exception\RuntimeException('validate failed as filter class "' . $this->filter . '" does not exist');
+            throw new Exception\RuntimeException('validate failed as filter class "' . $this->inputFilter . '" does not exist');
         }
 
         if (is_string($properties)) {
