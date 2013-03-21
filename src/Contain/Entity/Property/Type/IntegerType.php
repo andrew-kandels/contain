@@ -40,7 +40,7 @@ class IntegerType extends StringType
      */
     public function parse($value = null)
     {
-        if ($value === 0) {
+        if ($value === 0 || $value === '0') {
             return 0;
         }
 
