@@ -17,11 +17,13 @@ class BooleanTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('1', $this->entity->property('boolean')->getType()->parse(true));
         $this->assertEquals('1', $this->entity->property('boolean')->getType()->parse(1));
         $this->assertEquals('1', $this->entity->property('boolean')->getType()->parse('1'));
+        $this->assertEquals('1', $this->entity->property('boolean')->getType()->parse('true'));
         $this->assertTrue('1' === $this->entity->property('boolean')->getType()->parse(true));
 
         $this->assertEquals('0', $this->entity->property('boolean')->getType()->parse(false));
         $this->assertEquals('0', $this->entity->property('boolean')->getType()->parse(0));
         $this->assertEquals('0', $this->entity->property('boolean')->getType()->parse('0'));
+        $this->assertEquals('0', $this->entity->property('boolean')->getType()->parse('false'));
         $this->assertTrue('0' === $this->entity->property('boolean')->getType()->parse(false));
     }
 
@@ -30,11 +32,13 @@ class BooleanTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('1', $this->entity->property('boolean')->getType()->export(true));
         $this->assertEquals('1', $this->entity->property('boolean')->getType()->export(1));
         $this->assertEquals('1', $this->entity->property('boolean')->getType()->export('1'));
+        $this->assertEquals('1', $this->entity->property('boolean')->getType()->export('true'));
         $this->assertTrue('1' === $this->entity->property('boolean')->getType()->export(true));
 
         $this->assertEquals('0', $this->entity->property('boolean')->getType()->export(false));
         $this->assertEquals('0', $this->entity->property('boolean')->getType()->export(0));
         $this->assertEquals('0', $this->entity->property('boolean')->getType()->export('0'));
+        $this->assertEquals('0', $this->entity->property('boolean')->getType()->export('false'));
         $this->assertTrue('0' === $this->entity->property('boolean')->getType()->export(false));
     }
 

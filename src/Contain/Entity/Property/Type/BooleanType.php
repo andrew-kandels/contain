@@ -20,6 +20,7 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Exception\InvalidArgumentException;
+use Zend\Filter\Boolean;
 
 /**
  * String Data Type
@@ -40,8 +41,8 @@ class BooleanType extends StringType
      */
     public function parse($value)
     {
-        $value = (bool) $value;
-        return $value ? '1' : '0';
+        $filter = new Boolean(Boolean::TYPE_ALL);
+        return $filter->filter($value) ? '1' : '0';
     }
 
     /**
