@@ -17,6 +17,7 @@ class IntegerTypeTest extends \PHPUnit_Framework_TestCase
     public function testParseZero()
     {
         $this->assertTrue(0 === $this->type->parse(0));
+        $this->assertTrue(0 === $this->type->parse('0'));
     }
 
     public function testParseEmpty()
