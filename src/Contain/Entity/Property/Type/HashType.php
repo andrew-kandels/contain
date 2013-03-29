@@ -12,7 +12,7 @@
  * @category    akandels
  * @package     contain
  * @author      Andrew Kandels (me@andrewkandels.com)
- * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
+ * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link        http://andrewkandels.com/contain
  */
@@ -29,7 +29,7 @@ use Contain\Entity\Property\Type\EntityType;
  *
  * @category    akandels
  * @package     contain
- * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
+ * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 class HashType extends StringType

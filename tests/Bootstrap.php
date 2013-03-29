@@ -19,12 +19,14 @@
 
 error_reporting(E_ALL | E_STRICT);
 
-$phpUnitVersion = PHPUnit_Runner_Version::id();
-if ('@package_version@' !== $phpUnitVersion && version_compare($phpUnitVersion, '3.5.0', '<')) {
-    echo 'This version of PHPUnit (' . PHPUnit_Runner_Version::id() . ') is not supported.' . PHP_EOL;
-    exit(1);
+if (class_exists('PHPUnit_Runner_Version')) {
+    $phpUnitVersion = PHPUnit_Runner_Version::id();
+    if ('@package_version@' !== $phpUnitVersion && version_compare($phpUnitVersion, '3.5.0', '<')) {
+        echo 'This version of PHPUnit (' . PHPUnit_Runner_Version::id() . ') is not supported.' . PHP_EOL;
+        exit(1);
+    }
+    unset($phpUnitVersion);
 }
-unset($phpUnitVersion);
 
 /*
  * Determine the root, library, and tests directories.

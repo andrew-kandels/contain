@@ -12,7 +12,7 @@
  * @category    akandels
  * @package     contain
  * @author      Andrew Kandels (me@andrewkandels.com)
- * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
+ * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link        http://andrewkandels.com/contain
  */
@@ -30,7 +30,7 @@ use Zend\EventManager\EventManager;
  *
  * @category    akandels
  * @package     contain
- * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
+ * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 abstract class AbstractEntity implements EntityInterface
@@ -479,6 +479,9 @@ abstract class AbstractEntity implements EntityInterface
     public function set($name, $value)
     {
         if ($property = $this->property($name)) {
+            $eventManager = $this->getEventManager();
+            $eventManager->trigger('change.pre', $this);
+
             $value = $this->onEventSetter(
                 $name,
                 $property->getValue(),
@@ -487,6 +490,9 @@ abstract class AbstractEntity implements EntityInterface
             );
 
             $property->setValue($value);
+
+            $eventManager->trigger('change.post', $this);
+
             return $this;
         }
 

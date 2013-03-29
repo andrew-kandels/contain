@@ -17,7 +17,7 @@ class StringTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testParseNoValue()
     {
-        $this->assertNull($this->type->parse(''));
+        $this->assertEquals('', $this->type->parse(''));
         $this->assertNull($this->type->parse(false));
         $this->assertNull($this->type->parse(null));
         $this->assertNull($this->type->parse(0));

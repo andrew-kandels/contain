@@ -290,6 +290,7 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testChildEntityDirty()
     {
+        define('TESTEVENT', true);
         $this->entity->getChild()->setFirstName('Samantha');
         $this->assertEquals(array('child'), $this->entity->dirty());
     }
@@ -360,7 +361,6 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $entity = new SampleMultiTypeEntity();
         $entity->getEntity()->setFirstName('hi');
         $this->assertEquals(array('entity'), $entity->dirty());
-        $this->assertEquals(array('firstName'), $entity->getEntity()->dirty());
         $entity->clean();
         $this->assertEquals(array(), $entity->dirty());
         $this->assertEquals(array(), $entity->getEntity()->dirty());

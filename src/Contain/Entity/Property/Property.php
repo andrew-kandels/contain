@@ -12,7 +12,7 @@
  * @category    akandels
  * @package     contain
  * @author      Andrew Kandels (me@andrewkandels.com)
- * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
+ * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link        http://andrewkandels.com/contain
  */
@@ -89,10 +89,10 @@ class Property
 
         $this->setType($type);
 
-        $this->unsetValue   = $this->getType()->getUnsetValue();
-        $this->emptyValue   = $this->getType()->getEmptyValue();
-        $this->currentValue = $this->unsetValue;
+        $this->unsetValue = $this->getType()->getUnsetValue();
+        $this->emptyValue = $this->getType()->getEmptyValue();
 
+        $this->setValue($this->unsetValue);
         $this->clean();
     }
 
@@ -104,7 +104,7 @@ class Property
      */
     public function setValue($value)
     {
-        $this->currentValue = $this->getType()->parse($value);
+        $this->currentValue = $this->getType()->export($value);
         return $this;
     }
 
@@ -115,7 +115,19 @@ class Property
      */
     public function getValue()
     {
-        return $this->currentValue;
+        $value = $this->getType()->parse($this->currentValue);
+
+        // track changes to the entity so they persisted into the internal, export() value
+        if ($this->getType() instanceof Type\EntityType) {
+            $value->clean();
+
+            $property = $this;
+            $value->getEventManager()->attach('change.post', function ($event) use ($property) {
+                $property->setValue($event->getTarget());
+            }, -1000);
+        }
+
+        return $value;
     }
 
     /**
@@ -126,7 +138,7 @@ class Property
     public function isUnset()
     {
         if ($this->getType() instanceof Type\BooleanType) {
-            return $this->currentValue === $this->getType()->getUnsetValue();
+            return $this->getValue() === $this->getType()->getUnsetValue();
         }
 
         // lists can never be unset, just empty arrays so we can push onto them
@@ -139,7 +151,7 @@ class Property
             return false;
         }
 
-        return $this->getType()->export($this->currentValue) ===
+        return $this->getType()->export($this->getValue()) ===
                $this->getType()->export($this->getType()->getUnsetValue());
     }
 
@@ -151,11 +163,10 @@ class Property
     public function isEmpty()
     {
         if ($this->getType() instanceof Type\BooleanType) {
-            return $this->currentValue === $this->getType()->getEmptyValue();
+            return $this->getValue() === $this->getType()->getEmptyValue();
         }
 
-        return $this->getType()->export($this->currentValue) ===
-               $this->getType()->export($this->getType()->getEmptyValue());
+        return $this->currentValue === $this->getType()->export($this->getType()->getEmptyValue());
     }
 
     /**
@@ -165,7 +176,7 @@ class Property
      */
     public function clear()
     {
-        $this->currentValue = $this->getType()->getUnsetValue();
+        $this->setValue($this->getType()->getUnsetValue());
         return $this;
     }
 
@@ -176,19 +187,20 @@ class Property
      */
     public function setEmpty()
     {
-        $this->currentValue = $this->getType()->getEmptyValue();
+        $this->setValue($this->getType()->getEmptyValue());
         return $this;
     }
 
     /**
-     * Sets a property as dirty.
-     * @todo think of a better way to do this than a dummy hash
+     * Sets a property as dirty, which is tracked by the persisted value not equaling 
+     * the current value of the property, which is ensured by making the persisted value
+     * something one-of-a-kind.
      *
      * @return  $this
      */
     public function setDirty()
     {
-        $this->persistedValue = uniqid(true, '');
+        $this->persistedValue = new \stdclass();
         return $this;
     }
 
@@ -200,12 +212,7 @@ class Property
      */
     public function clean()
     {
-        $this->persistedValue = $this->getType()->export($this->currentValue);
-
-        if ($this->getType() instanceof Type\EntityType && $this->currentValue) {
-            $this->currentValue->clean();
-        }
-
+        $this->persistedValue = $this->currentValue;
         return $this;
     }
 
@@ -216,7 +223,7 @@ class Property
      */
     public function export()
     {
-        return $this->getType()->export($this->currentValue);
+        return $this->currentValue;
     }
 
     /**
@@ -227,7 +234,7 @@ class Property
      */
     public function isDirty()
     {
-        return $this->getType()->export($this->currentValue) !== $this->persistedValue;
+        return $this->currentValue !== $this->persistedValue;
     }
 
     /**
