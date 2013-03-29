@@ -3,12 +3,53 @@ namespace ContainTest\Performance;
 
 use ContainTest\Entity\SampleEntity;
 use ContainTest\Entity\SampleMultiTypeEntity;
+use ContainTest\Entity\SampleListEntityEntity;
 
 require(__DIR__ . '/../Bootstrap.php');
 
 class Suite
 {
     protected $iterations = 500;
+
+    // list entity starts being faster at about 2000-5000 items as of this writing
+    public function testListEntityWithOneHundredItems()
+    {
+        $this->start(__METHOD__);
+
+        $values = array();
+        for ($items = 0; $items < 2000; $items++) {
+            $values[] = array('firstName' => 'Mr.');
+        }
+        $entity = new SampleListEntityEntity(array(
+            'listEntity' => $values,
+        ));
+
+        foreach ($entity->getListEntity() as $item) {
+            $item->setFirstName(uniqid(''));
+            $item = null;
+        }
+
+        $this->end();
+    }
+
+    public function testListWithOneHundredEntityItems()
+    {
+        $this->start(__METHOD__);
+
+        $values = array();
+        for ($items = 0; $items < 2000; $items++) {
+            $values[] = array('firstName' => 'Mr.');
+        }
+        $entity = new SampleMultiTypeEntity(array(
+            'listEntity' => $values,
+        ));
+
+        foreach ($entity->getListEntity() as $item) {
+            $item->setFirstName(uniqid(''));
+        }
+
+        $this->end();
+    }
 
     public function testFromArrayHydration()
     {

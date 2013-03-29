@@ -197,6 +197,43 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
+     * Clears all extended properties.
+     *
+     * @return  $this
+     */
+    public function clearExtendedProperties($properties = null)
+    {
+        if ($properties && !is_array($properties) && !$properties instanceof Traversable) {
+            throw new Exception\InvalidArgumentException('$properties must be an array or an instance of Traversable.');
+        }
+
+        if ($properties) {
+            foreach ($properties as $property) {
+                unset($this->extendedProperties[$property]);
+            }
+        } else {
+            $this->extendedProperties = array();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Completely resets all properties and data for the entity.
+     *
+     * @return  $this
+     */
+    public function reset()
+    {
+        $this->clearExtendedProperties()
+             ->clear()
+             ->persisted(false)
+             ->clean();
+
+        return $this;
+    }
+
+    /**
      * Injects an extended property which can be set at anytime.
      *
      * @param   string                  Extended property name
@@ -654,9 +691,20 @@ abstract class AbstractEntity implements EntityInterface
             throw new Exception\RuntimeException('indexOf failed as property type is not a list');
         }
 
+        $arr   = $this->get($name) ?: array();
         $value = $property->getType()->getType()->parse($value);
 
-        return array_search($value, $this->get($name), $strict);
+        if ($property->getType() instanceof Type\ListEntityType) {
+            if ($arr instanceof \ContainMapper\Cursor) {
+                $arr = $arr->export();
+            }
+
+            if ($value instanceof \ContainMapper\Cursor) {
+                $value = $value->export();
+            }
+        }
+
+        return array_search($value, $arr, $strict);
     }
 
     /**
@@ -678,6 +726,11 @@ abstract class AbstractEntity implements EntityInterface
 
         $value = $property->getType()->getType()->parse($value);
         $arr   = $this->get($name) ?: array();
+
+        if ($property->getType() instanceof Type\ListEntityType &&
+            $arr instanceof \ContainMapper\Cursor) {
+            $arr = $arr->export();
+        }
 
         array_unshift($arr, $value);
 
@@ -706,6 +759,11 @@ abstract class AbstractEntity implements EntityInterface
         $value = $property->getType()->getType()->parse($value);
         $arr   = $this->get($name) ?: array();
 
+        if ($property->getType() instanceof Type\ListEntityType &&
+            $arr instanceof \ContainMapper\Cursor) {
+            $arr = $arr->export();
+        }
+
         array_push($arr, $value);
 
         $this->set($name, $arr);
@@ -729,7 +787,13 @@ abstract class AbstractEntity implements EntityInterface
             throw new Exception\RuntimeException('pop failed as property type is not a list');
         }
 
-        $arr    = $this->get($name) ?: array();
+        $arr = $this->get($name) ?: array();
+
+        if ($property->getType() instanceof Type\ListEntityType &&
+            $arr instanceof \ContainMapper\Cursor) {
+            $arr = $arr->export();
+        }
+
         $return = array_pop($arr, $value);
 
         $this->set($name, $arr);
@@ -753,7 +817,13 @@ abstract class AbstractEntity implements EntityInterface
             throw new Exception\RuntimeException('shift failed as property type is not a list');
         }
 
-        $arr    = $this->get($name) ?: array();
+        $arr = $this->get($name) ?: array();
+
+        if ($property->getType() instanceof Type\ListEntityType &&
+            $arr instanceof \ContainMapper\Cursor) {
+            $arr = $arr->export();
+        }
+
         $return = array_shift($arr, $value);
 
         $this->set($name, $arr);
@@ -779,7 +849,14 @@ abstract class AbstractEntity implements EntityInterface
             throw new Exception\RuntimeException('slice failed as property type is not a list');
         }
 
-        return array_slice($this->get($name) ?: array(), $offset, $length);
+        $arr = $this->get($name) ?: array();
+
+        if ($property->getType() instanceof Type\ListEntityType &&
+            $arr instanceof \ContainMapper\Cursor) {
+            $arr = $arr->export();
+        }
+
+        return array_slice($arr, $offset, $length);
     }
 
     /**
@@ -802,6 +879,16 @@ abstract class AbstractEntity implements EntityInterface
 
         $source = $this->get($name);
         $target = $property->getType()->parse($arr);
+
+        if ($property->getType() instanceof Type\ListEntityType) {
+            if ($source instanceof \ContainMapper\Cursor) {
+                $source = $source->export();
+            }
+
+            if ($target instanceof \ContainMapper\Cursor) {
+                $target = $target->export();
+            }
+        }
 
         if ($source) {
             $arr = array_merge($source, $target);

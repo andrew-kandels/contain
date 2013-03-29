@@ -52,6 +52,7 @@ set_include_path(implode(PATH_SEPARATOR, $path));
  * Setup autoloading
  */
 include __DIR__ . '/_autoload.php';
+include __DIR__ . '/../../contain-mapper/tests/_autoload.php';
 
 /*
  * Unset global variables that are no longer needed.
