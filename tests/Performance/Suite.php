@@ -47,6 +47,34 @@ class Suite
         $this->start(__METHOD__);
 
         for ($i = 0; $i < $this->iterations; $i++) {
+            $entity->set('string', 'StringValue');
+            $entity->set('entity', array(
+                'firstName' => 'Mr.',
+            ));
+            $entity->set('boolean', true);
+            $entity->set('dateTime', '2013-01-01 00:00:00');
+            $entity->set('date', '2013-01-01');
+            $entity->set('double', 1.1);
+            $entity->set('enum', 'one');
+            $entity->set('integer', 1);
+            $entity->set('list', array(1, 2, 3));
+            $entity->set('listEntity', array(
+                array('firstName' => 'Mr.'),
+                array('firstName' => 'Mrs.'),
+            ));
+            $entity->set('mixed', 'test');
+        }
+
+        $this->end();
+    }
+
+    public function testMagicSetterHydration()
+    {
+        $entity = new SampleMultiTypeEntity();
+
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < $this->iterations; $i++) {
             $entity->setString('StringValue');
             $entity->setEntity(array(
                 'firstName' => 'Mr.',
@@ -69,6 +97,29 @@ class Suite
     }
 
     public function testGetters()
+    {
+        $entity = new SampleMultiTypeEntity();
+
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < $this->iterations; $i++) {
+            $entity->get('string');
+            $entity->get('entity');
+            $entity->get('boolean');
+            $entity->get('dateTime');
+            $entity->get('date');
+            $entity->get('double');
+            $entity->get('enum');
+            $entity->get('integer');
+            $entity->get('list');
+            $entity->get('listEntity');
+            $entity->get('mixed');
+        }
+
+        $this->end();
+    }
+
+    public function testMagicGetters()
     {
         $entity = new SampleMultiTypeEntity();
 
@@ -129,6 +180,84 @@ class Suite
         $this->end();
     }
 
+    public function testOneHundredEntitiesWithReleasing()
+    {
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < 100; $i++) {
+            $entity = $this->getHydratedEntity();
+            $entity = null;
+        }
+
+        $this->end();
+    }
+
+    public function testClean()
+    {
+        $entity = $this->getHydratedEntity();
+
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < $this->iterations; $i++) {
+            $entity->clean();
+        }
+
+        $this->end();
+    }
+
+    public function testDirty()
+    {
+        $entity = $this->getHydratedEntity();
+
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < $this->iterations; $i++) {
+            $entity->dirty();
+        }
+
+        $this->end();
+    }
+
+    public function testClear()
+    {
+        $entity = $this->getHydratedEntity();
+
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < $this->iterations; $i++) {
+            $entity->clear();
+        }
+
+        $this->end();
+    }
+
+    public function testSetExtendedProperty()
+    {
+        $entity = new SampleMultiTypeEntity();
+
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < $this->iterations; $i++) {
+            $entity->setExtendedProperty('someName', 'someValue');
+        }
+
+        $this->end();
+    }
+
+    public function testGetExtendedProperty()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $entity->setExtendedProperty('someName', 'someValue');
+
+        $this->start(__METHOD__);
+
+        for ($i = 0; $i < $this->iterations; $i++) {
+            $entity->getExtendedProperty('someName');
+        }
+
+        $this->end();
+    }
+
     protected function getHydratedEntity()
     {
         return new SampleMultiTypeEntity(array(
@@ -155,7 +284,12 @@ class Suite
     {
         $this->memory    = memory_get_usage();
         $this->startTime = microtime(true);
-        printf('%-60s ... ', $name);
+
+        $method = preg_replace('/.*test(.*)/', '$1', $name);
+        $method = preg_replace('/[A-Z]/', ' $0', $method);
+        $method = trim(ucwords($method));
+
+        printf('%-60s ... ', $method);
     }
 
     protected function end()
@@ -168,8 +302,10 @@ class Suite
 
     protected function memSize($bytes)
     {
+        $bytes = (int) $bytes;
+
         if ($bytes <= 0) {
-            return '';
+            return '0';
         }
 
         if ($bytes < 1024) {
@@ -194,11 +330,3 @@ class Suite
         return 'huge';
     }
 }
-
-$test = new Suite();
-$test->testFromArrayHydration();
-$test->testSetterHydration();
-$test->testGetters();
-$test->testToArray();
-$test->testExport();
-$test->testOneHundredEntities();
