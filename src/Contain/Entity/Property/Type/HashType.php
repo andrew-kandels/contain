@@ -103,4 +103,17 @@ class HashType extends StringType
     {
         return array();
     }
+
+    /**
+     * A valid value that represents a dirty state (would never be equal to the actual 
+     * value but also isn't empty or unset). 
+     *
+     * @return  mixed
+     */
+    public function getDirtyValue()
+    {
+        return array(
+            'dirty' => uniqid(''),
+        );
+    }
 }

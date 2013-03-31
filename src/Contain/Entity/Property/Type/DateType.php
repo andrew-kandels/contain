@@ -42,4 +42,19 @@ class DateType extends DateTimeType
         parent::__construct();
         $this->options['dateFormat'] = 'Y-m-d';
     }
+
+    /**
+     * A valid value that represents a dirty state (would never be equal to the actual 
+     * value but also isn't empty or unset). 
+     *
+     * @return  mixed
+     */
+    public function getDirtyValue()
+    {
+        return sprintf('%04d-%02d-%02d',
+            rand(1970, 1990),
+            rand(1, 12),
+            rand(1, 28)
+        );
+    }
 }

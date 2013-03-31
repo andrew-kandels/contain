@@ -64,6 +64,14 @@ interface TypeInterface
     public function getUnsetValue();
 
     /**
+     * A valid value that represents a dirty state (would never be equal to the actual 
+     * value but also isn't empty or unset). 
+     *
+     * @return  mixed
+     */
+    public function getDirtyValue();
+
+    /**
      * Returns specific options for this type.
      *
      * @return  array

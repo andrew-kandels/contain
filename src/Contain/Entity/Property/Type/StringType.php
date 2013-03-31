@@ -109,6 +109,17 @@ class StringType implements TypeInterface
     }
 
     /**
+     * A valid value that represents a dirty state (would never be equal to the actual 
+     * value but also isn't empty or unset). 
+     *
+     * @return  mixed
+     */
+    public function getDirtyValue()
+    {
+        return uniqid('', true);
+    }
+
+    /**
      * Returns specific options for this type.
      *
      * @return  array

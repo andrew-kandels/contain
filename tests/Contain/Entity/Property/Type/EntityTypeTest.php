@@ -14,6 +14,33 @@ class EntityTypeTest extends \PHPUnit_Framework_TestCase
         $this->type = $entity->type('entity');
     }
 
+    public function testAbleToDistinguishSingleDirtyProperty()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $entity->getEntity()->define('lastName', 'string');
+        $entity->clean();
+
+        $this->assertEquals(array(), $entity->dirty());
+        $entity->getEntity()->setFirstName('Mr.');
+        $this->assertEquals(array('entity'), $entity->dirty());
+        $this->assertEquals(array('firstName'), $entity->getEntity()->dirty());
+
+        $entity->reset();
+        $this->assertEquals(array(), $entity->dirty());
+
+        $entity->getEntity()->fromArray(array(
+            'firstName' => 'Mrs.',
+            'lastName'  => 'Smith',
+        ));
+
+        $this->assertEquals(array('firstName', 'lastName'), $entity->getEntity()->dirty());
+        $entity->getEntity()->clean('lastName');
+        $this->assertEquals(array('firstName'), $entity->getEntity()->dirty());
+
+        $entity->getEntity()->markDirty('firstName');
+        $this->assertEquals(array('firstName'), $entity->getEntity()->dirty());
+    }
+
     public function testGetInstanceNoClass()
     {
         $this->setExpectedException(

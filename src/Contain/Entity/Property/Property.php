@@ -115,16 +115,31 @@ class Property
      */
     public function getValue()
     {
-        $value = $this->getType()->parse($this->currentValue);
-
         // track changes to the entity so they persisted into the internal, export() value
         if ($this->getType() instanceof Type\EntityType) {
-            $value->clean();
+            // set as persisted, then change properties to update the entity's internal dirty() flags
+            $value = $this->getType()->parse($this->persistedValue);
+            $value->clean()->fromArray($this->currentValue);
 
-            $property = $this;
-            $value->getEventManager()->attach('change.post', function ($event) use ($property) {
+            $property     = $this;
+            $eventManager = $value->getEventManager();
+
+            // changing any value should persist back to be stored in the property's serialized version
+            $eventManager->attach('change.post', function ($event) use ($property) {
                 $property->setValue($event->getTarget());
             }, -1000);
+
+            // cleaning any sub-entity property should clean the property's serialized version
+            $eventManager->attach('clean.post', function ($event) use ($property) {
+                $property->clean($event->getParam('property'));
+            }, -1000);
+
+            // dirtying any sub-entity property should dirty the property's serialized version
+            $eventManager->attach('dirty.post', function ($event) use ($property) {
+                $property->setDirty($event->getParam('property'));
+            }, -1000);
+        } else {
+            $value = $this->getType()->parse($this->currentValue);
         }
 
         return $value;
@@ -196,11 +211,29 @@ class Property
      * the current value of the property, which is ensured by making the persisted value
      * something one-of-a-kind.
      *
+     * Note: Some types (entity) allow sub-properties to be individually cleaned, hence
+     *       the optional argument.
+     *
      * @return  $this
      */
-    public function setDirty()
+    public function setDirty($subProperty = null)
     {
-        $this->persistedValue = new \stdclass();
+        if ($subProperty) {
+            if (!$this->getType() instanceof Type\EntityType) {
+                throw new \Contain\Entity\Exception\InvalidArgumentException('$subProperty invalid for this type');
+            }
+
+            if (!is_array($this->persistedValue)) {
+                $this->persistedValue = array();
+            }
+
+            $this->persistedValue[$subProperty] = $this->getValue()->type($subProperty)->getDirtyValue();
+
+            return $this;
+        }
+
+        $this->persistedValue = $this->getType()->getDirtyValue();
+
         return $this;
     }
 
@@ -208,11 +241,35 @@ class Property
      * Marks the current value as having been persisted for the sake of
      * dirty tracking.
      *
+     * Note: Some types (entity) allow sub-properties to be individually cleaned, hence
+     *       the optional argument.
+     *
+     * @param   string                          Sub-Property
      * @return  $this
      */
-    public function clean()
+    public function clean($subProperty = null)
     {
+        if ($subProperty) {
+            if (!$this->getType() instanceof Type\EntityType) {
+                throw new \Contain\Entity\Exception\InvalidArgumentException('$subProperty invalid for this type');
+            }
+
+            if (!is_array($this->persistedValue)) {
+                $this->persistedValue = array();
+            }
+
+            if (!isset($this->currentValue[$subProperty])) {
+                unset($this->persistedValue[$subProperty]);
+                return $this;
+            }
+
+            $this->persistedValue[$subProperty] = $this->currentValue[$subProperty];
+
+            return $this;
+        }
+
         $this->persistedValue = $this->currentValue;
+
         return $this;
     }
 

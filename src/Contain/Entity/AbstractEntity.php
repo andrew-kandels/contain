@@ -64,15 +64,7 @@ abstract class AbstractEntity implements EntityInterface
     public function __construct($properties = null)
     {
         $this->init();
-
-        if ($properties) {
-            $className = __CLASS__;
-            if (is_object($properties) && $properties instanceof $className) {
-                $this->fromArray($properties->export());
-            } else {
-                $this->fromArray($properties);
-            }
-        }
+        $this->fromArray($properties);
     }
 
     /**
@@ -315,7 +307,7 @@ abstract class AbstractEntity implements EntityInterface
     {
         if (!$property) {
             foreach ($this->properties as $name => $options) {
-                $this->property($name)->clean();
+                $this->clean($name);
             }
 
             return $this;
@@ -329,9 +321,21 @@ abstract class AbstractEntity implements EntityInterface
             return $this;
         }
 
-        if ($property = $this->property($property)) {
-            $property->clean();
+        if (!$property = $this->property($name = $property)) {
+            return $this;
         }
+
+        $eventManager = $this->getEventManager();
+
+        $eventManager->trigger('clean.pre', $this, array(
+            'property' => $name,
+        ));
+
+        $property->clean();
+
+        $eventManager->trigger('clean.post', $this, array(
+            'property' => $name,
+        ));
 
         return $this;
     }
@@ -362,9 +366,21 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function markDirty($name)
     {
-        if ($property = $this->property($name)) {
-            $property->setDirty();
+        $eventManager = $this->getEventManager();
+
+        if (!$property = $this->property($name)) {
+            return $this;
         }
+
+        $eventManager->trigger('dirty.pre', $this, array(
+            'property' => $name,
+        ));
+
+        $property->setDirty();
+
+        $eventManager->trigger('dirty.post', $this, array(
+            'property' => $name,
+        ));
 
         return $this;
     }
@@ -429,15 +445,24 @@ abstract class AbstractEntity implements EntityInterface
      * @param   array|Traversable   Property key/value pairs
      * @return  $this
      */
-    public function fromArray($properties)
+    public function fromArray($properties = null)
     {
+        if (!$properties) {
+            return $this;
+        }
+
+        $className = __CLASS__;
+        if (is_object($properties) && $properties instanceof $className) {
+            $properties = $properties->export();
+        }
+
         if (!is_array($properties) && !$properties instanceof Traversable) {
             throw new Exception\InvalidArgumentException('$properties must be an array or an instance of Traversable.');
         }
 
         foreach ($properties as $key => $value) {
             if ($property = $this->property($key)) {
-                $property->setValue($value);
+                $this->set($key, $value);
             }
         }
 
@@ -517,7 +542,9 @@ abstract class AbstractEntity implements EntityInterface
     {
         if ($property = $this->property($name)) {
             $eventManager = $this->getEventManager();
-            $eventManager->trigger('change.pre', $this);
+            $eventManager->trigger('change.pre', $this, array(
+                'property' => $name,
+            ));
 
             $value = $this->onEventSetter(
                 $name,
@@ -528,7 +555,9 @@ abstract class AbstractEntity implements EntityInterface
 
             $property->setValue($value);
 
-            $eventManager->trigger('change.post', $this);
+            $eventManager->trigger('change.post', $this, array(
+                'property' => $name,
+            ));
 
             return $this;
         }
@@ -620,7 +649,26 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Retrieve property meta-data ensuring indexes are set.
+     * Defines a new property for this entity.
+     *
+     * @param   string                      Name of property
+     * @param   string                      Type (keyword or FQCN)
+     * @param   array                       Options
+     * @return  $this
+     */
+    public function define($property, $type, array $options = array())
+    {
+        $this->properties[$property] = array(
+            'type' => $type,
+            'options' => $options,
+        );
+
+        return $this;
+    }
+
+    /**
+     * Retrieve property meta-data ensuring indexes are set. The property is managed through 
+     * a Property class which is lazy-loaded on demand.
      *
      * @param   string          Property name
      * @return  array|false
