@@ -186,7 +186,7 @@ class Property
             $value = $this->getType()->parse($this->currentValue);
 
             if ($value instanceof \ContainMapper\Cursor) {
-                $value->getEventManager()->attach('hydrate', function ($event) use ($value, $property) {
+                $value->getEventManager()->attach('hydrate', function ($event) use ($property) {
                     $entity = $event->getTarget();
                     $index  = $event->getParam('index');
 
@@ -201,16 +201,15 @@ class Property
         } elseif ($this->getType() instanceof Type\ListType) {
             $value = $this->getType()->parse($this->currentValue);
 
-            foreach ($value as $index => $entity) {
-                if (!$entity instanceof \Contain\Entity\EntityInterface) {
-                    continue;
+            if ($this->getType()->getOption('type') == 'entity') {
+                foreach ($value as $index => $entity) {
+                    $eventManager = $entity->getEventManager();
+                    $eventManager->attach('change.post', function ($event) use ($index, $property) {
+                        $property->setValueAtIndex($index, $event->getTarget()->export());
+                    }, -1000);
                 }
-
-                $eventManager = $entity->getEventManager();
-                $eventManager->attach('change.post', function ($event) use ($value, $index, $property) {
-                    $property->setValueAtIndex($index, $event->getTarget()->export());
-                }, -1000);
             }
+
         } else {
             $value = $this->getType()->parse($this->currentValue);
         }
