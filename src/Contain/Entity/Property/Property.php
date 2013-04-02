@@ -109,19 +109,61 @@ class Property
     }
 
     /**
+     * Sets the value for the index of the value, assuming the value itself is an 
+     * array. This is really only used internally for updating event callbacks in 
+     * lists and cursors of entites and should probably not be used outside of 
+     * the Contain internals.
+     *
+     * @param   integer                 Index
+     * @param   mixed                   export() value
+     * @return  $this
+     * @throws  Contain\Entity\Exception\InvalidArgumentException
+     */
+    public function setValueAtIndex($index, $value)
+    {
+        if (!isset($this->currentValue[$index])) {
+            throw new \Contain\Entity\Exception\InvalidArgumentException('$index invalid for current value');
+        } 
+
+        $this->currentValue[$index] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value for the index of the value, assuming the value itself is an 
+     * array. This is really only used internally for updating event callbacks in 
+     * lists and cursors of entites and should probably not be used outside of 
+     * the Contain internals.
+     *
+     * @param   integer                 Index
+     * @return  mixed
+     * @throws  Contain\Entity\Exception\InvalidArgumentException
+     */
+    public function getValueAtIndex($index)
+    {
+        if (!isset($this->currentValue[$index])) {
+            throw new \Contain\Entity\Exception\InvalidArgumentException('$index invalid for current value');
+        } 
+
+        return $this->currentValue[$index];
+    }
+
+    /**
      * Gets the value for this property.
      *
      * @return  mixed
      */
     public function getValue()
     {
+        $property = $this;
+
         // track changes to the entity so they persisted into the internal, export() value
         if ($this->getType() instanceof Type\EntityType) {
             // set as persisted, then change properties to update the entity's internal dirty() flags
             $value = $this->getType()->parse($this->persistedValue);
             $value->clean()->fromArray($this->currentValue);
 
-            $property     = $this;
             $eventManager = $value->getEventManager();
 
             // changing any value should persist back to be stored in the property's serialized version
@@ -138,6 +180,37 @@ class Property
             $eventManager->attach('dirty.post', function ($event) use ($property) {
                 $property->setDirty($event->getParam('property'));
             }, -1000);
+
+        // track changes to each entity in the list and persist them back to this, the parent list
+        } elseif ($this->getType() instanceof Type\ListEntityType) {
+            $value = $this->getType()->parse($this->currentValue);
+
+            if ($value instanceof \ContainMapper\Cursor) {
+                $value->getEventManager()->attach('hydrate', function ($event) use ($value, $property) {
+                    $entity = $event->getTarget();
+                    $index  = $event->getParam('index');
+
+                    $entity->getEventManager()->clearListeners('change.post');
+                    $entity->getEventManager()->attach('change.post', function ($e) use ($index, $property) {
+                        $property->setValueAtIndex($index, $e->getTarget()->export());
+                    }, -1000);
+                }, -1000);
+            }
+
+        // track changes to each entity in the list and persist them back to this, the parent list
+        } elseif ($this->getType() instanceof Type\ListType) {
+            $value = $this->getType()->parse($this->currentValue);
+
+            foreach ($value as $index => $entity) {
+                if (!$entity instanceof \Contain\Entity\EntityInterface) {
+                    continue;
+                }
+
+                $eventManager = $entity->getEventManager();
+                $eventManager->attach('change.post', function ($event) use ($value, $index, $property) {
+                    $property->setValueAtIndex($index, $event->getTarget()->export());
+                }, -1000);
+            }
         } else {
             $value = $this->getType()->parse($this->currentValue);
         }

@@ -2,6 +2,7 @@
 namespace ContainTest\Entity;
 
 use ContainTest\Entity\SampleMultiTypeEntity;
+use ContainTest\Entity\SampleChildEntity;
 
 class ListTypeTest extends \PHPUnit_Framework_TestCase
 {
@@ -92,5 +93,25 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
     public function getValidators()
     {
         $this->assertEquals(array(), $this->type->getValidators());
+    }
+
+    public function testUpdatingEntityInListEntityUpdatesProperty()
+    {
+        $this->entity->setListEntity(array(
+            new SampleChildEntity(array('firstName' => 'Mr.')),
+            new SampleChildEntity(array('firstName' => 'Mrs.')),
+        ));
+
+        $values = $this->entity->getListEntity();
+
+        foreach ($values as $value) {
+            $value->setFirstName($value->getFirstName() . ' Smith');
+        }
+
+        $this->assertEquals('Mr. Smith', $this->entity->at('listEntity', 0)->getFirstName());
+        $this->assertEquals('Mrs. Smith', $this->entity->at('listEntity', 1)->getFirstName());
+
+        $this->entity->at('listEntity', 1)->setFirstName('updated');
+        $this->assertEquals('updated', $this->entity->at('listEntity', 1)->getFirstName());
     }
 }

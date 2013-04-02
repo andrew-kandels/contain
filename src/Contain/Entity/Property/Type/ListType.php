@@ -116,7 +116,6 @@ class ListType extends StringType
 
         $type = $this->getType();
 
-        // @todo find a better way to deal with interfaces?
         if ($type == 'Contain\Entity\EntityInterface') {
             if (!$value instanceof $type) {
                 throw new InvalidArgumentException('$value must implement '

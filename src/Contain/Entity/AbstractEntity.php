@@ -217,6 +217,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function reset()
     {
+        $this->eventManager = null;
         $this->clearExtendedProperties()
              ->clear()
              ->persisted(false)
@@ -717,6 +718,10 @@ abstract class AbstractEntity implements EntityInterface
 
         $value = $this->get($name);
 
+        if ($value instanceof \ContainMapper\Cursor) {
+            $value = $value->toArray();
+        }
+
         return (isset($value[$index]) ? $value[$index] : null);
     }
 
@@ -744,11 +749,11 @@ abstract class AbstractEntity implements EntityInterface
 
         if ($property->getType() instanceof Type\ListEntityType) {
             if ($arr instanceof \ContainMapper\Cursor) {
-                $arr = $arr->export();
+                $arr = $arr->toArray();
             }
 
             if ($value instanceof \ContainMapper\Cursor) {
-                $value = $value->export();
+                $value = $value->toArray();
             }
         }
 
@@ -777,7 +782,7 @@ abstract class AbstractEntity implements EntityInterface
 
         if ($property->getType() instanceof Type\ListEntityType &&
             $arr instanceof \ContainMapper\Cursor) {
-            $arr = $arr->export();
+            $arr = $arr->toArray();
         }
 
         array_unshift($arr, $value);
@@ -809,7 +814,7 @@ abstract class AbstractEntity implements EntityInterface
 
         if ($property->getType() instanceof Type\ListEntityType &&
             $arr instanceof \ContainMapper\Cursor) {
-            $arr = $arr->export();
+            $arr = $arr->toArray();
         }
 
         array_push($arr, $value);
@@ -839,7 +844,7 @@ abstract class AbstractEntity implements EntityInterface
 
         if ($property->getType() instanceof Type\ListEntityType &&
             $arr instanceof \ContainMapper\Cursor) {
-            $arr = $arr->export();
+            $arr = $arr->toArray();
         }
 
         $return = array_pop($arr, $value);
@@ -869,7 +874,7 @@ abstract class AbstractEntity implements EntityInterface
 
         if ($property->getType() instanceof Type\ListEntityType &&
             $arr instanceof \ContainMapper\Cursor) {
-            $arr = $arr->export();
+            $arr = $arr->toArray();
         }
 
         $return = array_shift($arr, $value);
@@ -901,7 +906,7 @@ abstract class AbstractEntity implements EntityInterface
 
         if ($property->getType() instanceof Type\ListEntityType &&
             $arr instanceof \ContainMapper\Cursor) {
-            $arr = $arr->export();
+            $arr = $arr->toArray();
         }
 
         return array_slice($arr, $offset, $length);
@@ -930,11 +935,11 @@ abstract class AbstractEntity implements EntityInterface
 
         if ($property->getType() instanceof Type\ListEntityType) {
             if ($source instanceof \ContainMapper\Cursor) {
-                $source = $source->export();
+                $source = $source->toArray();
             }
 
             if ($target instanceof \ContainMapper\Cursor) {
-                $target = $target->export();
+                $target = $target->toArray();
             }
         }
 
