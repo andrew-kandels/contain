@@ -164,21 +164,19 @@ class Property
             $value = $this->getType()->parse($this->persistedValue);
             $value->clean()->fromArray($this->currentValue);
 
-            $eventManager = $value->getEventManager();
-
             // changing any value should persist back to be stored in the property's serialized version
-            $eventManager->attach('change.post', function ($event) use ($property) {
+            $value->attach('change', function ($event) use ($property) {
                 $property->setValue($event->getTarget());
             }, -1000);
 
             // cleaning any sub-entity property should clean the property's serialized version
-            $eventManager->attach('clean.post', function ($event) use ($property) {
-                $property->clean($event->getParam('property'));
+            $value->attach('clean', function ($event) use ($property) {
+                $property->clean($event->getParam('name'));
             }, -1000);
 
             // dirtying any sub-entity property should dirty the property's serialized version
-            $eventManager->attach('dirty.post', function ($event) use ($property) {
-                $property->setDirty($event->getParam('property'));
+            $value->attach('dirty', function ($event) use ($property) {
+                $property->setDirty($event->getParam('name'));
             }, -1000);
 
         // track changes to each entity in the list and persist them back to this, the parent list
@@ -190,8 +188,7 @@ class Property
                     $entity = $event->getTarget();
                     $index  = $event->getParam('index');
 
-                    $entity->getEventManager()->clearListeners('change.post');
-                    $entity->getEventManager()->attach('change.post', function ($e) use ($index, $property) {
+                    $entity->attach('change', function ($e) use ($index, $property) {
                         $property->setValueAtIndex($index, $e->getTarget()->export());
                     }, -1000);
                 }, -1000);
@@ -203,8 +200,7 @@ class Property
 
             if ($this->getType()->getOption('type') == 'entity') {
                 foreach ($value as $index => $entity) {
-                    $eventManager = $entity->getEventManager();
-                    $eventManager->attach('change.post', function ($event) use ($index, $property) {
+                    $entity->attach('change', function ($event) use ($index, $property) {
                         $property->setValueAtIndex($index, $event->getTarget()->export());
                     }, -1000);
                 }

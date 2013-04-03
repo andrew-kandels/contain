@@ -33,18 +33,6 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->entity->export(), $entity->export());
     }
 
-    public function testGetEventManager()
-    {
-        $this->assertInstanceOf('Zend\EventManager\EventManager', $this->entity->getEventManager());
-    }
-
-    public function testSetEventManager()
-    {
-        $eventManager = new \Zend\EventManager\EventManager();
-        $this->entity->setEventManager($eventManager);
-        $this->assertSame($eventManager, $this->entity->getEventManager());
-    }
-
     public function testGetExtendedProperty()
     {
         $this->assertEquals(1, $this->entity->setExtendedProperty('num', 1)
@@ -235,26 +223,22 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testOnEventGetter()
     {
-        $this->assertEquals('old', $this->entity->onEventGetter('firstName', 'old', false));
+        $this->assertEquals('old', $this->entity->onEventGetter('firstName', 'old'));
     }
 
     public function testOnEventGetterWithReplace()
     {
-        $this->entity->getEventManager()->attach('property.get', function ($e) {
-            $property = $e->getParam('property');
-            $property['value'] = 'newvalue';
-            $e->setParam('property', $property);
+        $this->entity->attach('property.get', function ($e) {
+            $e->setParam('value', 'newvalue');
         });
 
-        $this->assertEquals('newvalue', $this->entity->onEventGetter('firstName', 'old', false));
+        $this->assertEquals('newvalue', $this->entity->onEventGetter('firstName', 'old'));
     }
 
     public function testOnEventSetter()
     {
-        $this->entity->getEventManager()->attach('property.set', function ($e) {
-            $property = $e->getParam('property');
-            $property['value'] = 'newvalue';
-            $e->setParam('property', $property);
+        $this->entity->attach('property.set', function ($e) {
+            $e->setParam('value', 'newvalue');
         });
 
         $this->assertEquals(
@@ -262,8 +246,7 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
             $this->entity->onEventSetter(
                 'firstName',
                 'old',
-                'new',
-                true
+                'new'
             )
         );
     }
@@ -275,8 +258,7 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
             $this->entity->onEventSetter(
                 'firstName',
                 'old',
-                'new',
-                true
+                'new'
             )
         );
     }

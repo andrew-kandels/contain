@@ -47,7 +47,7 @@ class Timestampable extends AbstractDefinition
 
     public function init()
     {
-        $this->getEventManager()->attach('insert.pre', function (Event $e) {
+        $this->attach('insert.pre', function ($e) {
             $entity = $e->getTarget();
             $now    = new \DateTime('now');
             if (!$entity->getCreatedAt()) {
@@ -59,7 +59,7 @@ class Timestampable extends AbstractDefinition
             }
         });
 
-        $this->getEventManager()->attach('update.pre', function (Event $e) {
+        $this->attach('update.pre', function ($e) {
             $entity = $e->getTarget();
             $now    = new \DateTime('now');
             if (!$entity->getUpdatedAt()) {

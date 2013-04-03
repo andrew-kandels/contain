@@ -21,9 +21,9 @@ namespace Contain\Entity;
 
 use Contain\Entity\Exception;
 use Contain\Entity\Property\Type;
+use Closure;
+use Contain\Event;
 use Traversable;
-use Zend\EventManager\Event;
-use Zend\EventManager\EventManager;
 
 /**
  * Abstract Entity
@@ -41,9 +41,9 @@ abstract class AbstractEntity implements EntityInterface
     protected $properties = array();
 
     /**
-     * @var Zend\EventManager\EventManager
+     * @var array
      */
-    protected $eventManager;
+    protected $events = array();
 
     /**
      * @var array
@@ -78,58 +78,21 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Retrieves an instance of the Zend Framework event manager in order to
-     * register or trigger events.
-     *
-     * @return  Zend\EventManager\EventManager
-     */
-    public function getEventManager()
-    {
-        if (!$this->eventManager) {
-            $this->setEventManager(new EventManager());
-        }
-
-        return $this->eventManager;
-    }
-
-    /**
-     * Retrieves an instance of the Zend Framework event manager in order to
-     * register or trigger events.
-     *
-     * @param   Zend\EventManager\EventManager
-     * @return  $this
-     */
-    public function setEventManager(EventManager $eventManager)
-    {
-        $this->eventManager = $eventManager;
-        return $this;
-    }
-
-    /**
      * 'property.get' event that is fired when a property is accessed.
      *
      * @param   string              Property name
      * @param   mixed               Current Value
-     * @param   boolean             Is the value presently set?
      * @return  mixed|null
      */
-    public function onEventGetter($property, $currentValue, $isValueSet)
+    public function onEventGetter($name, $value)
     {
-        $eventManager = $this->getEventManager();
+        $params = $this->trigger('property.get', array(
+            'property'     => $this->property($name),
+            'name'         => $name,
+            'value'        => $value,
+        ));
 
-        $argv = $eventManager->prepareArgs(array('property' => array(
-            'property'      => $property,
-            'currentValue'  => $currentValue,
-            'isSet'         => $isValueSet,
-        )));
-
-        $eventManager->trigger('property.get', $this, $argv);
-
-        if (isset($argv['property']['value'])) {
-            return $argv['property']['value'];
-        }
-
-        return $currentValue;
+        return $params['value'];
     }
 
     /**
@@ -138,23 +101,18 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string              Property name
      * @param   mixed               Current Value
      * @param   mixed               New Value
-     * @param   boolean             Is the value presently set
      * @return  mixed|null
      */
-    public function onEventSetter($property, $currentValue, $newValue, $isValueSet)
+    public function onEventSetter($name, $currentValue, $newValue)
     {
-        $eventManager = $this->getEventManager();
-
-        $argv = $eventManager->prepareArgs(array('property' => array(
-            'property'      => $property,
+        $params = $this->trigger('property.set', array(
+            'property'      => $this->property($name),
+            'name'          => $name,
             'currentValue'  => $currentValue,
-            'isSet'         => $isValueSet,
             'value'         => $newValue,
-        )));
+        ));
 
-        $eventManager->trigger('property.set', $this, $argv);
-
-        return $argv['property']['value'];
+        return $params['value'];
     }
 
     /**
@@ -167,8 +125,7 @@ abstract class AbstractEntity implements EntityInterface
     {
         return $this->onEventGetter(
             $name,
-            isset($this->extendedProperties[$name]) ? $this->extendedProperties[$name] : null,
-            isset($this->extendedProperties[$name])
+            isset($this->extendedProperties[$name]) ? $this->extendedProperties[$name] : null
         );
     }
 
@@ -217,7 +174,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function reset()
     {
-        $this->eventManager = null;
+        $this->events = array();
         $this->clearExtendedProperties()
              ->clear()
              ->persisted(false)
@@ -326,16 +283,10 @@ abstract class AbstractEntity implements EntityInterface
             return $this;
         }
 
-        $eventManager = $this->getEventManager();
-
-        $eventManager->trigger('clean.pre', $this, array(
-            'property' => $name,
-        ));
-
         $property->clean();
-
-        $eventManager->trigger('clean.post', $this, array(
-            'property' => $name,
+        $this->trigger('clean', array(
+            'property' => $property,
+            'name'     => $name,
         ));
 
         return $this;
@@ -367,20 +318,14 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function markDirty($name)
     {
-        $eventManager = $this->getEventManager();
-
         if (!$property = $this->property($name)) {
             return $this;
         }
 
-        $eventManager->trigger('dirty.pre', $this, array(
-            'property' => $name,
-        ));
-
         $property->setDirty();
-
-        $eventManager->trigger('dirty.post', $this, array(
-            'property' => $name,
+        $this->trigger('dirty', array(
+            'property' => $property,
+            'name'     => $name,
         ));
 
         return $this;
@@ -525,8 +470,7 @@ abstract class AbstractEntity implements EntityInterface
         if ($property = $this->property($name)) {
             return $this->onEventGetter(
                 $name,
-                $property->getValue(),
-                !$property->isUnset()
+                $property->getValue()
             );
         }
 
@@ -542,11 +486,6 @@ abstract class AbstractEntity implements EntityInterface
     public function set($name, $value)
     {
         if ($property = $this->property($name)) {
-            $eventManager = $this->getEventManager();
-            $eventManager->trigger('change.pre', $this, array(
-                'property' => $name,
-            ));
-
             $value = $this->onEventSetter(
                 $name,
                 $property->getValue(),
@@ -555,9 +494,9 @@ abstract class AbstractEntity implements EntityInterface
             );
 
             $property->setValue($value);
-
-            $eventManager->trigger('change.post', $this, array(
-                'property' => $name,
+            $this->trigger('change', array(
+                'property' => $property,
+                'name'     => $name,
             ));
 
             return $this;
@@ -1056,5 +995,86 @@ abstract class AbstractEntity implements EntityInterface
         throw new Exception\InvalidArgumentException("'$method' is not a valid "
             . 'method for ' . get_class($this) . '.'
         );
+    }
+
+    /**
+     * Attaches a lightweight listener to the entity as a callback with an optional priority. 
+     *
+     * 2013-04-03: This no longer uses the ZF2 event manager as it's very expensive to create an EM
+     * for each entity. Using a factory or service locator to create entities with a shared EM 
+     * goes against my design for them being lightweight, fully self-contained, throw-away
+     * value dumps. I may revisit this in the future and am open to other ideas; but performance
+     * is key here and ZF2 was almost 10-20x slower in a recent implementation.
+     *
+     * @param   string                          Event name
+     * @param   Closure|array                   Callback method/closure
+     * @param   integer                         Priority
+     * @return  $this
+     */
+    public function attach($event, $callback, $priority = 0)
+    {
+        if (!isset($this->events[$event])) {
+            $this->events[$event] = array();
+        }
+
+        $this->events[$event][] = array(
+            $priority,
+            $callback,
+        );
+
+        return $this;
+    }
+
+    /** 
+     * Triggers an event by name, invoking any callbacks registered with attach() in 
+     * the order of their priority, passing an instance of Contain\Event which stores
+     * the parameters and allows for short circuiting and other utility.
+     *
+     * @param   string                          Event name
+     * @param   array                           Key/value Parameters
+     * @return  array                           (Possibly) Modified Parameters
+     */
+    public function trigger($event, array $params = array())
+    {
+        if (!isset($this->events[$event])) {
+            return $params;
+        }
+
+        $e      = new Event($this, $event, $params);
+        $events = $this->events[$event];
+
+        if (count($events) > 1) {
+            usort($events, function ($a, $b) {
+                return $a[0] > $b[0];
+            });
+        }
+
+        foreach ($events as $item) {
+            list($priority, $callback) = $item;
+
+            if ($callback instanceof Closure) {
+                $callback($e);
+            } elseif (is_array($callback)) {
+                call_user_func($callback, $e);
+            }
+
+            if (!$e->shouldPropogate()) {
+                break;
+            }
+        }
+
+        return $e->getParams();
+    }
+
+    /** 
+     * Clears all event listeners attach()'d to an event.
+     *
+     * @param   string                          Event name
+     * @return  $this
+     */
+    public function clearListeners($event)
+    {
+        unset($this->events[$event]);
+        return $this;
     }
 }
