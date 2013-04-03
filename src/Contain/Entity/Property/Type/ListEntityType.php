@@ -50,15 +50,16 @@ class ListEntityType extends ListType
     protected $mapper;
 
     /**
-     * Constructor
+     * Clears options.
      *
      * @return  $this
      */
-    public function __construct()
+    public function clearOptions()
     {
         $this->options = array(
             'className' => '',
         );
+        return $this;
     }
 
     /**

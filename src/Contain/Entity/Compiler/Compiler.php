@@ -223,6 +223,10 @@ class Compiler
      */
     public function compile($definition)
     {
+        if (!$definition) {
+            return $this;
+        }
+
         $this->setDefinition($definition);
 
         foreach ($this->definition->getProperties() as $name => $property) {

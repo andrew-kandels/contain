@@ -22,7 +22,7 @@ class Settings extends AbstractEntity
      */
     public function init()
     {
-        $this->properties['settings'] = array('type' => '\Contain\Entity\Property\Type\ListType', 'options' => array (
+        $this->define('settings', 'list', array (
   'type' => 'entity',
   'className' => 'Contain\\Entity\\Setting',
 ));

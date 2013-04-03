@@ -33,13 +33,14 @@ use DateTime;
 class DateTimeType extends StringType
 {
     /**
-     * Constructor
+     * Clears options.
      *
      * @return  $this
      */
-    public function __construct()
+    public function clearOptions()
     {
-        $this->options['dateFormat'] = 'Y-m-d H:i:s';
+        $this->options = array('dateFormat' => 'Y-m-d H:i:s');
+        return $this;
     }
 
     /**

@@ -35,16 +35,17 @@ use Contain\Entity\Property\Type\EntityType;
 class ListType extends StringType
 {
     /**
-     * Constructor
+     * Clears options.
      *
      * @return  $this
      */
-    public function __construct()
+    public function clearOptions()
     {
         $this->options = array(
             'type' => '',
             'className' => '',
         );
+        return $this;
     }
 
     /**

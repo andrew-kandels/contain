@@ -33,15 +33,16 @@ use Traversable;
 class EntityType extends StringType
 {
     /**
-     * Constructor
+     * Clears options.
      *
      * @return  $this
      */
-    public function __construct()
+    public function clearOptions()
     {
         $this->options = array(
             'className' => '',
         );
+        return $this;
     }
 
     /**
@@ -61,9 +62,10 @@ class EntityType extends StringType
             return null;
         }
 
-        // dependency may not have been compiled yet
         if (!class_exists($type)) {
-            throw new Exception\InvalidArgumentException('getInstance attempting to create non-existing object "' . $type . '"');
+            throw new Exception\InvalidArgumentException('getInstance attempting to create non-existing '
+                . 'object "' . $type . '"'
+            );
         }
 
         return new $type($properties);
@@ -78,19 +80,21 @@ class EntityType extends StringType
      */
     public function parse($value)
     {
-        if (!$value) {
-            return $this->getUnsetValue();
-        }
+        $value = $value ?: array();
 
         if (!$type = $this->getOption('className')) {
             throw new Exception\RuntimeException('$value is invalid because no type has been set for type entity');
         }
 
         if ($value instanceof $type) {
-            return clone $value;
+            return $this->getInstance($value->export());
         }
 
-        if (is_array($value) || $value instanceof Traversable) {
+        if ($value instanceof Traversable) {
+            $value = iterator_to_array($value);
+        }
+
+        if (is_array($value)) {
             return $this->getInstance($value);
         }
 
@@ -109,6 +113,14 @@ class EntityType extends StringType
      */
     public function export($value)
     {
+        if ($value === $this->getUnsetValue()) {
+            return $value;
+        }
+
+        if ($value === $this->getEmptyValue()) {
+            return $value;
+        }
+
         if ($entity = $this->parse($value)) {
             return $entity->export();
         }
@@ -123,7 +135,7 @@ class EntityType extends StringType
      */
     public function getEmptyValue()
     {
-        return $this->getInstance();
+        return array();
     }
 
     /**
@@ -133,6 +145,6 @@ class EntityType extends StringType
      */
     public function getUnsetValue()
     {
-        return $this->getInstance();
+        return null;
     }
 }

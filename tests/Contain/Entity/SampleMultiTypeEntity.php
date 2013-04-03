@@ -11,7 +11,7 @@ class SampleMultiTypeEntity extends AbstractEntity
 
     public function init()
     {
-        $this->properties['string'] = array('type' => 'string', 'options' => array(
+        $this->define('string', 'string', array(
             'filters' => array(
                 array('name' => 'StringTrim'),
             ),
@@ -22,25 +22,25 @@ class SampleMultiTypeEntity extends AbstractEntity
                 )),
             ),
         ));
-        $this->properties['entity']  = array('type' => 'entity', 'options' => array(
+        $this->define('entity', 'entity', array(
             'className' => 'ContainTest\Entity\SampleChildEntity',
         ));
-        $this->properties['boolean'] = array('type' => 'boolean');
-        $this->properties['dateTime'] = array('type' => 'dateTime');
-        $this->properties['date'] = array('type' => 'date');
-        $this->properties['double'] = array('type' => 'double');
-        $this->properties['enum'] = array('type' => 'enum', 'options' => array(
+        $this->define('boolean', 'boolean');
+        $this->define('dateTime', 'dateTime');
+        $this->define('date', 'date');
+        $this->define('double', 'double');
+        $this->define('enum', 'enum', array(
             'options' => array('one', 'two', 'three'),
         ));
-        $this->properties['integer'] = array('type' => 'integer');
-        $this->properties['list'] = array('type' => 'list', 'options' => array(
+        $this->define('integer', 'integer');
+        $this->define('list', 'list', array(
             'type' => 'integer'
         ));
-        $this->properties['listEntity'] = array('type' => 'list', 'options' => array(
+        $this->define('listEntity', 'list', array(
             'type' => 'entity',
             'className' => '\ContainTest\Entity\SampleChildEntity',
         ));
-        $this->properties['mixed'] = array('type' => 'mixed');
-        $this->properties['string'] = array('type' => 'string');
+        $this->define('mixed', 'mixed');
+        $this->define('string', 'string');
     }
 }

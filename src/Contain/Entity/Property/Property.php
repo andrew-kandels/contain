@@ -19,6 +19,8 @@
 
 namespace Contain\Entity\Property;
 
+use ContainMapper\Cursor;
+use Contain\Manager\TypeManager;
 use Contain\Entity\EntityInterface;
 use Traversable;
 
@@ -33,7 +35,7 @@ use Traversable;
 class Property
 {
     /**
-     * @var Property\Type\AbstractType
+     * @var string
      */
     protected $type;
 
@@ -63,37 +65,116 @@ class Property
     protected $options = array();
 
     /**
-     * @var array
+     * @var Contain\Entity\EntityInterface
      */
-    protected $validOptions = array(
-        'defaultValue',
-        'primary',
-        'required',
-        'filters',
-        'validators',
-    );
+    protected $parent;
 
     /**
-     * Constructs the property which needs be associated with a name
-     * and a data type.
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * @var Contain\Manager\TypeManager
+     */
+    protected $typeManager;
+
+    /**
+     * Injects the parent entity.
      *
-     * @param   Contain\Entity\Property\Type\AbstractType|string
-     * @param   array|Traversable                                   Options
+     * @param   Contain\Entity\EntityInterface
      * @return  $this
      */
-    public function __construct($type, $options = null)
+    public function setParent(EntityInterface $parent = null)
     {
-        if ($options) {
-            $this->setOptions($options);
+        $this->parent = $parent;
+        return $this;
+    }
+
+    /**
+     * Gets or sets a type manager.
+     *
+     * @param   Contain\Manager\TypeManager|null
+     * @return  Contain\Manager\TypeManager
+     */
+    public function typeManager(TypeManager $manager = null)
+    {
+        if ($manager) {
+            $this->typeManager = $manager;
         }
 
-        $this->setType($type);
+        if (!$this->typeManager) {
+            $this->typeManager = new TypeManager();
+        }
 
-        $this->unsetValue = $this->getType()->getUnsetValue();
-        $this->emptyValue = $this->getType()->getEmptyValue();
+        return $this->typeManager;
+    }
 
-        $this->setValue($this->unsetValue);
-        $this->clean();
+    /**
+     * Hydrates the property from a syntax compatible with export().
+     *
+     * @param   array                           Serialized Options/Values
+     * @return  $this
+     */
+    public function import(array $arr)
+    {
+        $parent = $this->parent;
+        $this->parent = null;
+
+        $this->options = array();
+        if (!empty($arr['options'])) {
+            $this->setOptions($arr['options']);
+        }
+
+        if (empty($arr['type'])) {
+            throw new \Contain\Entity\Exception\InvalidArgumentException('import expects a type index');
+        }
+        $this->type = $arr['type'];
+
+        if (empty($arr['name'])) {
+            throw new \Contain\Entity\Exception\InvalidArgumentException('import expects a name index');
+        }
+        $this->name = $arr['name'];
+        
+        $this->unsetValue = array_key_exists('unsetValue', $arr)
+            ? $arr['unsetValue']
+            : $this->getType()->getUnsetValue();
+
+        $this->emptyValue = array_key_exists('emptyValue', $arr)
+            ? $arr['emptyValue']
+            : $this->getType()->getEmptyValue();
+
+        $this->currentValue = array_key_exists('currentValue', $arr)
+            ? $arr['currentValue']
+            : $this->unsetValue;
+
+        if (array_key_exists('persistedValue', $arr)) {
+            $this->persistedValue = $arr['persistedValue'];
+        } else {
+            $this->clean();
+        }
+
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /** 
+     * Serializes the property for later hydration.
+     *
+     * @return  array
+     */
+    public function export()
+    {
+        return array(
+            'name'           => $this->name,
+            'options'        => $this->options,
+            'currentValue'   => $this->currentValue,
+            'persistedValue' => $this->persistedValue,
+            'emptyValue'     => $this->emptyValue,
+            'unsetValue'     => $this->unsetValue,
+            'type'           => $this->type,
+        );
     }
 
     /**
@@ -105,7 +186,7 @@ class Property
     public function setValue($value)
     {
         $this->currentValue = $this->getType()->export($value);
-        return $this;
+        return $this->save();
     }
 
     /**
@@ -126,8 +207,10 @@ class Property
         } 
 
         $this->currentValue[$index] = $value;
+        echo "SETTING $index TO "
+            . print_r($value->export(), true) . "\n";
 
-        return $this;
+        return $this->save();
     }
 
     /**
@@ -150,67 +233,142 @@ class Property
     }
 
     /**
+     * Watches an entity for changes to its values, rolling those events
+     * back up to the parent entity's property.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @param   integer                                         Index
+     * @return  $this
+     */
+    public function watch(EntityInterface $entity, $index = null)
+    {
+        $entity->setExtendedProperty('_parent', array(
+            'parent' => $this->parent,
+            'name'   => $this->name,
+            'index'  => $index,
+        ));
+
+        // changing any value should persist back to be stored in the property's serialized version
+        $entity->attach('change', function ($event) use ($index) {
+            $entity = $event->getTarget();
+            $e = $entity->getExtendedProperty('_parent');
+            if ($index !== null) {
+                $e['parent']->property($e['name'])->setValueAtIndex($index, $entity);
+            } else {
+                $e['parent']->property($e['name'])->setValue($entity);
+            }
+        }, -1000);
+
+        // cleaning any sub-entity property should clean the property's serialized version
+        $entity->attach('clean', function ($event) use ($index) {
+            $entity = $event->getTarget();
+            $e = $entity->getExtendedProperty('_parent');
+            if ($index !== null) {
+                $e['parent']->property($e['name'])->cleanAtIndex($index);
+            } else {
+                $e['parent']->property($e['name'])->cleanAtIndex($event->getParam('name'));
+            }
+        }, -1000);
+
+        // dirtying any sub-entity property should dirty the property's serialized version
+        $entity->attach('dirty', function ($event) use ($index) {
+            $entity = $event->getTarget();
+            $e = $entity->getExtendedProperty('_parent');
+            if ($index !== null) {
+                $e['parent']->property($e['name'])->setDirtyAtIndex($index);
+            } else {
+                $e['parent']->property($e['name'])->setDirtyAtIndex($event->getParam('name'));
+            }
+        }, -1000);
+
+        return $this;
+    }
+
+    /** 
+     * getValue() for entity properties, which must always return an actual
+     * entity that can be acted upon with events to send back change actions.
+     *
+     * @return  Contain\Entity\EntityInterface
+     */
+    public function getEntityValue()
+    {
+        // if unset, an empty one
+        $value = $this->getType()->parse($this->persistedValue);
+        if (!$value instanceof EntityInterface) {
+            $value = $this->getType()->parse($this->emptyValue);
+        }
+
+        // update the dirty states by setting current properties
+        $value->clean()->fromArray($this->currentValue ?: array());
+
+        $this->watch($value);
+
+        return $value;
+    }
+
+    /**
+     * getValue() for lists of entity types, which slow-hydrate entities from a 
+     * cursor. Changes to those entities should cycle back to the parent property.
+     *
+     * @return  ContainMapper\Cursor|array
+     */
+    public function getListEntityValue()
+    {
+        $value        = $this->getType()->parse($this->currentValue);
+        $propertyName = $this->name;
+        $parent       = $this->parent;
+    
+        if ($value instanceof Cursor) {
+            $value->getEventManager()->attach('hydrate', function ($event) use ($parent, $propertyName) {
+                $entity = $event->getTarget();
+                $parent->property($propertyName)->watch($entity, $event->getParam('index'));
+            }, -1000);
+        }
+
+        return $value;
+    }
+
+    /**
+     * getValue() for lists which needs to watch any entities it spawns for changes to 
+     * propogate back to the parent property.
+     *
+     * @return  array
+     */
+    public function getListValue()
+    {
+        $value = $this->getType()->parse($this->currentValue);
+
+        if ($this->getType()->getOption('type') == 'entity') {
+            foreach ($value as $index => $entity) {
+                $this->watch($entity, $index);
+            }
+        }
+
+        return $value; 
+    }
+
+    /**
      * Gets the value for this property.
      *
      * @return  mixed
      */
     public function getValue()
     {
-        $property = $this;
+        $type = $this->getType();
 
-        // track changes to the entity so they persisted into the internal, export() value
-        if ($this->getType() instanceof Type\EntityType) {
-            // set as persisted, then change properties to update the entity's internal dirty() flags
-            $value = $this->getType()->parse($this->persistedValue);
-            $value->clean()->fromArray($this->currentValue);
-
-            // changing any value should persist back to be stored in the property's serialized version
-            $value->attach('change', function ($event) use ($property) {
-                $property->setValue($event->getTarget());
-            }, -1000);
-
-            // cleaning any sub-entity property should clean the property's serialized version
-            $value->attach('clean', function ($event) use ($property) {
-                $property->clean($event->getParam('name'));
-            }, -1000);
-
-            // dirtying any sub-entity property should dirty the property's serialized version
-            $value->attach('dirty', function ($event) use ($property) {
-                $property->setDirty($event->getParam('name'));
-            }, -1000);
-
-        // track changes to each entity in the list and persist them back to this, the parent list
-        } elseif ($this->getType() instanceof Type\ListEntityType) {
-            $value = $this->getType()->parse($this->currentValue);
-
-            if ($value instanceof \ContainMapper\Cursor) {
-                $value->getEventManager()->attach('hydrate', function ($event) use ($property) {
-                    $entity = $event->getTarget();
-                    $index  = $event->getParam('index');
-
-                    $entity->attach('change', function ($e) use ($index, $property) {
-                        $property->setValueAtIndex($index, $e->getTarget()->export());
-                    }, -1000);
-                }, -1000);
-            }
-
-        // track changes to each entity in the list and persist them back to this, the parent list
-        } elseif ($this->getType() instanceof Type\ListType) {
-            $value = $this->getType()->parse($this->currentValue);
-
-            if ($this->getType()->getOption('type') == 'entity') {
-                foreach ($value as $index => $entity) {
-                    $entity->attach('change', function ($event) use ($index, $property) {
-                        $property->setValueAtIndex($index, $event->getTarget()->export());
-                    }, -1000);
-                }
-            }
-
-        } else {
-            $value = $this->getType()->parse($this->currentValue);
+        if ($type instanceof Type\EntityType) {
+            return $this->getEntityValue();
         }
 
-        return $value;
+        if ($type instanceof Type\ListEntityType) {
+            return $this->getListEntityValue();
+        }
+
+        if ($type instanceof Type\ListType) {
+            return $this->getListValue();
+        }
+
+        return $type->parse($this->currentValue);
     }
 
     /**
@@ -220,22 +378,7 @@ class Property
      */
     public function isUnset()
     {
-        if ($this->getType() instanceof Type\BooleanType) {
-            return $this->getValue() === $this->getType()->getUnsetValue();
-        }
-
-        // lists can never be unset, just empty arrays so we can push onto them
-        if ($this->getType() instanceof Type\ListType) {
-            return false;
-        }
-
-        // entities can never be unset, just empty hashes we can push into
-        if ($this->getType() instanceof Type\EntityType) {
-            return false;
-        }
-
-        return $this->getType()->export($this->getValue()) ===
-               $this->getType()->export($this->getType()->getUnsetValue());
+        return $this->currentValue === $this->unsetValue;
     }
 
     /**
@@ -245,11 +388,7 @@ class Property
      */
     public function isEmpty()
     {
-        if ($this->getType() instanceof Type\BooleanType) {
-            return $this->getValue() === $this->getType()->getEmptyValue();
-        }
-
-        return $this->currentValue === $this->getType()->export($this->getType()->getEmptyValue());
+        return $this->currentValue === $this->emptyValue;
     }
 
     /**
@@ -259,8 +398,8 @@ class Property
      */
     public function clear()
     {
-        $this->setValue($this->getType()->getUnsetValue());
-        return $this;
+        $this->currentValue = $this->unsetValue;
+        return $this->save();
     }
 
     /**
@@ -270,8 +409,29 @@ class Property
      */
     public function setEmpty()
     {
-        $this->setValue($this->getType()->getEmptyValue());
-        return $this;
+        $this->currentValue = $this->emptyValue;
+        return $this->save();
+    }
+
+    /**
+     * Sets a property dirty at a specified index of a list property.
+     *
+     * @param   integer                 Index
+     * @return  $this
+     */
+    public function setDirtyAtIndex($index)
+    {
+        if (!$this->getType() instanceof Type\EntityType) {
+            throw new \Contain\Entity\Exception\InvalidArgumentException('$subProperty invalid for this type');
+        }
+
+        if (!is_array($this->persistedValue)) {
+            $this->persistedValue = array();
+        }
+
+        $this->persistedValue[$index] = $this->getValue()->type($index)->getDirtyValue();
+
+        return $this->save();
     }
 
     /**
@@ -279,66 +439,45 @@ class Property
      * the current value of the property, which is ensured by making the persisted value
      * something one-of-a-kind.
      *
-     * Note: Some types (entity) allow sub-properties to be individually cleaned, hence
-     *       the optional argument.
+     * @return  $this
+     */
+    public function setDirty()
+    {
+        $this->persistedValue = $this->getType()->getDirtyValue();
+        return $this->save();
+    }
+
+    /**
+     * Cleans a property at a specified index of a list property.
      *
      * @return  $this
      */
-    public function setDirty($subProperty = null)
+    public function cleanAtIndex($index)
     {
-        if ($subProperty) {
-            if (!$this->getType() instanceof Type\EntityType) {
-                throw new \Contain\Entity\Exception\InvalidArgumentException('$subProperty invalid for this type');
-            }
+        if (!is_array($this->persistedValue)) {
+            $this->persistedValue = array();
+        }
 
-            if (!is_array($this->persistedValue)) {
-                $this->persistedValue = array();
-            }
-
-            $this->persistedValue[$subProperty] = $this->getValue()->type($subProperty)->getDirtyValue();
-
+        if (!isset($this->currentValue[$index])) {
+            unset($this->persistedValue[$index]);
             return $this;
         }
 
-        $this->persistedValue = $this->getType()->getDirtyValue();
+        $this->persistedValue[$index] = $this->currentValue[$index];
 
-        return $this;
+        return $this->save();
     }
 
     /**
      * Marks the current value as having been persisted for the sake of
      * dirty tracking.
      *
-     * Note: Some types (entity) allow sub-properties to be individually cleaned, hence
-     *       the optional argument.
-     *
-     * @param   string                          Sub-Property
      * @return  $this
      */
     public function clean($subProperty = null)
     {
-        if ($subProperty) {
-            if (!$this->getType() instanceof Type\EntityType) {
-                throw new \Contain\Entity\Exception\InvalidArgumentException('$subProperty invalid for this type');
-            }
-
-            if (!is_array($this->persistedValue)) {
-                $this->persistedValue = array();
-            }
-
-            if (!isset($this->currentValue[$subProperty])) {
-                unset($this->persistedValue[$subProperty]);
-                return $this;
-            }
-
-            $this->persistedValue[$subProperty] = $this->currentValue[$subProperty];
-
-            return $this;
-        }
-
         $this->persistedValue = $this->currentValue;
-
-        return $this;
+        return $this->save();
     }
 
     /**
@@ -346,7 +485,7 @@ class Property
      *
      * @return  mixed
      */
-    public function export()
+    public function getExport()
     {
         return $this->currentValue;
     }
@@ -373,57 +512,25 @@ class Property
     }
 
     /**
-     * Sets the data type for the property.
-     *
-     * @param   Contain\Entity\Property\Type\AbstractType|string
-     * @return  $this
-     */
-    public function setType($type)
-    {
-        if (is_string($type)) {
-            if (is_subclass_of($type, '\Contain\Entity\EntityInterface')) {
-                $newType = new Type\EntityType();
-                $newType->setOptions(array('className' => $type));
-                $type = $newType;
-            } elseif (is_subclass_of($type, '\Contain\Entity\Property\Type\TypeInterface')) {
-                $type = new $type();
-            }
-        }
-
-        if (!$type instanceof Type\TypeInterface) {
-            if (is_string($type) && strpos($type, '\\') === false) {
-                $type = 'Contain\Entity\Property\Type\\' . ucfirst($type) . 'Type';
-            }
-
-            if (!class_exists($type)) {
-                throw new \Contain\Entity\Exception\InvalidArgumentException('Type \''
-                    . $type . '\' does not exist.'
-                );
-            }
-
-            $type = new $type();
-
-            if (!$type instanceof Type\TypeInterface) {
-                throw new \Contain\Entity\Exception\InvalidArgumentException('$type does not implement '
-                    . 'Contain\Entity\Property\Type\TypeInterface.'
-                );
-            }
-        }
-
-        $this->type = $type;
-
-        $this->type->setOptions($this->options);
-
-        return $this;
-    }
-
-    /**
      * Returns the type object which defines how the data type
      * behaves.
      *
      * @return Contain\Entity\Property\Type\AbstractType
      */
     public function getType()
+    {
+        return $this->typeManager()->type(
+            $this->type, 
+            $this->options
+        );
+    }
+
+    /**
+     * Returns the alias of the current type as set in the define().
+     *
+     * @return  string
+     */
+    public function getTypeAlias()
     {
         return $this->type;
     }
@@ -446,7 +553,7 @@ class Property
             $this->setOption($name, $value);
         }
 
-        return $this;
+        return $this->save();
     }
 
     /**
@@ -459,8 +566,7 @@ class Property
     public function setOption($name, $value)
     {
         $this->options[$name] = $value;
-
-        return $this;
+        return $this->save();
     }
 
     /**
@@ -482,5 +588,38 @@ class Property
     public function getOption($name)
     {
         return isset($this->options[$name]) ? $this->options[$name] : null;
+    }
+
+    /**
+     * Gets the name of the property this object currently represents.
+     *
+     * @return  string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Gets the parent entity.
+     *
+     * @return  Contain\Entity\EntityInterface
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Persists changes back to the parent's property array.
+     *
+     * @return  $this
+     */
+    public function save()
+    {
+        if ($this->parent) {
+            $this->parent->saveProperty($this);
+        }
+        return $this;
     }
 }

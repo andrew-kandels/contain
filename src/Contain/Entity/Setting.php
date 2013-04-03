@@ -22,14 +22,14 @@ class Setting extends AbstractEntity
      */
     public function init()
     {
-        $this->properties['name'] = array('type' => '\Contain\Entity\Property\Type\StringType', 'options' => array (
+        $this->define('name', 'string', array (
   'required' => true,
   'options' => 
   array (
     'label' => 'Name',
   ),
 ));
-        $this->properties['value'] = array('type' => '\Contain\Entity\Property\Type\MixedType', 'options' => array (
+        $this->define('value', 'mixed', array (
   'options' => 
   array (
     'label' => 'Value',

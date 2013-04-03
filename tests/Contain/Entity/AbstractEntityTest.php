@@ -3,6 +3,8 @@ namespace ContainTest\Entity;
 
 use ContainTest\Entity\SampleEntity;
 use ContainTest\Entity\SampleMultiTypeEntity;
+use ContainTest\Entity\SampleMultiEntityEntity;
+use ContainTest\Entity\SampleChildEntity;
 
 class AbstractEntityTest extends \PHPUnit_Framework_TestCase
 {
@@ -17,9 +19,15 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
     {
         $entity = new SampleEntity($values = array(
             'firstName' => 'Andrew',
-            'child' => array(),
+            'child'     => array(),
         ));
         $this->assertEquals($values, $entity->export());
+    }
+
+    public function testUnsetSubEntityStillReturnsObject()
+    {
+        $entity = new SampleEntity();
+        $this->assertInstanceOf('ContainTest\Entity\SampleChildEntity', $entity->getChild());
     }
 
     public function testConstruct()
@@ -150,10 +158,10 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testProperties()
     {
-        $this->assertEquals(array('child'), $this->entity->properties());
+        $this->assertEquals(array(), $this->entity->properties());
         $this->assertEquals(array('firstName', 'child'), $this->entity->properties(true));
         $this->entity->setFirstName('Andrew');
-        $this->assertEquals(array('firstName', 'child'), $this->entity->properties());
+        $this->assertEquals(array('firstName'), $this->entity->properties());
     }
 
     public function testToArray()
@@ -189,18 +197,16 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testExport()
     {
-        $this->assertEquals(array('child' => array()), $this->entity->export());
+        $this->assertEquals(array(), $this->entity->export());
         $this->assertEquals(
             array(
                 'firstName' => $this->entity->property('firstName')->getType()->getUnsetValue(),
-                'child'     => array(),
+                'child'     => null,
             ),
             $this->entity->export(null, true)
         );
-        $this->entity->fromArray(array(
-            'firstName' => 'Andrew',
-        ));
-        $this->assertEquals(array('firstName' => 'Andrew', 'child' => array()), $this->entity->export());
+        $this->entity->fromArray(array('firstName' => 'Andrew'));
+        $this->assertEquals(array('firstName' => 'Andrew'), $this->entity->export());
     }
 
     public function testExportWithString()
@@ -265,14 +271,13 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testChildEntityInstantiated()
     {
-        $this->assertEquals(array('child' => array()), $this->entity->export('child'));
-        $this->assertEquals(array('child' => array()), $this->entity->export('child', true));
+        $this->assertEquals(array(), $this->entity->export('child'));
+        $this->assertEquals(array('child' => null), $this->entity->export('child', true));
         $this->assertInstanceOf('ContainTest\Entity\SampleChildEntity', $this->entity->getChild());
     }
 
     public function testChildEntityDirty()
     {
-        define('TESTEVENT', true);
         $this->entity->getChild()->setFirstName('Samantha');
         $this->assertEquals(array('child'), $this->entity->dirty());
     }

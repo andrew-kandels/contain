@@ -32,15 +32,14 @@ use Contain\Entity\Exception\InvalidArgumentException;
 class EnumType extends StringType
 {
     /**
-     * Constructor
+     * Clears options.
      *
      * @return  $this
      */
-    public function __construct()
+    public function clearOptions()
     {
-        $this->options['options'] = array(
-            'value_options' => array(),
-        );
+        $this->options = array('options' => array());
+        return $this;
     }
 
     /**
@@ -60,14 +59,12 @@ class EnumType extends StringType
 
         // @todo backwards compatibility fix for ZF2 2.0.2, to be removed to
         // simply use value_options like ZF2 does
-        $options = $this->getOption('options');
-        if (!isset($options['value_options']) && $options) {
-            $valueOptions = $options;
-        } else {
-            $valueOptions = $options['value_options'];
+        $options = $this->getOption('options') ?: array();
+        if (!empty($options['value_options'])) {
+            $options = $options['value_options'];
         }
 
-        if (in_array($value, $valueOptions) || isset($valueOptions[$value])) {
+        if (in_array($value, $options) || isset($options[$value])) {
             return $value;
         }
 
@@ -83,20 +80,18 @@ class EnumType extends StringType
     {
         // @todo backwards compatibility fix for ZF2 2.0.2, to be removed to
         // simply use value_options like ZF2 does
-        $options = $this->getOption('options');
-        if (!isset($options['value_options']) && $options) {
-            $valueOptions = $options;
-        } else {
-            $valueOptions = $options['value_options'];
+        $options = $this->getOption('options') ?: array();
+        if (!empty($options['value_options']) && is_array($options['value_options'])) {
+            $options = $options['value_options'];
         }
 
         // associative array / forms
-        if (!isset($valueOptions[0])) {
-            $valueOptions = array_keys($valueOptions);
+        if (!isset($options[0])) {
+            $options = array_keys($options);
         }
 
         return array(
-            array('name' => 'InArray', 'options' => array('haystack' => $valueOptions)),
+            array('name' => 'InArray', 'options' => array('haystack' => $options)),
         );
     }
 }

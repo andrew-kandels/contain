@@ -37,6 +37,16 @@ class StringType implements TypeInterface
     protected $options = array();
 
     /**
+     * Constructor
+     *
+     * @return  $this
+     */
+    public function __construct()
+    {
+        $this->clearOptions();
+    }
+
+    /**
      * Parse a given input into a suitable value for the current data type.
      *
      * @param   mixed               Value to be set
@@ -189,6 +199,17 @@ class StringType implements TypeInterface
             unset($this->options[$name]);
         }
 
+        return $this;
+    }
+
+    /**
+     * Clears options
+     *
+     * @return  $this
+     */
+    public function clearOptions()
+    {
+        $this->options = array();
         return $this;
     }
 

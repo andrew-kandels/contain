@@ -92,4 +92,11 @@ interface TypeInterface
      * @return  array
      */
     public function getValidators();
+
+    /**
+     * Clears options
+     *
+     * @return  $this
+     */
+    public function clearOptions();
 }

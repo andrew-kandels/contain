@@ -19,10 +19,13 @@
 
 namespace Contain\Entity;
 
+use Closure;
+use ContainMapper\Cursor;
 use Contain\Entity\Exception;
 use Contain\Entity\Property\Type;
-use Closure;
+use Contain\Entity\Property\Property;
 use Contain\Event;
+use Contain\Manager\TypeManager;
 use Traversable;
 
 /**
@@ -39,6 +42,16 @@ abstract class AbstractEntity implements EntityInterface
      * @var array
      */
     protected $properties = array();
+
+    /**
+     * @var Contain\Entity\Property\Property
+     */
+    protected $property;
+
+    /**
+     * @var Contain\Manager\TypeManager
+     */
+    protected $typeManager;
 
     /**
      * @var array
@@ -65,6 +78,25 @@ abstract class AbstractEntity implements EntityInterface
     {
         $this->init();
         $this->fromArray($properties);
+    }
+
+    /**
+     * Gets or sets a type manager.
+     *
+     * @param   Contain\Manager\TypeManager|null
+     * @return  Contain\Manager\TypeManager
+     */
+    public function typeManager(TypeManager $manager = null)
+    {
+        if ($manager) {
+            $this->typeManager = $manager;
+        }
+
+        if (!$this->typeManager) {
+            $this->typeManager = new TypeManager();
+        }
+
+        return $this->typeManager;
     }
 
     /**
@@ -179,6 +211,8 @@ abstract class AbstractEntity implements EntityInterface
              ->clear()
              ->persisted(false)
              ->clean();
+
+        $this->init();
 
         return $this;
     }
@@ -377,6 +411,12 @@ abstract class AbstractEntity implements EntityInterface
 
         foreach ($this->properties as $name => $options) {
             $property = $this->property($name);
+
+            if ($property->getType() instanceof Type\EntityType) {
+                $result[$name] = $property->getValue();
+                continue;
+            }
+
             if ($includeUnset || !$property->isUnset()) {
                 $result[$name] = $property->getValue();
             }
@@ -453,7 +493,7 @@ abstract class AbstractEntity implements EntityInterface
             }
 
             if ($includeUnset || !$property->isUnset()) {
-                $result[$name] = $property->export();
+                $result[$name] = $property->getExport();
             }
         }
 
@@ -489,8 +529,7 @@ abstract class AbstractEntity implements EntityInterface
             $value = $this->onEventSetter(
                 $name,
                 $property->getValue(),
-                $value,
-                !$property->isUnset()
+                $value
             );
 
             $property->setValue($value);
@@ -599,42 +638,56 @@ abstract class AbstractEntity implements EntityInterface
     public function define($property, $type, array $options = array())
     {
         $this->properties[$property] = array(
-            'type' => $type,
-            'options' => $options,
+            'name'           => $property,
+            'options'        => $options,
+            'type'           => $type,
         );
+
+        if (!empty($options['defaultValue'])) {
+            $type = $this->typeManager()->type($type, $options);
+            $this->properties[$property]['currentValue'] = $type->export($options['defaultValue']);
+        }
 
         return $this;
     }
 
     /**
-     * Retrieve property meta-data ensuring indexes are set. The property is managed through 
-     * a Property class which is lazy-loaded on demand.
+     * Persist changes to a property into the internal array.
      *
-     * @param   string          Property name
-     * @return  array|false
+     * @param   Contain\Entity\Property\Property
+     * @return  $this
+     */
+    public function saveProperty(Property $property)
+    {
+        $this->properties[$property->getName()] = $property->export();
+        return $this;
+    }
+
+    /**
+     * Fetches the entity's property object and points it to a specific
+     * property with all that property's options and internal settings.
+     *
+     * @param   string                                          Property name
+     * @return  Contain\Entity\Property\Property|false
      */
     public function property($name)
     {
-        $propertyName = '_' . $name;
-
-        if (isset($this->$propertyName)) {
-            return $this->$propertyName;
-        }
-
         if (!isset($this->properties[$name])) {
             return false;
         }
 
-        $options = isset($this->properties[$name]['options'])
-            ? $this->properties[$name]['options']
-            : array();
+        if (!$this->property) {
+            $this->property = new Property();
+            $this->property
+                 ->setParent($this)
+                 ->typeManager($this->typeManager());
+        }
 
-        $this->$propertyName = new Property\Property(
-            $this->properties[$name]['type'],
-            $options
-        );
+        if ($this->property->getName() == $name) {
+            return $this->property;
+        }
 
-        return $this->$propertyName;
+        return $this->property->import($this->properties[$name]);
     }
 
     /**
@@ -657,7 +710,7 @@ abstract class AbstractEntity implements EntityInterface
 
         $value = $this->get($name);
 
-        if ($value instanceof \ContainMapper\Cursor) {
+        if ($value instanceof Cursor) {
             $value = $value->toArray();
         }
 
@@ -687,11 +740,11 @@ abstract class AbstractEntity implements EntityInterface
         $value = $property->getType()->getType()->parse($value);
 
         if ($property->getType() instanceof Type\ListEntityType) {
-            if ($arr instanceof \ContainMapper\Cursor) {
+            if ($arr instanceof Cursor) {
                 $arr = $arr->toArray();
             }
 
-            if ($value instanceof \ContainMapper\Cursor) {
+            if ($value instanceof Cursor) {
                 $value = $value->toArray();
             }
         }
@@ -720,7 +773,7 @@ abstract class AbstractEntity implements EntityInterface
         $arr   = $this->get($name) ?: array();
 
         if ($property->getType() instanceof Type\ListEntityType &&
-            $arr instanceof \ContainMapper\Cursor) {
+            $arr instanceof Cursor) {
             $arr = $arr->toArray();
         }
 
@@ -752,7 +805,7 @@ abstract class AbstractEntity implements EntityInterface
         $arr   = $this->get($name) ?: array();
 
         if ($property->getType() instanceof Type\ListEntityType &&
-            $arr instanceof \ContainMapper\Cursor) {
+            $arr instanceof Cursor) {
             $arr = $arr->toArray();
         }
 
@@ -782,7 +835,7 @@ abstract class AbstractEntity implements EntityInterface
         $arr = $this->get($name) ?: array();
 
         if ($property->getType() instanceof Type\ListEntityType &&
-            $arr instanceof \ContainMapper\Cursor) {
+            $arr instanceof Cursor) {
             $arr = $arr->toArray();
         }
 
@@ -812,7 +865,7 @@ abstract class AbstractEntity implements EntityInterface
         $arr = $this->get($name) ?: array();
 
         if ($property->getType() instanceof Type\ListEntityType &&
-            $arr instanceof \ContainMapper\Cursor) {
+            $arr instanceof Cursor) {
             $arr = $arr->toArray();
         }
 
@@ -844,7 +897,7 @@ abstract class AbstractEntity implements EntityInterface
         $arr = $this->get($name) ?: array();
 
         if ($property->getType() instanceof Type\ListEntityType &&
-            $arr instanceof \ContainMapper\Cursor) {
+            $arr instanceof Cursor) {
             $arr = $arr->toArray();
         }
 
@@ -873,11 +926,11 @@ abstract class AbstractEntity implements EntityInterface
         $target = $property->getType()->parse($arr);
 
         if ($property->getType() instanceof Type\ListEntityType) {
-            if ($source instanceof \ContainMapper\Cursor) {
+            if ($source instanceof Cursor) {
                 $source = $source->toArray();
             }
 
-            if ($target instanceof \ContainMapper\Cursor) {
+            if ($target instanceof Cursor) {
                 $target = $target->toArray();
             }
         }

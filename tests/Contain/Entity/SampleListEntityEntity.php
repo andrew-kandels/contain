@@ -11,7 +11,7 @@ class SampleListEntityEntity extends AbstractEntity
 
     public function init()
     {
-        $this->properties['listEntity'] = array('type' => 'listEntity', 'options' => array(
+        $this->define('listEntity', 'listEntity', array(
             'className' => '\ContainTest\Entity\SampleChildEntity',
         ));
     }

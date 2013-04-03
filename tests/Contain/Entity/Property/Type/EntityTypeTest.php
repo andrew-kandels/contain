@@ -125,12 +125,12 @@ class EntityTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testGetEmptyValue()
     {
-        $this->assertInstanceOf('ContainTest\Entity\SampleChildEntity', $this->type->getEmptyValue());
+        $this->assertEquals(array(), $this->type->getEmptyValue());
     }
 
     public function testGetUnsetValue()
     {
-        $this->assertInstanceOf('ContainTest\Entity\SampleChildEntity', $this->type->getUnsetValue());
+        $this->assertNull($this->type->getUnsetValue());
     }
 
     public function getValidators()
