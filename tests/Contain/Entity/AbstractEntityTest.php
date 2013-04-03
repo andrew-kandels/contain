@@ -416,4 +416,66 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $entity->persisted(true);
         $this->assertTrue($entity->isPersisted());
     }
+
+    public function testClearingSubEntityPropertyDirtiesParent()
+    {
+        $entity = new SampleEntity();
+        $entity->setExtendedProperty('fuck', true);
+        $entity->fromArray(array(
+            'child' => array('firstName' => 'Mr.'),
+        ));
+        $entity->clean();
+
+        $entity->getChild()->clear('firstName');
+        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+        $this->assertEquals(array('child'), $entity->dirty());
+    }
+
+    public function testSettingUnsetSubEntityPropertyDirtiesParent()
+    {
+        $entity = new SampleEntity();
+        $entity->fromArray(array(
+            'child' => array('firstName' => 'Mr.'),
+        ));
+        $entity->clean();
+        $entity->getChild()->setFirstName(null);
+        $this->assertEquals(array('child'), $entity->dirty());
+        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+    }
+
+    public function testSettingEmptySubEntityPropertyDirtiesParent()
+    {
+        $entity = new SampleEntity();
+        $entity->fromArray(array(
+            'child' => array('firstName' => 'Mr.'),
+        ));
+        $entity->clean();
+        $entity->getChild()->setFirstName(false);
+        $this->assertEquals(array('child'), $entity->dirty());
+        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+    }
+
+    public function testSettingEmptyStringSubEntityPropertyDirtiesParent()
+    {
+        $entity = new SampleEntity();
+        $entity->fromArray(array(
+            'child' => array('firstName' => 'Mr.'),
+        ));
+        $entity->clean();
+        $entity->getChild()->setFirstName('');
+        $this->assertEquals(array('child'), $entity->dirty());
+        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+    }
+
+    public function testMarkingDirtyStringSubEntityPropertyDirtiesParent()
+    {
+        $entity = new SampleEntity();
+        $entity->fromArray(array(
+            'child' => array('firstName' => 'Mr.'),
+        ));
+        $entity->clean();
+        $entity->getChild()->markDirty('firstName');
+        $this->assertEquals(array('child'), $entity->dirty());
+        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+    }
 }

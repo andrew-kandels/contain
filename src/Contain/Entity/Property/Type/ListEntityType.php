@@ -139,24 +139,4 @@ class ListEntityType extends ListType
 
         return $value;
     }
-
-    /**
-     * The value assigned when the property is unset.
-     *
-     * @return  array
-     */
-    public function getUnsetValue()
-    {
-        return array();
-    }
-
-    /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  array
-     */
-    public function getEmptyValue()
-    {
-        return array();
-    }
 }

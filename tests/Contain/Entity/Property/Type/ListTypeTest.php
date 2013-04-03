@@ -15,8 +15,8 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testUnsetValue()
     {
-        $this->assertEquals($this->entity->type('list')->getUnsetValue(), $this->entity->getList());
-        $this->assertEquals(array(), $this->entity->type('list')->getUnsetValue());
+        $this->assertEquals(array(), $this->entity->getList());
+        $this->assertNull($this->entity->type('list')->getUnsetValue());
     }
 
     public function testEmptyValue()
@@ -38,7 +38,7 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testSetTypeString()
     {
-        $this->entity->type('list')->setOption('type', 'string');
+        $this->entity->property('list')->setOption('type', 'string');
         $this->assertEquals(array('test'), $this->entity->setList(array('test'))->getList());
     }
 
@@ -49,7 +49,7 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
             '$type may not be a nested instance of Contain\Entity\Property\Type\ListType.'
         );
 
-        $this->entity->type('list')->setOption('type', 'list');
+        $this->entity->property('list')->setOption('type', 'list');
         $this->entity->setList(array(array('1')));
     }
 
@@ -60,14 +60,14 @@ class ListTypeTest extends \PHPUnit_Framework_TestCase
             '$type of entity must specify a className option that points to a class that implements Contain\Entity\EntityInterface.'
         );
 
-        $this->entity->type('list')->setOption('type', 'entity');
+        $this->entity->property('list')->setOption('type', 'entity');
         $this->entity->setList(array('firstName' => ''));
     }
 
     public function testParseEmptyGivesUnsetValue()
     {
         $this->assertEquals(
-            $this->entity->type('list')->getUnsetValue(),
+            array(),
             $this->entity->setList(false)->getList()
         );
     }

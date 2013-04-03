@@ -118,6 +118,7 @@ class Property
      */
     public function import(array $arr)
     {
+        // unset the parent so we don't make any save()'s during hydration
         $parent = $this->parent;
         $this->parent = null;
 
@@ -151,9 +152,10 @@ class Property
         if (array_key_exists('persistedValue', $arr)) {
             $this->persistedValue = $arr['persistedValue'];
         } else {
-            $this->clean();
+            $this->persistedValue = $this->currentValue;
         }
 
+        // re-enable saves
         $this->parent = $parent;
 
         return $this;
@@ -206,9 +208,7 @@ class Property
             throw new \Contain\Entity\Exception\InvalidArgumentException('$index invalid for current value');
         } 
 
-        $this->currentValue[$index] = $value;
-        echo "SETTING $index TO "
-            . print_r($value->export(), true) . "\n";
+        $this->currentValue[$index] = $this->getType()->getType()->export($value);
 
         return $this->save();
     }
@@ -292,14 +292,18 @@ class Property
      */
     public function getEntityValue()
     {
+        $type = $this->getType();
+
         // if unset, an empty one
-        $value = $this->getType()->parse($this->persistedValue);
+        $value = $type->parse($this->persistedValue);
         if (!$value instanceof EntityInterface) {
-            $value = $this->getType()->parse($this->emptyValue);
+            $value = $type->parse($this->emptyValue);
         }
 
+        $value->clean();
+
         // update the dirty states by setting current properties
-        $value->clean()->fromArray($this->currentValue ?: array());
+        $value->clear()->fromArray($this->currentValue ?: array());
 
         $this->watch($value);
 
@@ -314,7 +318,7 @@ class Property
      */
     public function getListEntityValue()
     {
-        $value        = $this->getType()->parse($this->currentValue);
+        $value        = $this->getType()->parse($this->currentValue) ?: array();
         $propertyName = $this->name;
         $parent       = $this->parent;
     
@@ -336,7 +340,7 @@ class Property
      */
     public function getListValue()
     {
-        $value = $this->getType()->parse($this->currentValue);
+        $value = $this->getType()->parse($this->currentValue) ?: array();
 
         if ($this->getType()->getOption('type') == 'entity') {
             foreach ($value as $index => $entity) {
@@ -421,10 +425,6 @@ class Property
      */
     public function setDirtyAtIndex($index)
     {
-        if (!$this->getType() instanceof Type\EntityType) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException('$subProperty invalid for this type');
-        }
-
         if (!is_array($this->persistedValue)) {
             $this->persistedValue = array();
         }
@@ -474,7 +474,7 @@ class Property
      *
      * @return  $this
      */
-    public function clean($subProperty = null)
+    public function clean()
     {
         $this->persistedValue = $this->currentValue;
         return $this->save();
@@ -620,6 +620,7 @@ class Property
         if ($this->parent) {
             $this->parent->saveProperty($this);
         }
+
         return $this;
     }
 }

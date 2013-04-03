@@ -183,7 +183,7 @@ class ListType extends StringType
      */
     public function getUnsetValue()
     {
-        return array();
+        return null;
     }
 
     /**

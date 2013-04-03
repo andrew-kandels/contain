@@ -85,10 +85,17 @@ class ListEntityTypeTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testUnsetValueReturnsEmptyArray()
+    {
+        $this->assertTrue($this->entity->property('listEntity')->isUnset());
+        $this->assertEquals(array(), $this->entity->getListEntity());
+        $this->assertEquals(array('listEntity' => null), $this->entity->export('listEntity', true));
+    }
+
     public function testUnsetValue()
     {
-        $this->assertEquals($this->entity->type('listEntity')->getUnsetValue(), $this->entity->getListEntity());
-        $this->assertEquals(array(), $this->entity->type('listEntity')->getUnsetValue());
+        $this->assertEquals(array(), $this->entity->getListEntity());
+        $this->assertNull($this->entity->type('listEntity')->getUnsetValue());
     }
 
     public function testEmptyValue()
@@ -101,7 +108,7 @@ class ListEntityTypeTest extends \PHPUnit_Framework_TestCase
     public function testParseEmptyGivesUnsetValue()
     {
         $this->assertEquals(
-            $this->entity->type('listEntity')->getUnsetValue(),
+            array(),
             $this->entity->setListEntity(false)->getListEntity()
         );
     }

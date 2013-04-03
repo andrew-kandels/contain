@@ -281,8 +281,13 @@ abstract class AbstractEntity implements EntityInterface
             return $this;
         }
 
-        if ($property = $this->property($property)) {
+        if ($property = $this->property($name = $property)) {
             $property->clear();
+
+            $this->trigger('change', array(
+                'property' => $property,
+                'name'     => $name,
+            ));
         }
 
         return $this;
@@ -439,7 +444,7 @@ abstract class AbstractEntity implements EntityInterface
 
         $className = __CLASS__;
         if (is_object($properties) && $properties instanceof $className) {
-            $properties = $properties->export();
+            $properties = $properties->export(null, true);
         }
 
         if (!is_array($properties) && !$properties instanceof Traversable) {
