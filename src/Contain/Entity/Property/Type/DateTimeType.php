@@ -62,10 +62,7 @@ class DateTimeType extends StringType
         }
 
         if ($value instanceof MongoDate) {
-            list($microseconds, $seconds) = explode(' ', (string) $value);
-            $result = new DateTime();
-            $result->setTimestamp($seconds);
-            return $result;
+            return new DateTime($value->sec);
         }
 
         if (is_string($value)) {
@@ -111,7 +108,11 @@ class DateTimeType extends StringType
             return date($this->getOption('dateFormat'), $value);
         }
 
-        throw new Exception\InvalidArgumentException('$value is invalid for date type');
+        if (is_array($value) && isset($value['date'])) {
+            return date($this->getOption('dateFormat'), strtotime($value['date']));
+        }
+
+        throw new Exception\InvalidArgumentException('$value is invalid for date type: ' . var_export($value, true));
     }
 
     /**

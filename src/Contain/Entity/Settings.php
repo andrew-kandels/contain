@@ -41,6 +41,18 @@ class Settings extends AbstractEntity
     }
 
     /**
+     * Sets a value for a list item at a given index.
+     *
+     * @param   string                          Property name
+     * @param   integer                         Index
+     * @return  mixed|null                      Value or null if unset
+     */
+    public function putSettings($index)
+    {
+        return $this->put('settings', $index);
+    }
+
+    /**
      * Fetches a list item by its numerical index position.
      *
      * @param   string                          Property name

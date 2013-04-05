@@ -41,10 +41,8 @@ class MongoDateType extends DateTimeType
      */
     public function parse($value = null)
     {
-        $value = parent::parse($value);
-
-        if ($value instanceof DateTime) {
-            return new MongoDate($value->getTimestamp());
+        if ($value = parent::export($value)) {
+            return new MongoDate(strtotime($value));
         }
 
         return $value;
