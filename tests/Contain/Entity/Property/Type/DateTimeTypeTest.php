@@ -34,6 +34,7 @@ class DateTimeTypeTest extends \PHPUnit_Framework_TestCase
     public function testParseMongoDate()
     {
         if (class_exists('MongoDate')) {
+            define('FUCK', true);
             $this->assertInstanceOf('DateTime', $this->type->parse(new \MongoDate()));
         }
     }
