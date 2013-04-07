@@ -168,13 +168,9 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
     {
         $arr = $this->entity->toArray();
         $this->assertTrue(isset($arr['child']));
-        $this->assertEquals(
-            array(
-                'firstName' => $this->entity->property('firstName')->getType()->getUnsetValue(),
-                'child'     => $this->entity->getChild(),
-            ),
-            $this->entity->toArray(true)
-        );
+
+        $this->assertEquals($arr['child']->export(), $this->entity->getChild()->export());
+
         $this->entity->setFirstName('Andrew');
         $arr = $this->entity->toArray();
         unset($arr['child']);
@@ -477,5 +473,143 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $entity->getChild()->markDirty('firstName');
         $this->assertEquals(array('child'), $entity->dirty());
         $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+    }
+
+    public function testChangeTriggersEventsInOrder()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $rs->order = array();
+        $entity->attach('change', function($e) use ($test, $entity, $rs) {
+            $test->assertInstanceOf('Contain\Event', $e);
+            $test->assertSame($entity, $e->getTarget());
+            $rs->order[] = 'second';
+        }, 100);
+
+        $entity->attach('change', function($e) use ($test, $entity, $rs) {
+            $test->assertInstanceOf('Contain\Event', $e);
+            $test->assertSame($entity, $e->getTarget());
+            $rs->order[] = 'first';
+        }, 200);
+
+        $entity->setFirstName('Mr.');
+        $this->assertEquals(array('first', 'second'), $rs->order);
+
+        $entity->clean('firstName');
+        $this->assertEquals(array('first', 'second', 'first', 'second'), $rs->order);
+
+        $entity->clear('firstName');
+        $this->assertEquals(array('first', 'second', 'first', 'second', 'first', 'second'), $rs->order);
+    }
+
+    public function testCleanTriggersEvents()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $entity->attach('clean', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+
+        $entity->clean();
+        $this->assertTrue($rs->called);
+    }
+
+    public function testDirtyTriggersEvents()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $entity->attach('dirty', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+
+        $entity->markDirty('firstName');
+        $this->assertTrue($rs->called);
+    }
+
+    public function testChildFiresParentChangeEvent()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $entity->attach('change', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+
+        $entity->getChild()->setFirstName('Mr.');
+        $this->assertTrue($rs->called);
+    }
+
+    public function testChildFiresParentDirtyEvent()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $entity->attach('dirty', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+
+        $entity->getChild()->markDirty('firstName');
+        $this->assertTrue($rs->called);
+    }
+
+    public function testChildFiresParentCleanEvent()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $entity->attach('clean', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+
+        $entity->getChild()->clean('firstName');
+        $this->assertTrue($rs->called);
+    }
+
+    public function testClearListenersClearsEvent()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $rs->called = false;
+        $entity->attach('change', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+        $entity->clearListeners('change');
+
+        $entity->setFirstName('Andrew');
+        $this->assertFalse($rs->called);
+    }
+
+    public function testResetClearsEverything()
+    {
+        $entity = new SampleEntity();
+        $entity->setExtendedProperty('test', true);
+        $test = $this;
+        $rs = new \stdclass();
+        $rs->called = false;
+        $entity->setFirstName('Mr.');
+        $entity->attach('change', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+        $entity->reset();
+
+        $this->assertEquals(array(), $entity->dirty());
+
+        $this->assertNull($entity->getFirstName());
+        $entity->setFirstName('Mr.');
+        $this->assertFalse($rs->called);
+        $this->assertNull($entity->getExtendedProperty('test'));
+    }
+
+    public function testPutAndAt()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $entity->setList(array(3, 2, 3));
+        $entity->put('list', 0, 1);
+        $this->assertEquals(array(1, 2, 3), $entity->getList());
+        $this->assertEquals(1, $entity->at('list', 0));
     }
 }

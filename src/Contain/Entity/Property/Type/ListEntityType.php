@@ -98,11 +98,11 @@ class ListEntityType extends ListType
      */
     public function parse($value)
     {
-        $this->getType();
-
         if (!$value = $this->export($value)) {
             return $this->getEmptyValue();
         }
+
+        $this->getType();
 
         return new Cursor($this->mapper, $value);
     }
@@ -117,22 +117,31 @@ class ListEntityType extends ListType
      */
     public function export($value)
     {
-        if (!$value) {
+        if ($value === $this->getUnsetValue()) {
             return $this->getUnsetValue();
+        }
+
+        if (!$value || $value === $this->getEmptyValue()) {
+            return $this->getEmptyValue();
         }
 
         $type = $this->getType();
 
         if ($value instanceof Cursor) {
-            $value = $value->export();
+            return $value->export();
+        }
+
+        if ($value instanceof Traversable) {
+            $value = iterator_to_array($value);
         }
 
         if (!is_array($value)) {
+            die(var_dump($value));
             throw new InvalidArgumentException('$value for ListEntityType should be an array or ContainMapper\Cursor');
         }
 
         foreach ($value as $index => $item) {
-            if (!is_array($item)) {
+            if ($item instanceof EntityInterface) {
                 $value[$index] = $type->export($item);
             }
         }

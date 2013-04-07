@@ -41,31 +41,12 @@ class MongoDateType extends DateTimeType
      */
     public function parse($value = null)
     {
-        if (!$value) {
-            return $this->getUnsetValue();
+        $value = parent::parse($value);
+
+        if ($value instanceof DateTime) {
+            return new MongoDate($value->getTimestamp());
         }
 
-        if ($value instanceof MongoDate) {
-            return $value;
-        }
-
-        return new MongoDate(parent::parse($value)->getTimestamp());
-    }
-
-    /**
-     * Returns the internal value represented as an integer value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  false|null|integer
-     * @throws  Contain\Exception\InvalidArgumentException
-     */
-    public function export($value)
-    {
-        if (!$when = $this->parse($value)) {
-            return $this->getUnsetValue();
-        }
-
-        return date($this->getOption('dateFormat'), $when->sec);
+        return $value;
     }
 }

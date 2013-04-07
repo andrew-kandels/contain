@@ -281,14 +281,16 @@ abstract class AbstractEntity implements EntityInterface
             return $this;
         }
 
-        if ($property = $this->property($name = $property)) {
-            $property->clear();
-
-            $this->trigger('change', array(
-                'property' => $property,
-                'name'     => $name,
-            ));
+        if (!$property = $this->property($name = $property)) {
+            return $this;
         }
+
+        $property->clear();
+
+        $this->trigger('change', array(
+            'property' => $property,
+            'name'     => $name,
+        ));
 
         return $this;
     }
@@ -324,6 +326,11 @@ abstract class AbstractEntity implements EntityInterface
 
         $property->clean();
         $this->trigger('clean', array(
+            'property' => $property,
+            'name'     => $name,
+        ));
+
+        $this->trigger('change', array(
             'property' => $property,
             'name'     => $name,
         ));
@@ -513,10 +520,26 @@ abstract class AbstractEntity implements EntityInterface
     public function get($name)
     {
         if ($property = $this->property($name)) {
-            return $this->onEventGetter(
+            $value = $this->onEventGetter(
                 $name,
                 $property->getValue()
             );
+
+            // bubble up events to the parent entity (us)
+            if ($value instanceof EntityInterface) {
+                $parent = $this;
+                $events = array('change', 'dirty', 'clean');
+                foreach ($events as $event) {
+                    $value->attach($event, function($e) use ($parent, $event) {
+                        $parent->trigger($event, array(
+                            'property' => $e->getParam('property'),
+                            'name'     => $e->getParam('name'),
+                        ));
+                    }, -1000);
+                }
+            }
+
+            return $value;
         }
 
         return null;
@@ -530,21 +553,21 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function set($name, $value)
     {
-        if ($property = $this->property($name)) {
-            $value = $this->onEventSetter(
-                $name,
-                $property->getValue(),
-                $value
-            );
-
-            $property->setValue($value);
-            $this->trigger('change', array(
-                'property' => $property,
-                'name'     => $name,
-            ));
-
+        if (!$property = $this->property($name)) {
             return $this;
         }
+
+        $value = $this->onEventSetter(
+            $name,
+            $property->getValue(),
+            $value
+        );
+
+        $property->setValue($value);
+        $this->trigger('change', array(
+            'property' => $property,
+            'name'     => $name,
+        ));
 
         return $this;
     }
@@ -648,7 +671,7 @@ abstract class AbstractEntity implements EntityInterface
             'type'           => $type,
         );
 
-        if (!empty($options['defaultValue'])) {
+        if (isset($options['defaultValue'])) {
             $type = $this->typeManager()->type($type, $options);
             $this->properties[$property]['currentValue'] = $type->export($options['defaultValue']);
         }
@@ -673,10 +696,15 @@ abstract class AbstractEntity implements EntityInterface
      * property with all that property's options and internal settings.
      *
      * @param   string                                          Property name
+     * @param   Contain\Entity\Property\Property                Optional cached property object
      * @return  Contain\Entity\Property\Property|false
      */
-    public function property($name)
+    public function property($name, Property $property = null)
     {
+        if ($property) {
+            $this->property = $property;
+        }
+
         if (!isset($this->properties[$name])) {
             return false;
         }
@@ -693,6 +721,37 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         return $this->property->import($this->properties[$name]);
+    }
+
+    /**
+     * Fetches a list item by its numerical index position.
+     *
+     * @param   string                          Property name
+     * @param   integer                         Index
+     * @param   mixed                           Value to assign
+     * @return  $this
+     */
+    public function put($name, $index, $item)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType &&
+            !$property->getType() instanceof Type\HashType) {
+            throw new Exception\RuntimeException('indexOf failed as property type is not a list');
+        }
+
+        $value = $this->get($name);
+
+        if ($value instanceof Cursor) {
+            $value = $value->toArray();
+        }
+
+        $value[$index] = $item;
+        $this->set($name, $value);
+
+        return $this;
     }
 
     /**
@@ -1103,7 +1162,7 @@ abstract class AbstractEntity implements EntityInterface
 
         if (count($events) > 1) {
             usort($events, function ($a, $b) {
-                return $a[0] > $b[0];
+                return $a[0] < $b[0];
             });
         }
 

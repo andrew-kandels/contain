@@ -113,7 +113,7 @@ class EntityType extends StringType
      */
     public function export($value)
     {
-        if ($value === $this->getUnsetValue()) {
+        if (!$value || $value === $this->getUnsetValue()) {
             return $value;
         }
 
@@ -121,11 +121,25 @@ class EntityType extends StringType
             return $value;
         }
 
-        if ($entity = $this->parse($value)) {
-            return $entity->export();
+        if (!$type = $this->getOption('className')) {
+            throw new Exception\RuntimeException('$value is invalid because no type has been set for type entity');
         }
 
-        return $this->getUnsetValue();
+        if ($value instanceof $type) {
+            return $value->export();
+        }
+
+        if ($value instanceof Traversable) {
+            return iterator_to_array($value);
+        }
+
+        if (is_array($value)) {
+            return $value;
+        }
+
+        throw new Exception\InvalidArgumentException('$value is not of '
+            . 'type Contain\Property\Type\EntityType, an array, or an instance of Traversable.'
+        );
     }
 
     /**

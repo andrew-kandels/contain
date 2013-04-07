@@ -20,6 +20,7 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Entity\Exception;
+use MongoDate; // if available
 use DateTime;
 
 /**
@@ -60,7 +61,7 @@ class DateTimeType extends StringType
             return clone $value;
         }
 
-        if (class_exists('MongoDate') && $value instanceof \MongoDate) {
+        if ($value instanceof MongoDate) {
             list($microseconds, $seconds) = explode(' ', (string) $value);
             $result = new DateTime();
             $result->setTimestamp($seconds);
@@ -90,11 +91,27 @@ class DateTimeType extends StringType
      */
     public function export($value)
     {
-        if (!$when = $this->parse($value)) {
+        if (!$value) {
             return $this->getUnsetValue();
         }
 
-        return $when->format($this->getOption('dateFormat'));
+        if ($value instanceof DateTime) {
+            return $value->format($this->getOption('dateFormat'));
+        }
+
+        if ($value instanceof MongoDate) {
+            return date($this->getOption('dateFormat'), $value->sec);
+        }
+
+        if (is_string($value)) {
+            return date($this->getOption('dateFormat'), strtotime($value));
+        }
+
+        if (is_integer($value)) {
+            return date($this->getOption('dateFormat'), $value);
+        }
+
+        throw new Exception\InvalidArgumentException('$value is invalid for date type');
     }
 
     /**
