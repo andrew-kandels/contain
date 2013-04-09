@@ -612,4 +612,12 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(1, 2, 3), $entity->getList());
         $this->assertEquals(1, $entity->at('list', 0));
     }
+
+    public function testSetSubDocumentEmpty()
+    {
+        $entity = new SampleMultiTypeEntity();
+        $this->assertEquals(array(), $entity->dirty());
+        $entity->property('entity')->setDirty();
+        $this->assertEquals(array('entity'), $entity->dirty());
+    }
 }
