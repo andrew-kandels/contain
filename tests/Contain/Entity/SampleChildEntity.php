@@ -24,6 +24,7 @@ class SampleChildEntity extends AbstractEntity
 
         $this->define('firstName', 'string', array('primary' => true));
         $this->define('lastName', 'string');
+        $this->define('update', 'mongoDate');
     }
 
     public function __destruct()

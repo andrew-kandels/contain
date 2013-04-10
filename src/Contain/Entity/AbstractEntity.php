@@ -131,17 +131,15 @@ abstract class AbstractEntity implements EntityInterface
      * 'property.set' event when a property is being set.
      *
      * @param   string              Property name
-     * @param   mixed               Current Value
      * @param   mixed               New Value
      * @return  mixed|null
      */
-    public function onEventSetter($name, $currentValue, $newValue)
+    public function onEventSetter($name, $value)
     {
         $params = $this->trigger('property.set', array(
             'property'      => $this->property($name),
             'name'          => $name,
-            'currentValue'  => $currentValue,
-            'value'         => $newValue,
+            'value'         => $value,
         ));
 
         return $params['value'];
@@ -226,13 +224,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function setExtendedProperty($name, $value)
     {
-        $this->extendedProperties[$name] = $this->onEventSetter(
-            $name,
-            isset($this->extendedProperties[$name]) ? $this->extendedProperties[$name] : null,
-            $value,
-            isset($this->extendedProperties[$name])
-        );
-
+        $this->extendedProperties[$name] = $this->onEventSetter($name, $value);
         return $this;
     }
 
@@ -270,6 +262,7 @@ abstract class AbstractEntity implements EntityInterface
                 $this->property($name)->clear();
             }
 
+            $this->trigger('change');
             return $this;
         }
 
@@ -286,11 +279,7 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         $property->clear();
-
-        $this->trigger('change', array(
-            'property' => $property,
-            'name'     => $name,
-        ));
+        $this->trigger('change');
 
         return $this;
     }
@@ -306,8 +295,9 @@ abstract class AbstractEntity implements EntityInterface
     {
         if (!$property) {
             foreach ($this->properties as $name => $options) {
-                $this->clean($name);
+                $this->property($name)->clean();
             }
+            $this->trigger('change');
 
             return $this;
         }
@@ -320,20 +310,12 @@ abstract class AbstractEntity implements EntityInterface
             return $this;
         }
 
-        if (!$property = $this->property($name = $property)) {
+        if (!$property = $this->property($property)) {
             return $this;
         }
 
         $property->clean();
-        $this->trigger('clean', array(
-            'property' => $property,
-            'name'     => $name,
-        ));
-
-        $this->trigger('change', array(
-            'property' => $property,
-            'name'     => $name,
-        ));
+        $this->trigger('change');
 
         return $this;
     }
@@ -369,10 +351,7 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         $property->setDirty();
-        $this->trigger('dirty', array(
-            'property' => $property,
-            'name'     => $name,
-        ));
+        $this->trigger('change');
 
         return $this;
     }
@@ -460,9 +439,11 @@ abstract class AbstractEntity implements EntityInterface
 
         foreach ($properties as $key => $value) {
             if ($property = $this->property($key)) {
-                $this->set($key, $value);
+                $this->set($key, $value, false);
             }
         }
+
+        $this->trigger('change');
 
         return $this;
     }
@@ -525,20 +506,6 @@ abstract class AbstractEntity implements EntityInterface
                 $property->getValue()
             );
 
-            // bubble up events to the parent entity (us)
-            if ($value instanceof EntityInterface) {
-                $parent = $this;
-                $events = array('change', 'dirty', 'clean');
-                foreach ($events as $event) {
-                    $value->attach($event, function($e) use ($parent, $event) {
-                        $parent->trigger($event, array(
-                            'property' => $e->getParam('property'),
-                            'name'     => $e->getParam('name'),
-                        ));
-                    }, -1000);
-                }
-            }
-
             return $value;
         }
 
@@ -548,26 +515,22 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Sets the value of a property.
      *
+     * @param   string                  Property Name
      * @param   mixed                   Value
+     * @param   boolean                 Fire Change Event?
      * @return  $this
      */
-    public function set($name, $value)
+    public function set($name, $value, $fireChangeEvent = true)
     {
         if (!$property = $this->property($name)) {
             return $this;
         }
 
-        $value = $this->onEventSetter(
-            $name,
-            $property->getValue(),
-            $value
-        );
+        $property->setValue($this->onEventSetter($name, $value));
 
-        $property->setValue($value);
-        $this->trigger('change', array(
-            'property' => $property,
-            'name'     => $name,
-        ));
+        if ($fireChangeEvent) {
+            $this->trigger('change');
+        }
 
         return $this;
     }
@@ -879,7 +842,7 @@ abstract class AbstractEntity implements EntityInterface
 
         return $this;
     }
-  
+
     /**
      * Removes a property from the end of a list and returns it.
      *
@@ -1115,10 +1078,10 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Attaches a lightweight listener to the entity as a callback with an optional priority. 
+     * Attaches a lightweight listener to the entity as a callback with an optional priority.
      *
      * 2013-04-03: This no longer uses the ZF2 event manager as it's very expensive to create an EM
-     * for each entity. Using a factory or service locator to create entities with a shared EM 
+     * for each entity. Using a factory or service locator to create entities with a shared EM
      * goes against my design for them being lightweight, fully self-contained, throw-away
      * value dumps. I may revisit this in the future and am open to other ideas; but performance
      * is key here and ZF2 was almost 10-20x slower in a recent implementation.
@@ -1142,8 +1105,8 @@ abstract class AbstractEntity implements EntityInterface
         return $this;
     }
 
-    /** 
-     * Triggers an event by name, invoking any callbacks registered with attach() in 
+    /**
+     * Triggers an event by name, invoking any callbacks registered with attach() in
      * the order of their priority, passing an instance of Contain\Event which stores
      * the parameters and allows for short circuiting and other utility.
      *
@@ -1183,7 +1146,7 @@ abstract class AbstractEntity implements EntityInterface
         return $e->getParams();
     }
 
-    /** 
+    /**
      * Clears all event listeners attach()'d to an event.
      *
      * @param   string                          Event name

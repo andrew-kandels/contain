@@ -15,6 +15,79 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->entity = new SampleEntity();
     }
 
+    public function testChildFiresParentChangeEvent()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $rs->called = false;
+        $entity->attach('change', function($e) use ($rs) {
+            $rs->called = true;
+        }, 100);
+
+        $entity->getChild()->setFirstName('Mr.');
+        $this->assertTrue($rs->called);
+    }
+
+    public function testCleanTriggersEvents()
+    {
+        $entity = new SampleEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $rs->called = false;
+        $entity->attach('change', function($e) use ($rs) {
+            $rs->called = true;
+        }, 100);
+
+        $entity->clean();
+        $this->assertTrue($rs->called);
+    }
+
+    public function testCleanAll()
+    {
+        $this->assertEquals(array(), $this->entity->dirty());
+        $this->entity->setFirstName('Andrew');
+        $this->assertEquals(array('firstName'), $this->entity->dirty());
+        $this->entity->clean();
+        $this->assertEquals(array(), $this->entity->dirty());
+    }
+
+    public function testDirtyingGrandchildUpdatesGrandParent()
+    {
+        $entity = new SampleGrandfatherEntity();
+        $this->assertEquals(array(), $entity->getParent()->getChild()->dirty());
+        $this->assertEquals(array(), $entity->getParent()->dirty());
+        $this->assertEquals(array(), $entity->dirty());
+        $entity->getParent()->getChild()->markDirty('firstName');
+        $this->assertEquals(array('parent'), $entity->dirty());
+        $this->assertEquals(array('child'), $entity->getParent()->dirty());
+        $this->assertEquals(array('firstName'), $entity->getParent()->getChild()->dirty());
+    }
+
+    public function testMarkingDirtyStringSubEntityPropertyDirtiesParent()
+    {
+        $entity = new SampleEntity();
+        $entity->fromArray(array(
+            'child' => array('firstName' => 'Mr.'),
+        ));
+        $entity->clean();
+        $entity->getChild()->markDirty('firstName');
+        $this->assertEquals(array('child'), $entity->dirty());
+        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+    }
+
+    public function testSettingGrandchildUpdatesGrandParent()
+    {
+        $entity = new SampleGrandfatherEntity();
+        $this->assertEquals(array(), $entity->getParent()->getChild()->dirty());
+        $this->assertEquals(array(), $entity->getParent()->dirty());
+        $this->assertEquals(array(), $entity->dirty());
+        $entity->getParent()->getChild()->setFirstName('Mr.');
+        $this->assertEquals(array('parent'), $entity->dirty());
+        $this->assertEquals(array('child'), $entity->getParent()->dirty());
+        $this->assertEquals(array('firstName'), $entity->getParent()->getChild()->dirty());
+    }
+
     public function testConstructWithArray()
     {
         $entity = new SampleEntity($values = array(
@@ -99,15 +172,6 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->entity->setFirstName('Andrew');
         $this->assertTrue((boolean) $this->entity->dirty());
         $this->entity->clean(array('firstName'));
-        $this->assertFalse((boolean) $this->entity->dirty());
-    }
-
-    public function testCleanAll()
-    {
-        $this->assertFalse((boolean) $this->entity->dirty());
-        $this->entity->setFirstName('Andrew');
-        $this->assertTrue((boolean) $this->entity->dirty());
-        $this->entity->clean();
         $this->assertFalse((boolean) $this->entity->dirty());
     }
 
@@ -259,7 +323,6 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
             'new',
             $this->entity->onEventSetter(
                 'firstName',
-                'old',
                 'new'
             )
         );
@@ -463,18 +526,6 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
     }
 
-    public function testMarkingDirtyStringSubEntityPropertyDirtiesParent()
-    {
-        $entity = new SampleEntity();
-        $entity->fromArray(array(
-            'child' => array('firstName' => 'Mr.'),
-        ));
-        $entity->clean();
-        $entity->getChild()->markDirty('firstName');
-        $this->assertEquals(array('child'), $entity->dirty());
-        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
-    }
-
     public function testChangeTriggersEventsInOrder()
     {
         $entity = new SampleEntity();
@@ -503,42 +554,17 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('first', 'second', 'first', 'second', 'first', 'second'), $rs->order);
     }
 
-    public function testCleanTriggersEvents()
-    {
-        $entity = new SampleEntity();
-        $test = $this;
-        $rs = new \stdclass();
-        $entity->attach('clean', function($e) use ($test, $rs) {
-            $rs->called = true;
-        }, 100);
-
-        $entity->clean();
-        $this->assertTrue($rs->called);
-    }
-
     public function testDirtyTriggersEvents()
     {
         $entity = new SampleEntity();
         $test = $this;
         $rs = new \stdclass();
-        $entity->attach('dirty', function($e) use ($test, $rs) {
-            $rs->called = true;
-        }, 100);
-
-        $entity->markDirty('firstName');
-        $this->assertTrue($rs->called);
-    }
-
-    public function testChildFiresParentChangeEvent()
-    {
-        $entity = new SampleEntity();
-        $test = $this;
-        $rs = new \stdclass();
+        $rs->called = false;
         $entity->attach('change', function($e) use ($test, $rs) {
             $rs->called = true;
         }, 100);
 
-        $entity->getChild()->setFirstName('Mr.');
+        $entity->markDirty('firstName');
         $this->assertTrue($rs->called);
     }
 
@@ -547,7 +573,8 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $entity = new SampleEntity();
         $test = $this;
         $rs = new \stdclass();
-        $entity->attach('dirty', function($e) use ($test, $rs) {
+        $rs->called = false;
+        $entity->attach('change', function($e) use ($test, $rs) {
             $rs->called = true;
         }, 100);
 
@@ -560,7 +587,8 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $entity = new SampleEntity();
         $test = $this;
         $rs = new \stdclass();
-        $entity->attach('clean', function($e) use ($test, $rs) {
+        $rs->called = false;
+        $entity->attach('change', function($e) use ($test, $rs) {
             $rs->called = true;
         }, 100);
 
@@ -620,4 +648,49 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $entity->property('entity')->setDirty();
         $this->assertEquals(array('entity'), $entity->dirty());
     }
+
+    public function testGrandChildFiresGrandfatherChangeEvent()
+    {
+        $entity = new SampleGrandfatherEntity();
+        $test = $this;
+        $rs = new \stdclass();
+        $rs->called = false;
+        $entity->attach('change', function($e) use ($test, $rs) {
+            $rs->called = true;
+        }, 100);
+
+        $this->assertFalse($rs->called);
+        $entity->getParent()->getChild()->setFirstName('Mr.');
+        $this->assertTrue($rs->called);
+    }
+
+    public function testChangeGrandchildUpdatesGrandParent()
+    {
+        $entity = new SampleGrandfatherEntity();
+        $entity->getParent()->getChild()->setFirstName('Mr.');
+        $this->assertEquals(
+            array(
+                'parent' => array(
+                    'child' => array(
+                        'firstName' => 'Mr.',
+                    ),
+                ),
+            ),
+            $entity->export()
+        );
+    }
+
+    public function testDirtyGrandchildUpdatesGrandParent()
+    {
+        $entity = new SampleGrandfatherEntity();
+        $entity->getParent()->getChild()->setFirstName('Mr.');
+        $this->assertEquals(array('parent'), $entity->dirty());
+        $this->assertEquals(array('child'), $entity->getParent()->dirty());
+        $this->assertEquals(array('firstName'), $entity->getParent()->getChild()->dirty());
+        $entity->getParent()->getChild()->clean('firstName');
+        $this->assertEquals(array(), $entity->getParent()->getChild()->dirty());
+        $this->assertEquals(array(), $entity->getParent()->dirty());
+        $this->assertEquals(array(), $entity->dirty());
+    }
+
 }

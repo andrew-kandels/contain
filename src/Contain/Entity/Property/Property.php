@@ -136,7 +136,7 @@ class Property
             throw new \Contain\Entity\Exception\InvalidArgumentException('import expects a name index');
         }
         $this->name = $arr['name'];
-        
+
         $this->unsetValue = array_key_exists('unsetValue', $arr)
             ? $arr['unsetValue']
             : $this->getType()->getUnsetValue();
@@ -161,7 +161,55 @@ class Property
         return $this;
     }
 
-    /** 
+    /**
+     * Entities have self-contained dirty, clean and persisted
+     * values that need to "bubble" up to a single property-compatible
+     * export so they can be hydrated into a parent container property.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @return  $this
+     */
+    public function importEntity(EntityInterface $entity)
+    {
+        $type         = $this->getType();
+        $properties   = $entity->properties(true);
+        $export       = $this->export();
+
+        $export['currentValue'] = $export['persistedValue'] = $type->getUnsetValue();
+
+        foreach ($properties as $name) {
+            $property   = $entity->property($name);
+            $unsetValue = $property->getType()->getUnsetValue();
+
+            if ($unsetValue !== ($currentValue = $property->getExport())) {
+                if (!$export['currentValue']) {
+                    $export['currentValue'] = array();
+                }
+
+                $export['currentValue'][$name] = $currentValue;
+            }
+
+            if ($unsetValue !== ($persistedValue = $property->getPersistedValue())) {
+                if (!$export['persistedValue']) {
+                    $export['persistedValue'] = array();
+                }
+
+                $export['persistedValue'][$name] = $persistedValue;
+            }
+        }
+
+        $this->import($export)->save();
+        $this->parent->trigger('change');
+
+        if ($e = $this->parent->getExtendedProperty('_property')) {
+            extract($e);
+            $parent->property($name)->importEntity($this->parent);
+        }
+
+        return $this;
+    }
+
+    /**
      * Serializes the property for later hydration.
      *
      * @return  array
@@ -175,7 +223,7 @@ class Property
             'persistedValue' => $this->persistedValue,
             'emptyValue'     => $this->emptyValue,
             'unsetValue'     => $this->unsetValue,
-            'type'           => $this->type,
+            'type'           => $this->getTypeAlias(),
         );
     }
 
@@ -192,9 +240,9 @@ class Property
     }
 
     /**
-     * Sets the value for the index of the value, assuming the value itself is an 
-     * array. This is really only used internally for updating event callbacks in 
-     * lists and cursors of entites and should probably not be used outside of 
+     * Sets the value for the index of the value, assuming the value itself is an
+     * array. This is really only used internally for updating event callbacks in
+     * lists and cursors of entites and should probably not be used outside of
      * the Contain internals.
      *
      * @param   integer                 Index
@@ -206,7 +254,7 @@ class Property
     {
         if (!isset($this->currentValue[$index])) {
             throw new \Contain\Entity\Exception\InvalidArgumentException('$index invalid for current value');
-        } 
+        }
 
         $this->currentValue[$index] = $this->getType()->getType()->export($value);
 
@@ -214,9 +262,9 @@ class Property
     }
 
     /**
-     * Gets the value for the index of the value, assuming the value itself is an 
-     * array. This is really only used internally for updating event callbacks in 
-     * lists and cursors of entites and should probably not be used outside of 
+     * Gets the value for the index of the value, assuming the value itself is an
+     * array. This is really only used internally for updating event callbacks in
+     * lists and cursors of entites and should probably not be used outside of
      * the Contain internals.
      *
      * @param   integer                 Index
@@ -227,7 +275,7 @@ class Property
     {
         if (!isset($this->currentValue[$index])) {
             throw new \Contain\Entity\Exception\InvalidArgumentException('$index invalid for current value');
-        } 
+        }
 
         return $this->currentValue[$index];
     }
@@ -242,49 +290,33 @@ class Property
      */
     public function watch(EntityInterface $entity, $index = null)
     {
-        $entity->setExtendedProperty('_parent', array(
+        $entity->setExtendedProperty('_property', array(
             'parent' => $this->parent,
             'name'   => $this->name,
             'index'  => $index,
         ));
 
         // changing any value should persist back to be stored in the property's serialized version
-        $entity->attach('change', function ($event) use ($index) {
+        $entity->attach('change', function ($event) {
             $entity = $event->getTarget();
-            $e = $entity->getExtendedProperty('_parent');
-            if ($index !== null) {
-                $e['parent']->property($e['name'])->setValueAtIndex($index, $entity);
-            } else {
-                $e['parent']->property($e['name'])->setValue($entity);
-            }
-        }, -1000);
+            extract($entity->getExtendedProperty('_property'));
 
-        // cleaning any sub-entity property should clean the property's serialized version
-        $entity->attach('clean', function ($event) use ($index) {
-            $entity = $event->getTarget();
-            $e = $entity->getExtendedProperty('_parent');
-            if ($index !== null) {
-                $e['parent']->property($e['name'])->cleanAtIndex($index);
-            } else {
-                $e['parent']->property($e['name'])->cleanAtIndex($event->getParam('name'));
-            }
-        }, -1000);
+            $property = $parent->property($name);
 
-        // dirtying any sub-entity property should dirty the property's serialized version
-        $entity->attach('dirty', function ($event) use ($index) {
-            $entity = $event->getTarget();
-            $e = $entity->getExtendedProperty('_parent');
             if ($index !== null) {
-                $e['parent']->property($e['name'])->setDirtyAtIndex($index);
+                $property->setValueAtIndex($index, $entity);
+                if ($parent = $property->getParent()) {
+                    $parent->trigger('change');
+                }
             } else {
-                $e['parent']->property($e['name'])->setDirtyAtIndex($event->getParam('name'));
+                $property->importEntity($entity);
             }
-        }, -1000);
+        }, -100);
 
         return $this;
     }
 
-    /** 
+    /**
      * getValue() for entity properties, which must always return an actual
      * entity that can be acted upon with events to send back change actions.
      *
@@ -292,26 +324,34 @@ class Property
      */
     public function getEntityValue()
     {
-        $type = $this->getType();
+        $type       = $this->getType();
+        $export     = $this->export();
+        $entity     = $type->parse(array()); // empty entity
+        $properties = $entity->properties(true);
+        $indexes    = array('currentValue', 'persistedValue');
 
-        // if unset, an empty one
-        $value = $type->parse($this->persistedValue);
-        if (!$value instanceof EntityInterface) {
-            $value = $type->parse($this->emptyValue);
+        // sync the current/persisted values with that stored in the parent
+        foreach ($properties as $name) {
+            $property       = $entity->property($name);
+            $propertyExport = $property->export();
+            $unsetValue     = $propertyExport['unsetValue'];
+
+            foreach ($indexes as $index) {
+                if (isset($export[$index][$name]) && $export[$index][$name] !== $unsetValue) {
+                    $propertyExport[$index] = $export[$index][$name];
+                }
+            }
+
+            $property->import($propertyExport)->save();
         }
 
-        $value->clean();
+        $this->watch($entity);
 
-        // update the dirty states by setting current properties
-        $value->clear()->fromArray($this->currentValue ?: array());
-
-        $this->watch($value);
-
-        return $value;
+        return $entity;
     }
 
     /**
-     * getValue() for lists of entity types, which slow-hydrate entities from a 
+     * getValue() for lists of entity types, which slow-hydrate entities from a
      * cursor. Changes to those entities should cycle back to the parent property.
      *
      * @return  ContainMapper\Cursor|array
@@ -321,7 +361,7 @@ class Property
         $value        = $this->getType()->parse($this->currentValue) ?: array();
         $propertyName = $this->name;
         $parent       = $this->parent;
-    
+
         if ($value instanceof Cursor) {
             $value->getEventManager()->attach('hydrate', function ($event) use ($parent, $propertyName) {
                 $entity = $event->getTarget();
@@ -333,7 +373,7 @@ class Property
     }
 
     /**
-     * getValue() for lists which needs to watch any entities it spawns for changes to 
+     * getValue() for lists which needs to watch any entities it spawns for changes to
      * propogate back to the parent property.
      *
      * @return  array
@@ -348,7 +388,7 @@ class Property
             }
         }
 
-        return $value; 
+        return $value;
     }
 
     /**
@@ -418,24 +458,7 @@ class Property
     }
 
     /**
-     * Sets a property dirty at a specified index of a list property.
-     *
-     * @param   integer                 Index
-     * @return  $this
-     */
-    public function setDirtyAtIndex($index)
-    {
-        if (!is_array($this->persistedValue)) {
-            $this->persistedValue = array();
-        }
-
-        $this->persistedValue[$index] = $this->getValue()->type($index)->getDirtyValue();
-
-        return $this->save();
-    }
-
-    /**
-     * Sets a property as dirty, which is tracked by the persisted value not equaling 
+     * Sets a property as dirty, which is tracked by the persisted value not equaling
      * the current value of the property, which is ensured by making the persisted value
      * something one-of-a-kind.
      *
@@ -444,27 +467,6 @@ class Property
     public function setDirty()
     {
         $this->persistedValue = $this->getType()->getDirtyValue();
-        return $this->save();
-    }
-
-    /**
-     * Cleans a property at a specified index of a list property.
-     *
-     * @return  $this
-     */
-    public function cleanAtIndex($index)
-    {
-        if (!is_array($this->persistedValue)) {
-            $this->persistedValue = array();
-        }
-
-        if (!isset($this->currentValue[$index])) {
-            unset($this->persistedValue[$index]);
-            return $this;
-        }
-
-        $this->persistedValue[$index] = $this->currentValue[$index];
-
         return $this->save();
     }
 
@@ -508,7 +510,7 @@ class Property
      */
     public function getPersistedValue()
     {
-        return $this->getType()->parse($this->persistedValue);
+        return $this->persistedValue;
     }
 
     /**
@@ -520,7 +522,7 @@ class Property
     public function getType()
     {
         return $this->typeManager()->type(
-            $this->type, 
+            $this->type,
             $this->options
         );
     }

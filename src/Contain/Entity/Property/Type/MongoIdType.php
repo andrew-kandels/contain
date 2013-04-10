@@ -63,7 +63,7 @@ class MongoIdType extends StringType
      * for purposes of debugging or export.
      *
      * @param   mixed       Internal value
-     * @return  false|null|integer
+     * @return  false|null|string
      * @throws  Contain\Exception\InvalidArgumentException
      */
     public function export($value)
