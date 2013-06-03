@@ -33,6 +33,12 @@ use Contain\Entity\Property\Property;
  */
 abstract class AbstractDefinition
 {
+
+    /**
+     * @var string
+     */
+    const CONSTANT_NAME_VALID = '/^[a-z_\x7f-\xff][a-z0-9_\x7f-\xff]*$/i';
+
     /**
      * @var string
      */
@@ -44,6 +50,11 @@ abstract class AbstractDefinition
     const ENTITY = 'entity';
     const FILTER = 'filter';
     const FORM   = 'form';
+
+    /**
+     * @var array
+     */
+    protected $constants = array();
 
     /**
      * @var array
@@ -116,6 +127,69 @@ abstract class AbstractDefinition
     public function init()
     {
     }
+
+    /**
+     * Registers a new constant.
+     *
+     * @param   string              Name of the constant
+     * @param   scalar              Value of the constant
+     * @return  self
+     */
+    public function setConstant($name, $value)
+    {
+        if (!preg_match(self::CONSTANT_NAME_VALID, $name)) {
+            throw new InvalidArgumentException('Constant $name does not match allowed: '
+                . self::CONSTANT_NAME_VALID . '.'
+            );
+        }
+
+        if (!is_scalar($value)) {
+            throw new InvalidArgumentException('Constant $value is not a scalar value: '
+                . gettype($value) . '.'
+            );
+        }
+
+        $this->constants[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Returns all of the entity's constants.
+     *
+     * @return  array
+     */
+    public function getConstants()
+    {
+        return $this->constants;
+    }
+
+    /**
+     * Finds a constant by its registered name.
+     *
+     * @param   string              Name of the constant
+     * @return  scalar
+     */
+    public function getConstant($name)
+    {
+        if (isset($this->constants[$name])) {
+            return $this->constants[$name];
+        }
+
+        throw new InvalidArgumentException('$name is not a registered constant');
+    }
+
+    /**
+     * Checks to see if a constant has been registered under a given name.
+     *
+     * @param   string              Name of the constant
+     * @return  boolean
+     */
+    public function hasConstant($name)
+    {
+        return isset($this->constants[$name]);
+    }
+
 
     /**
      * Registers a new property and returns the property object which can
