@@ -39,7 +39,7 @@ define('COMPOSER_AUTOLOADER', ZF2_APPLICATION_PATH . '/vendor/autoload.php');
 
 define('IS_PRODUCTION', false);
 define('IS_DEVELOPMENT', true);
-define('APPLICATION_CONFIG_FILE', ZF2_APPLICATION_PATH . '/config/production-application.config.php');
+define('APPLICATION_CONFIG_FILE', ZF2_APPLICATION_PATH . '/config/application.config.php');
 
 // DO NOT EDIT Below this line
 /********************************************************************************/
