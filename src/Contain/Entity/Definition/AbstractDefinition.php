@@ -138,7 +138,7 @@ abstract class AbstractDefinition
         $this->removeProperty($name);
 
         $obj = new Property();
-        $obj->import($fuck = array(
+        $obj->import(array(
             'name'    => $name,
             'type'    => $type,
             'options' => $options ?: array(),
