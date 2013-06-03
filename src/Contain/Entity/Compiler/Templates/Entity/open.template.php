@@ -15,6 +15,10 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     if ($this->implementors): ?> implements <?php echo implode(', ', $this->implementors); endif; ?>
 
 {
+<?php foreach ($this->constants as $name => $value): ?>
+    const <?php echo strtoupper($name); ?> = <?php var_export($value); ?>;
+<?php endforeach; ?>
+
 <?php if ($this->filter): ?>
     protected $inputFilter = '<?php echo $this->filter; ?>';
     protected $messages = array();
