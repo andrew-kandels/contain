@@ -65,6 +65,9 @@ if (ZF2_IS_MODULE) {
     );  
 } else {
     $config = include(APPLICATION_CONFIG_FILE);
+    if (!isset($config['service_manager'])) {
+        $config['service_manager'] = array();
+    }
 }
 $serviceManager = new ServiceManager(new ServiceManagerConfig($config['service_manager']));
 $serviceManager->setService('ApplicationConfig', $config);
