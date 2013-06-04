@@ -287,6 +287,7 @@ class Compiler
         $this->append('Entity/open', array(
             'namespace'    => $this->getTargetNamespace(AbstractDefinition::ENTITY),
             'name'         => $this->definition->getName(),
+            'constants'    => $this->definition->getConstants(),
             'properties'   => $properties,
             'implementors' => $this->definition->getImplementors(),
             'init'         => $this->importMethods('init'),
