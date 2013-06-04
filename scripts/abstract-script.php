@@ -37,9 +37,9 @@ define('ZF2_MODULES_PATH', $modulesPath);
 define('ZF2_FRAMEWORK_PATH', ZF2_APPLICATION_PATH . '/vendor/zendframework/zendframework');
 define('COMPOSER_AUTOLOADER', ZF2_APPLICATION_PATH . '/vendor/autoload.php');
 
-define('IS_PRODUCTION', false);
-define('IS_DEVELOPMENT', true);
-define('APPLICATION_CONFIG_FILE', ZF2_APPLICATION_PATH . '/config/application.config.php');
+if (!defined('APPLICATION_CONFIG_FILE')) {
+    define('APPLICATION_CONFIG_FILE', ZF2_APPLICATION_PATH . '/config/application.config.php');
+}
 
 // DO NOT EDIT Below this line
 /********************************************************************************/
@@ -60,9 +60,9 @@ if (ZF2_IS_MODULE) {
         'service_manager' => array(),
         'module_listener_options' => array(
             'module_paths' => array(dirname(ZF2_APPLICATION_PATH)),
-        ),  
+        ),
         'modules' => array($moduleName),
-    );  
+    );
 } else {
     $config = include(APPLICATION_CONFIG_FILE);
     if (!isset($config['service_manager'])) {

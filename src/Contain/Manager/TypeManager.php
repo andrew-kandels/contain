@@ -89,7 +89,7 @@ class TypeManager
         throw new \InvalidArgumentException('$type invalid as type alias or class name.');
     }
 
-    /** 
+    /**
      * Resets the options, mainining any options the manager might have set for
      * alias convenience.
      *

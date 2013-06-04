@@ -97,6 +97,18 @@ class AbstractEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($values, $entity->export());
     }
 
+    public function testChildShowsDirtyWhenConstructed()
+    {
+        $entity = new SampleEntity($values = array(
+            'firstName' => 'Andrew',
+            'child'     => array(
+                'firstName' => 'Sub-Andrew',
+            ),
+        ));
+
+        $this->assertEquals(array('firstName'), $entity->getChild()->dirty());
+    }
+
     public function testUnsetSubEntityStillReturnsObject()
     {
         $entity = new SampleEntity();
