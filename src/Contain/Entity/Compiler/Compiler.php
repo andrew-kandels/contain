@@ -26,6 +26,8 @@ use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
 use Contain\Entity\Property\Type;
 use ReflectionMethod;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerAwareTrait;
 
 /**
  * Compiles an entity definition into a entity class.
@@ -35,8 +37,10 @@ use ReflectionMethod;
  * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class Compiler
+class Compiler implements EventManagerAwareInterface
 {
+    use EventManagerAwareTrait;
+
     /**
      * @var Contain\Entity\Definition\AbstractDefinition
      */
@@ -51,7 +55,7 @@ class Compiler
      * Sets the definition file in which to compile.
      *
      * @param   Contain\Entity\Definition\AbstractDefinition|string
-     * @return  $this
+     * @return  self
      */
     protected function setDefinition($definition)
     {
@@ -66,6 +70,12 @@ class Compiler
         }
 
         $this->definition = $definition;
+
+        $this->getEventManager()->trigger('definition.set', $this, array(
+            'definition' => $definition,
+        ));
+
+        return $this;
     }
 
     /**
