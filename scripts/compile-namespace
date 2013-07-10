@@ -30,7 +30,7 @@ if (empty($argv[1])) {
     exit(1);
 }
 
-$compiler = $serviceManager->get('di')->get('Contain\Entity\Compiler\Compiler');
+$compiler = $serviceManager->get('Contain\Entity\Compiler\Compiler');
 try {
     $compiler->compile($argv[1]);
 } catch (Exception $e) {

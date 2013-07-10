@@ -61,10 +61,9 @@ if (DELETE_UNUSED) {
     clear_unused_module_files($entities);
 }
 
-compile_entities($entities);
+compile_entities($entities, $serviceManager->get('Contain\Entity\Compiler\Compiler'));
 
-function compile_entities(array $entities) {
-    $compiler     = new Contain\Entity\Compiler\Compiler();
+function compile_entities(array $entities, \Contain\Entity\Compiler\Compiler $compiler) {
     $dependencies = array();
     $compiled     = 0;
 

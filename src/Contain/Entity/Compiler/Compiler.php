@@ -26,6 +26,9 @@ use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
 use Contain\Entity\Property\Type;
 use ReflectionMethod;
+use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\EventManagerAwareInterface;
 
 /**
  * Compiles an entity definition into a entity class.
@@ -35,12 +38,17 @@ use ReflectionMethod;
  * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class Compiler
+class Compiler implements EventManagerAwareInterface
 {
     /**
      * @var Contain\Entity\Definition\AbstractDefinition
      */
     protected $definition;
+
+    /**
+     * @var Zend\EventManager\EventManagerInterface
+     */
+    protected $events;
 
     /**
      * @var resource
@@ -51,7 +59,7 @@ class Compiler
      * Sets the definition file in which to compile.
      *
      * @param   Contain\Entity\Definition\AbstractDefinition|string
-     * @return  $this
+     * @return  self
      */
     protected function setDefinition($definition)
     {
@@ -66,6 +74,52 @@ class Compiler
         }
 
         $this->definition = $definition;
+
+        $this->getEventManager()->trigger('definition.set', $this, array(
+            'definition' => $definition,
+        ));
+
+        return $this;
+    }
+
+    /**
+     * Set the event manager instance used by this context
+     *
+     * @param  Zend\EventManager\EventManagerInterface $events
+     * @return mixed
+     */
+    public function setEventManager(EventManagerInterface $events)
+    {
+        $identifiers = array(__CLASS__, get_class($this));
+        if (isset($this->eventIdentifier)) {
+            if ((is_string($this->eventIdentifier))
+                || (is_array($this->eventIdentifier))
+                || ($this->eventIdentifier instanceof Traversable)
+            ) {
+                $identifiers = array_unique(array_merge($identifiers, (array) $this->eventIdentifier));
+            } elseif (is_object($this->eventIdentifier)) {
+                $identifiers[] = $this->eventIdentifier;
+            }
+            // silently ignore invalid eventIdentifier types
+        }
+        $events->setIdentifiers($identifiers);
+        $this->events = $events;
+        return $this;
+    }
+
+    /**
+     * Retrieve the event manager
+     *
+     * Lazy-loads an EventManager instance if none registered.
+     *
+     * @return Zend\EventManager\EventManagerInterface
+     */
+    public function getEventManager()
+    {
+        if (!$this->events instanceof EventManagerInterface) {
+            $this->setEventManager(new EventManager());
+        }
+        return $this->events;
     }
 
     /**

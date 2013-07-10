@@ -23,7 +23,7 @@
 
 require_once(__DIR__ . '/abstract-script.php');
 
-$compiler = $serviceManager->get('di')->get('Contain\Entity\Compiler\Compiler');
+$compiler = $serviceManager->get('Contain\Entity\Compiler\Compiler');
 $iterator = new \DirectoryIterator(ZF2_MODULES_PATH);
 $exitCode = 0;
 
