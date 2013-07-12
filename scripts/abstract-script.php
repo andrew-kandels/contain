@@ -72,3 +72,4 @@ if (ZF2_IS_MODULE) {
 $serviceManager = new ServiceManager(new ServiceManagerConfig($config['service_manager']));
 $serviceManager->setService('ApplicationConfig', $config);
 $serviceManager->get('ModuleManager')->loadModules();
+$serviceManager->setInvokableClass('Contain\Entity\Compiler\Complier', 'Contain\Entity\Compiler\Compiler');
