@@ -19,6 +19,10 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     const <?php echo strtoupper($name); ?> = <?php var_export($value); ?>;
 <?php endforeach; ?>
 
+<?php if ($this->aliases): ?>
+    protected $aliases = <?php var_export($this->aliases); ?>;
+<?php endif; ?>
+
 <?php if ($this->filter): ?>
     protected $inputFilter = '<?php echo $this->filter; ?>';
     protected $messages = array();
@@ -42,7 +46,8 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
 <?php echo $this->init; ?>
     }
 
-<?php foreach ($this->properties as $name => $property): ?>
+<?php foreach ($this->allProperties as $name => $property): ?>
+<?php $property = $this->properties[$property]; ?>
 <?php if ($property->getType() instanceof \Contain\Entity\Property\Type\ListType ||
           $property->getType() instanceof \Contain\Entity\Property\Type\HashType): ?>
     /**

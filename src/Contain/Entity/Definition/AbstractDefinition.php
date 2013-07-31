@@ -54,6 +54,11 @@ abstract class AbstractDefinition
     /**
      * @var array
      */
+    protected $aliases = array();
+
+    /**
+     * @var array
+     */
     protected $constants = array();
 
     /**
@@ -70,8 +75,9 @@ abstract class AbstractDefinition
      * @var array
      */
     protected $options = array(
-        'iteration' => true,
-        'events'    => false,
+        'iteration'  => true,
+        'events'     => false,
+        'auto_alias' => false,
     );
 
     /**
@@ -126,6 +132,53 @@ abstract class AbstractDefinition
      */
     public function init()
     {
+    }
+
+    /**
+     * Registers a new alias.
+     *
+     * @param  string               Name of the alias
+     * @param  string               Name of the target
+     * @return self
+     */
+    public function setAlias($name, $target)
+    {
+        if (!preg_match(self::PROPERTY_NAME_VALID, $name)) {
+            throw new InvalidArgumentException('Alias $name does not match allowed: '
+                . self::PROPERTY_NAME_VALID . '.'
+            );
+        }
+
+        if (!preg_match(self::PROPERTY_NAME_VALID, $target)) {
+            throw new InvalidArgumentException('Alias $target does not match allowed: '
+                . self::PROPERTY_NAME_VALID . '.'
+            );
+        }
+
+        $this->aliases[$name] = $target;
+    }
+
+    /**
+     * Returns all of the entities aliases.
+     *
+     * @return array
+     */
+    public function getAliases()
+    {
+        return $this->aliases;
+    }
+
+    /**
+     * Finds an alias by it's registered name.
+     *
+     * @return string|false
+     */
+    public function getAlias($name)
+    {
+        if (array_key_exists($name, $this->aliases)) {
+            return $this->aliases[$name];
+        }
+        return false;
     }
 
     /**
@@ -219,6 +272,17 @@ abstract class AbstractDefinition
         ));
 
         $this->properties[$name] = $obj;
+
+        if ($this->getOption('auto_alias')) {
+            $alias = preg_replace_callback('/(_[a-z])/', function ($letters) {
+                $letter = substr(array_shift($letters), 1, 1);
+                return ucfirst($letter);
+            }, $name);
+
+            if ($alias != $name) {
+                $this->setAlias($alias, $name);
+            }
+        }
 
         return $obj;
     }
