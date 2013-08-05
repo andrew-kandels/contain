@@ -341,6 +341,8 @@ class Compiler implements EventManagerAwareInterface
         $this->append('Entity/open', array(
             'namespace'    => $this->getTargetNamespace(AbstractDefinition::ENTITY),
             'name'         => $this->definition->getName(),
+            'aliases'      => $this->definition->getAliases(),
+            'allProperties' => array_merge(array_combine(array_keys($properties), array_keys($properties)), $this->definition->getAliases()),
             'constants'    => $this->definition->getConstants(),
             'properties'   => $properties,
             'implementors' => $this->definition->getImplementors(),

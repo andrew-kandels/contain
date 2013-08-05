@@ -38,6 +38,12 @@ use Traversable;
  */
 abstract class AbstractEntity implements EntityInterface
 {
+
+    /**
+     * @var array
+     */
+    protected $aliases = array();
+
     /**
      * @var array
      */
@@ -669,7 +675,11 @@ abstract class AbstractEntity implements EntityInterface
         }
 
         if (!isset($this->properties[$name])) {
-            return false;
+            if (!isset($this->aliases[$name]) ||
+                !isset($this->properties[$this->aliases[$name]])) {
+                return false;
+            }
+            $name = $this->aliases[$name];
         }
 
         if (!$this->property) {
