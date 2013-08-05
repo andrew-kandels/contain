@@ -33,7 +33,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     {
 <?php foreach ($this->properties as $name => $property): ?>
 <?php if ($options = $property->getOptions() + $property->getType()->getOptions()): ?>
-        $this->define('<?php echo $name; ?>', '<?php echo $property->getTypeAlias(); 
+        $this->define('<?php echo $name; ?>', '<?php echo $property->getTypeAlias();
             ?>', <?php var_export($options); ?>);
 <?php else: ?>
         $this->define('<?php echo $name; ?>', '<?php echo $property->getTypeAlias(); ?>');
@@ -55,6 +55,17 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     public function indexOf<?php echo ucfirst($name); ?>($value, $strict = false)
     {
         return $this->indexOf('<?php echo $name; ?>', $value, $strict);
+    }
+
+    /**
+     * Prepends a value to a list property.
+     *
+     * @param   string|integer                  Index to unset
+     * @return  $this
+     */
+    public function unset<?php echo ucfirst($name); ?>($index)
+    {
+        return $this->unsetIndex('<?php echo $name; ?>', $index);
     }
 
     /**
@@ -104,7 +115,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     {
         return $this->push('<?php echo $name; ?>', $value);
     }
-  
+
     /**
      * Removes a property from the end of a list and returns it.
      *

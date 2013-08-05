@@ -780,6 +780,39 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
+     * Unsets an index in a hash/associative array.
+     *
+     * @param   string                          Property name
+     * @param   string                          Index name
+     * @return  void
+     */
+    public function unsetIndex($name, $index)
+    {
+        if (!$property = $this->property($name)) {
+            throw new Exception\RuntimeException('Specified $property does not exist');
+        }
+
+        if (!$property->getType() instanceof Type\ListType &&
+            !$property->getType() instanceof Type\HashType) {
+            throw new Exception\RuntimeException('indexOf failed as property type is not a list');
+        }
+
+        $arr = $this->get($name) ?: array();
+
+        if ($property->getType() instanceof Type\ListEntityType) {
+            if ($arr instanceof Cursor) {
+                $arr = $arr->toArray();
+            }
+        }
+
+        unset($arr[$index]);
+
+        $this->set($name, $arr);
+
+        return $this;
+    }
+
+    /**
      * Prepends a value to a list property.
      *
      * @param   string                          Property name
