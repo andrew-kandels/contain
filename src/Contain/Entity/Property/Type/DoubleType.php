@@ -86,7 +86,7 @@ class DoubleType extends StringType
     public function getValidators()
     {
         return array(
-            array('name' => 'Digits'),
+            array('name' => 'Float'),
         );
     }
 }
