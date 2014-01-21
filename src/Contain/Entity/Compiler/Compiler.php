@@ -448,13 +448,9 @@ class Compiler implements EventManagerAwareInterface
         ));
 
         foreach ($this->definition->getProperties() as $name => $property) {
-            if ($property->getType() instanceof Type\ListType) {
-                continue;
-            }
-
             $attributes = $property->getOption('attributes') ?: array();
             $options    = $property->getOption('options') ?: array();
-            $type       = $property->getOption('type');
+            $type       = $property->getOption('formType') ?: $property->getOption('type');
 
             if (!$type) {
                 if ($property->getType() instanceof Type\EnumType) {

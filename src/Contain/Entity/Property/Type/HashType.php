@@ -63,7 +63,7 @@ class HashType extends StringType
                 continue;
             }
 
-            if (!is_scalar($innerValue)) {
+            if ($innerValue !== null && !is_scalar($innerValue)) {
                 throw new InvalidArgumentException('All keys in $value must be scalar or simple arrays');
             }
         }
