@@ -40,12 +40,12 @@ use Zend\EventManager\EventManagerInterface;
 class Compiler implements EventManagerAwareInterface
 {
     /**
-     * @var Contain\Entity\Definition\AbstractDefinition
+     * @var \Contain\Entity\Definition\AbstractDefinition
      */
     protected $definition;
 
     /**
-     * @var Zend\EventManager\EventManagerInterface
+     * @var \Zend\EventManager\EventManagerInterface|null
      */
     protected $events;
 
@@ -57,8 +57,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Sets the definition file in which to compile.
      *
-     * @param   Contain\Entity\Definition\AbstractDefinition|string
-     * @return  self
+     * @param \Contain\Entity\Definition\AbstractDefinition|string $definition
+     *
+     * @return self
      */
     protected function setDefinition($definition)
     {
@@ -84,8 +85,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Set the event manager instance used by this context
      *
-     * @param  Zend\EventManager\EventManagerInterface $events
-     * @return mixed
+     * @param  \Zend\EventManager\EventManagerInterface $events
+     *
+     * @return self
      */
     public function setEventManager(EventManagerInterface $events)
     {
@@ -93,7 +95,7 @@ class Compiler implements EventManagerAwareInterface
         if (isset($this->eventIdentifier)) {
             if ((is_string($this->eventIdentifier))
                 || (is_array($this->eventIdentifier))
-                || ($this->eventIdentifier instanceof Traversable)
+                || ($this->eventIdentifier instanceof \Traversable)
             ) {
                 $identifiers = array_unique(array_merge($identifiers, (array) $this->eventIdentifier));
             } elseif (is_object($this->eventIdentifier)) {
@@ -111,7 +113,7 @@ class Compiler implements EventManagerAwareInterface
      *
      * Lazy-loads an EventManager instance if none registered.
      *
-     * @return Zend\EventManager\EventManagerInterface
+     * @return \Zend\EventManager\EventManagerInterface
      */
     public function getEventManager()
     {
@@ -124,8 +126,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Returns the full path to the target based on its key.
      *
-     * @param   string                  Target key (entity, filter, etc.)
-     * @return  string
+     * @param string $target Target key (entity, filter, etc.)
+     *
+     * @return string
      */
     public function getTargetFile($target)
     {
@@ -151,8 +154,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Returns the namespace for a given target key.
      *
-     * @param   string                  Target key (entity, filter, etc.)
-     * @return  string
+     * @param string $target Target key (entity, filter, etc.)
+     *
+     * @return string
      */
     public function getTargetNamespace($target)
     {
@@ -184,8 +188,9 @@ class Compiler implements EventManagerAwareInterface
      * Renders a template and writes the output to the active file
      * handle.
      *
-     * @param   string                  Template name
-     * @param   array                   View variables
+     * @param string $name   Template name
+     * @param array  $params View variables
+     *
      * @return self
      */
     public function append($name, array $params = array())
@@ -223,8 +228,9 @@ class Compiler implements EventManagerAwareInterface
      * Imports the raw source code from a method in the definition class and anything
      * it imports.
      *
-     * @param   string              Method name
-     * @return  string
+     * @param string $method Method name
+     *
+     * @return string
      */
     protected function importMethods($method)
     {
@@ -241,10 +247,11 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Imports the raw source code from a single method in an object.
      *
-     * @param   object              Class object instance
-     * @param   string              Method name
-     * @param   boolean             Include function definition?
-     * @return  string
+     * @param string $className      Class object instance
+     * @param string $method         Method name
+     * @param bool   $withDefinition Include function definition?
+     *
+     * @return string
      */
     protected function importMethod($className, $method, $withDefinition = false)
     {
@@ -271,6 +278,8 @@ class Compiler implements EventManagerAwareInterface
 
     /**
      * Builds the entity class and writes it to the filesystem.
+     *
+     * @param \Contain\Entity\Definition\AbstractDefinition|string $definition
      *
      * @return self
      */
@@ -317,10 +326,11 @@ class Compiler implements EventManagerAwareInterface
         return $this;
     }
 
-    /*
+    /**
      * Compiles the entity object target.
      *
-     * @param   string              FQDN to the filter class
+     * @param string|null $filter FQDN to the filter class
+     *
      * @return self
      */
     protected function compileEntity($filter = null)
@@ -423,6 +433,8 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Compiles the entity form target, an instance of
      * Zend\Form\Form.
+     *
+     * @param string|null $filter FQDN to the filter class
      *
      * @return self
      */
