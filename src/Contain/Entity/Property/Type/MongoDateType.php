@@ -19,7 +19,6 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception;
 use MongoDate;
 
 /**

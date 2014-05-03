@@ -19,7 +19,7 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception;
+use Contain\Entity\Exception\InvalidArgumentException;
 use MongoId;
 
 /**
@@ -49,9 +49,7 @@ class MongoIdType extends StringType
             return new MongoId($value);
         }
 
-        throw new Exception\InvalidArgumentException('$value should be an instance of '
-            . 'MongoId or a string'
-        );
+        throw new InvalidArgumentException('$value should be an instance of MongoId or a string');
     }
 
     /**
