@@ -19,8 +19,6 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception\InvalidArgumentException;
-
 /**
  * Double / Floating Point / Precision Data Type
  *
