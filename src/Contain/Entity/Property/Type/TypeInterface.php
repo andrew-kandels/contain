@@ -32,9 +32,11 @@ interface TypeInterface
     /**
      * Parse a given input into a suitable value for the current data type.
      *
-     * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  Contain\Exception\InvalidArgumentException
+     * @param mixed $value Value to be set
+     *
+     * @return mixed Internal value
+     *
+     * @throws \Contain\Entity\Exception\InvalidArgumentException
      */
     public function parse($value);
 
@@ -42,16 +44,18 @@ interface TypeInterface
      * Returns the internal value represented as a string value
      * for purposes of debugging or export.
      *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * @param mixed $value Internal value
+     *
+     * @return string
+     *
+     * @throws \Contain\Entity\Exception\InvalidArgumentException
      */
     public function export($value);
 
     /**
      * The value to compare the internal value to which translates to empty or null.
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getEmptyValue();
 
@@ -59,7 +63,7 @@ interface TypeInterface
      * The value to compare the internal value to which translates to not being
      * set during hydration.
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getUnsetValue();
 
@@ -67,21 +71,22 @@ interface TypeInterface
      * A valid value that represents a dirty state (would never be equal to the actual 
      * value but also isn't empty or unset). 
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getDirtyValue();
 
     /**
      * Returns specific options for this type.
      *
-     * @return  array
+     * @return array
      */
     public function getOptions();
 
     /**
      * Sets specific options for this type.
      *
-     * @param   array|Traversable           Option name/value pairs
+     * @param array|\Traversable $options Option name/value pairs
+     *
      * @return self
      */
     public function setOptions($options);
@@ -89,7 +94,7 @@ interface TypeInterface
     /**
      * Validator configuration array to automatically include when building filters.
      *
-     * @return  array
+     * @return array
      */
     public function getValidators();
 
