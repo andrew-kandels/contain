@@ -136,8 +136,8 @@ class StringType implements TypeInterface
      */
     public function setOptions($options)
     {
-        if (!is_array($options) && !$options instanceof Traversable) {
-            throw new InvalidArgumentException('$options argument must be an array or '
+        if (!is_array($options) && !$options instanceof \Traversable) {
+            throw new Exception\InvalidArgumentException('$options argument must be an array or '
                 . 'an instance of Traversable.'
             );
         }

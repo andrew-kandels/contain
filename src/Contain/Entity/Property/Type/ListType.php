@@ -46,7 +46,9 @@ class ListType extends StringType
     }
 
     /**
-     * {@inheritDoc}
+     * @return TypeInterface
+     *
+     * @throws InvalidArgumentException
      */
     public function getType()
     {

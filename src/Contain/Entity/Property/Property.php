@@ -210,6 +210,7 @@ class Property
         if ($e = $this->parent->getExtendedProperty('_property')) {
             extract($e);
             /* @var $parent EntityInterface */
+            /* @var $name string */
             $parent->property($name)->importEntity($this->parent);
         }
 

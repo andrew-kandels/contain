@@ -187,8 +187,8 @@ abstract class AbstractDefinition
     /**
      * Registers a new constant.
      *
-     * @param   string              Name of the constant
-     * @param   scalar              Value of the constant
+     * @param   string $name  Name of the constant
+     * @param   mixed  $value Value of the constant
      * @return  self
      */
     public function setConstant($name, $value)

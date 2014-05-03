@@ -38,7 +38,6 @@ use Traversable;
  */
 abstract class AbstractEntity implements EntityInterface
 {
-
     /**
      * @var array
      */
@@ -73,6 +72,11 @@ abstract class AbstractEntity implements EntityInterface
      * @var boolean
      */
     protected $isPersisted = false;
+
+    /**
+     * @var string[]
+     */
+    protected $messages = array();
 
     /**
      * Constructor
@@ -581,9 +585,10 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Defines a new property for this entity.
      *
-     * @param   string                      Name of property
-     * @param   string                      Type (keyword or FQCN)
-     * @param   array                       Options
+     * @param string $property Name of property
+     * @param string $type     Type (keyword or FQCN)
+     * @param array  $options  Options
+     *
      * @return self
      */
     public function define($property, $type, array $options = array())
@@ -878,7 +883,7 @@ abstract class AbstractEntity implements EntityInterface
             $arr = $arr->toArray();
         }
 
-        $return = array_pop($arr, $value);
+        $return = array_pop($arr);
 
         $this->set($name, $arr);
 
@@ -911,7 +916,7 @@ abstract class AbstractEntity implements EntityInterface
             $arr = $arr->toArray();
         }
 
-        $return = array_shift($arr, $value);
+        $return = array_shift($arr);
 
         $this->set($name, $arr);
 
