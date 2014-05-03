@@ -420,10 +420,6 @@ abstract class AbstractDefinition
                 );
             }
 
-            if (strpos('\\', $definition) === false) {
-                $def = 'Contain\Entity\Definition\\' . $definition;
-            }
-
             $definition = new $definition();
 
             if (!$definition instanceof AbstractDefinition) {

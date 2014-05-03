@@ -44,9 +44,9 @@ class HashType extends StringType
             throw new InvalidArgumentException('$value must be an array');
         }
 
-        foreach ($value as $key => $innerValue) {
+        foreach ($value as $innerValue) {
             if (is_array($innerValue)) {
-                foreach ($innerValue as $subKey => $subValue) {
+                foreach ($innerValue as $subValue) {
                     if (!is_scalar($subValue)) {
                         throw new InvalidArgumentException('All keys in $value must be scalar '
                             . 'or simple arrays'

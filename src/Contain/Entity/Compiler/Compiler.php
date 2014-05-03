@@ -282,7 +282,7 @@ class Compiler implements EventManagerAwareInterface
 
         $this->setDefinition($definition);
 
-        foreach ($this->definition->getProperties() as $name => $property) {
+        foreach ($this->definition->getProperties() as $property) {
             // dependency must be compiled first
             if ($property->getType() instanceof EntityType &&
                 $property->getOption('className') != 'Contain\Entity\EntityInterface') {
@@ -390,7 +390,7 @@ class Compiler implements EventManagerAwareInterface
 
             if ($extra = $property->getOption('validators')) {
                 foreach ($validators as $index => $validator) {
-                    foreach ($extra as $subIndex => $subValidator) {
+                    foreach ($extra as $subValidator) {
                         if ($validator['name'] == $subValidator['name']) {
                             unset($validators[$index]);
                             break;
@@ -398,7 +398,7 @@ class Compiler implements EventManagerAwareInterface
                     }
                 }
 
-                foreach ($extra as $subIndex => $subValidator) {
+                foreach ($extra as $subValidator) {
                     $validators[] = $subValidator;
                 }
 
