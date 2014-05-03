@@ -26,6 +26,18 @@ namespace Contain\Entity;
  * @package     contain
  * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
+ *
+ * @method string            getExtendedProperty(string $realName)
+ * @method void              setExtendedProperty(string $realName, string $propertyName)
+ * @method mixed             getProperty(string $realName)
+ * @method void              setProperty(string $realName, mixed $value)
+ * @method bool              isPersisted()
+ * @method EntityInterface   reset()
+ * @method EntityInterface   persisted()
+ * @method EntityInterface   trigger(string $eventName)
+ * @method mixed             get(string $name)
+ * @method void              set(string $name, mixed $value)
+ * @method Property\Property property(string $name)
  */
 interface EntityInterface
 {
