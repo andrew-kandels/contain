@@ -33,7 +33,7 @@ use Contain\Entity\Property\Type\TypeInterface;
 class TypeManager
 {
     /**
-     * @var array
+     * @var \Contain\Entity\Property\Type\TypeInterface[]
      */
     protected $types = array();
 
@@ -45,9 +45,9 @@ class TypeManager
     /**
      * Retrieves a type from the manager for a specific type of entity property.
      *
-     * @param   string                      Type (string, etc.)
-     * @param   array                       Options
-     * @return  Contain\Entity\Property\Type\TypeInterface
+     * @param string $type    Type (string, etc.)
+     * @param array  $options
+     * @return \Contain\Entity\Property\Type\TypeInterface
      */
     public function type($type, array $options = array())
     {
@@ -93,9 +93,10 @@ class TypeManager
      * Resets the options, mainining any options the manager might have set for
      * alias convenience.
      *
-     * @param   string                                          Type name/search
-     * @param   array                                           Options
-     * @return  Contain\Entity\Property\Type\TypeInterface
+     * @param string $search  Type name/search
+     * @param array  $options
+     *
+     * @return \Contain\Entity\Property\Type\TypeInterface
      */
     public function resetOptions($search, array $options)
     {
