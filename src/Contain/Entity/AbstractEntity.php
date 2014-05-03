@@ -45,17 +45,17 @@ abstract class AbstractEntity implements EntityInterface
     protected $aliases = array();
 
     /**
-     * @var array
+     * @var \Contain\Entity\Property\Property[]
      */
     protected $properties = array();
 
     /**
-     * @var Contain\Entity\Property\Property
+     * @var \Contain\Entity\Property\Property
      */
     protected $property;
 
     /**
-     * @var Contain\Manager\TypeManager
+     * @var TypeManager
      */
     protected $typeManager;
 
@@ -89,8 +89,9 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Gets or sets a type manager.
      *
-     * @param   Contain\Manager\TypeManager|null
-     * @return  Contain\Manager\TypeManager
+     * @param TypeManager|null $manager
+     *
+     * @return TypeManager
      */
     public function typeManager(TypeManager $manager = null)
     {
@@ -118,8 +119,9 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * 'property.get' event that is fired when a property is accessed.
      *
-     * @param   string              Property name
-     * @param   mixed               Current Value
+     * @param   string $name  Property name
+     * @param   mixed  $value Current Value
+     *
      * @return  mixed|null
      */
     public function onEventGetter($name, $value)
@@ -136,9 +138,10 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * 'property.set' event when a property is being set.
      *
-     * @param   string              Property name
-     * @param   mixed               New Value
-     * @return  mixed|null
+     * @param string $name  Property name
+     * @param mixed  $value New Value
+     *
+     * @return mixed|null
      */
     public function onEventSetter($name, $value)
     {
@@ -152,10 +155,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Fetches an extended property which can be set at anytime.
-     *
-     * @param   string                  Extended property name
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getExtendedProperty($name)
     {
@@ -184,7 +184,11 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Clears all extended properties.
      *
+     * @param array|Traversable|null $properties
+     *
      * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function clearExtendedProperties($properties = null)
     {
@@ -204,9 +208,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Completely resets all properties and data for the entity.
-     *
-     * @return self
+     * {@inheritDoc}
      */
     public function reset()
     {
@@ -222,11 +224,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Injects an extended property which can be set at anytime.
-     *
-     * @param   string                  Extended property name
-     * @param   mixed                   Value to set
-     * @return self
+     * {@inheritDoc}
      */
     public function setExtendedProperty($name, $value)
     {
@@ -235,11 +233,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Returns an array of the columns flagged as primary as the
-     * key(s) and the current values for the keys as the property
-     * values.
-     *
-     * @return  array(primary => value)
+     * {@inheritDoc}
      */
     public function primary()
     {
@@ -256,10 +250,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Unsets one, some or all properties.
-     *
-     * @param   string|array|Traversable|null       Propert(y|ies)
-     * @return self
+     * {@inheritDoc}
      */
     public function clear($property = null)
     {
@@ -291,11 +282,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Marks a changed property (or all properties by default) as clean,
-     * or unmodified.
-     *
-     * @param   string|Contain\Entity\Property\Property|array|Traversable|null
-     * @return self
+     * {@inheritDoc}
      */
     public function clean($property = null)
     {
@@ -327,9 +314,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Returns dirty, modified properties and their current values.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function dirty()
     {
@@ -345,10 +330,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Marks a property as dirty.
-     *
-     * @param   string                      Property name
-     * @return self
+     * {@inheritDoc}
      */
     public function markDirty($name)
     {
@@ -363,10 +345,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Gets the property type for a given property.
-     *
-     * @param   string|Contain\Entity\Property\Property
-     * @return  Contain\Entity\Property\Type\TypeInterface
+     * {@inheritDoc}
      */
     public function type($name)
     {
@@ -378,10 +357,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Gets an array of all the entity's properties.
-     *
-     * @param   boolean             Include unset properties
-     * @return  array
+     * {@inheritDoc}
      */
     public function properties($includeUnset = false)
     {
@@ -397,10 +373,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Returns an array of all the entity properties.
-     *
-     * @param   boolean             Include unset properties
-     * @return  array
+     * {@inheritDoc}
      */
     public function toArray($includeUnset = false)
     {
@@ -423,10 +396,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Hydrates entity properties from an array.
-     *
-     * @param   array|Traversable   Property key/value pairs
-     * @return self
+     * {@inheritDoc}
      */
     public function fromArray($properties = null)
     {
@@ -455,12 +425,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Returns an array of all the entity properties
-     * as an array of string-converted values (no objects).
-     *
-     * @param   Traversable|array|null              Properties
-     * @param   boolean             Include unset properties
-     * @return  array
+     * {@inheritDoc}
      */
     public function export($includeProperties = null, $includeUnset = false)
     {
@@ -500,9 +465,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Fetches the current value for a property.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function get($name)
     {
@@ -519,12 +482,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Sets the value of a property.
-     *
-     * @param   string                  Property Name
-     * @param   mixed                   Value
-     * @param   boolean                 Fire Change Event?
-     * @return self
+     * {@inheritDoc}
      */
     public function set($name, $value, $fireChangeEvent = true)
     {
@@ -556,8 +514,8 @@ abstract class AbstractEntity implements EntityInterface
      * Filters and validates some or all properties of the entity. If false,
      * additional messages can be retrieved by invoking the messages method.
      *
-     * @param   string|array|Traversable            Properties to filter/validate (omit for all)
-     * @return  boolean
+     * @param string|array|Traversable $properties Properties to filter/validate (omit for all)
+     * @return boolean
      */
     public function isValid($properties = array())
     {
@@ -603,9 +561,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Returns true if the entity has been persisted into a data store.
-     *
-     * @return  boolean
+     * {@inheritDoc}
      */
     public function isPersisted()
     {
@@ -613,14 +569,12 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Flags the entity as being persisted.
-     *
-     * @param   boolean                 Value
-     * @return self
+     * {@inheritDoc}
      */
     public function persisted($value = true)
     {
         $this->isPersisted = (boolean) $value;
+
         return $this;
     }
 
@@ -651,7 +605,8 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Persist changes to a property into the internal array.
      *
-     * @param   Contain\Entity\Property\Property
+     * @param Property $property
+     *
      * @return self
      */
     public function saveProperty(Property $property)
@@ -661,12 +616,7 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
-     * Fetches the entity's property object and points it to a specific
-     * property with all that property's options and internal settings.
-     *
-     * @param   string                                          Property name
-     * @param   Contain\Entity\Property\Property                Optional cached property object
-     * @return  Contain\Entity\Property\Property|false
+     * {@inheritDoc}
      */
     public function property($name, Property $property = null)
     {
@@ -699,10 +649,13 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Fetches a list item by its numerical index position.
      *
-     * @param   string                          Property name
-     * @param   integer                         Index
-     * @param   mixed                           Value to assign
+     * @param string $name  Property name
+     * @param int    $index Index
+     * @param mixed  $item  Value to assign
+     *
      * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function put($name, $index, $item)
     {
@@ -730,9 +683,12 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Fetches a list item by its numerical index position.
      *
-     * @param   string                          Property name
-     * @param   integer                         Index
-     * @return  mixed|null                      Value or null if unset
+     * @param string  $name  Property name
+     * @param integer $index
+     *
+     * @return mixed|null Value or null if unset
+     *
+     * @throws Exception\RuntimeException
      */
     public function at($name, $index)
     {
@@ -757,10 +713,13 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Searches for a value and returns its index or FALSE if not found.
      *
-     * @param   string                          Property name
-     * @param   mixed                           Value to search for
-     * @param   boolean                         Strict type checking
-     * @return  integer|false
+     * @param string $name   Property name
+     * @param mixed  $value  Value to search for
+     * @param bool   $strict Strict type checking
+     *
+     * @return integer|false
+     *
+     * @throws Exception\RuntimeException
      */
     public function indexOf($name, $value, $strict = false)
     {
@@ -792,9 +751,12 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Unsets an index in a hash/associative array.
      *
-     * @param   string                          Property name
-     * @param   string                          Index name
-     * @return  void
+     * @param string $name  Property name
+     * @param string $index Index name
+     *
+     * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function unsetIndex($name, $index)
     {
@@ -825,9 +787,12 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Prepends a value to a list property.
      *
-     * @param   string                          Property name
-     * @param   mixed                           Value to prepend
+     * @param string $name  Property name
+     * @param mixed  $value Value to prepend
+     *
      * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function unshift($name, $value)
     {
@@ -857,9 +822,12 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Appends a value to a list property.
      *
-     * @param   string                          Property name
-     * @param   mixed                           Value to append
+     * @param string $name  Property name
+     * @param mixed  $value Value to append
+     *
      * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function push($name, $value)
     {
@@ -889,8 +857,9 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Removes a property from the end of a list and returns it.
      *
-     * @param   string                          Property name
-     * @return  mixed                           List item (now removed)
+     * @param string $name Property name
+     *
+     * @return mixed List item (now removed)
      */
     public function pop($name)
     {
@@ -919,8 +888,11 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Removes a property from the beginning of a list and returns it.
      *
-     * @param   string                          Property name
-     * @return  mixed                           List item (now removed)
+     * @param string $name Property name
+     *
+     * @return mixed List item (now removed)
+     *
+     * @throws Exception\RuntimeException
      */
     public function shift($name)
     {
@@ -949,10 +921,13 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Extracts a slice of the list.
      *
-     * @param   string                          Property name
-     * @param   integer                         Offset
-     * @param   integer|null                    Length
-     * @return  array
+     * @param string       $name   Property name
+     * @param integer      $offset Offset
+     * @param integer|null $length Length
+     *
+     * @return array
+     *
+     * @throws Exception\RuntimeException
      */
     public function slice($name, $offset, $length = null)
     {
@@ -977,10 +952,13 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Merges the list with another array.
      *
-     * @param   string                          Property name
-     * @param   array                           Array to merge with
-     * @param   boolean                         True if existing list is the source vs. target
+     * @param string  $name   Property name
+     * @param array   $arr    Array to merge with
+     * @param boolean $source True if existing list is the source vs. target
+     *
      * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function merge($name, $arr, $source = true)
     {
@@ -1019,9 +997,12 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Removes a single item from the list by value if it exists.
      *
-     * @param   string                          Property name
-     * @param   mixed                           Value to remove
+     * @param string $name  Property name
+     * @param mixed  $value Value to remove
+     *
      * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function remove($name, $value)
     {
@@ -1047,10 +1028,13 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Adds an item to the list if it doesn't already exist.
      *
-     * @param   string                          Property name
-     * @param   mixed                           Value to add
-     * @param   boolean                         True for prepend, false for append
+     * @param string $name    Property name
+     * @param mixed  $value   Value to add
+     * @param bool   $prepend True for prepend, false for append
+     *
      * @return self
+     *
+     * @throws Exception\RuntimeException
      */
     public function add($name, $value, $prepend = true)
     {
@@ -1082,9 +1066,12 @@ abstract class AbstractEntity implements EntityInterface
      * If compiled (recommended), the methods will be declared explicitly leaving this
      * method unused for better performance / code completion support.
      *
-     * @param   string              Method
-     * @param   array               Variable arguments
+     * @param string $method Method
+     * @param array  $args   Variable arguments
+     *
      * @return  mixed
+     *
+     * @throws Exception\RuntimeException
      */
     public function __call($method, $args)
     {
@@ -1129,9 +1116,10 @@ abstract class AbstractEntity implements EntityInterface
      * value dumps. I may revisit this in the future and am open to other ideas; but performance
      * is key here and ZF2 was almost 10-20x slower in a recent implementation.
      *
-     * @param   string                          Event name
-     * @param   Closure|array                   Callback method/closure
-     * @param   integer                         Priority
+     * @param   string   $event    Event name
+     * @param   callable $callback Callback method/closure
+     * @param   integer  $priority Priority
+     *
      * @return self
      */
     public function attach($event, $callback, $priority = 0)
@@ -1149,13 +1137,16 @@ abstract class AbstractEntity implements EntityInterface
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Triggers an event by name, invoking any callbacks registered with attach() in
      * the order of their priority, passing an instance of Contain\Event which stores
      * the parameters and allows for short circuiting and other utility.
      *
-     * @param   string                          Event name
-     * @param   array                           Key/value Parameters
-     * @return  array                           (Possibly) Modified Parameters
+     * @param string $event  Event name
+     * @param array  $params Key/value Parameters
+     *
+     * @return array (Possibly) Modified Parameters
      */
     public function trigger($event, array $params = array())
     {
@@ -1192,7 +1183,8 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Clears all event listeners attach()'d to an event.
      *
-     * @param   string                          Event name
+     * @param string $event Event name
+     *
      * @return self
      */
     public function clearListeners($event)
