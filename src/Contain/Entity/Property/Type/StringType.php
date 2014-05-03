@@ -47,11 +47,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  COntain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value)
     {
@@ -79,12 +75,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Returns the internal value represented as a string value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
@@ -98,9 +89,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getEmptyValue()
     {
@@ -108,10 +97,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * The value to compare the internal value to which translates to not being
-     * set during hydration.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getUnsetValue()
     {
@@ -119,10 +105,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * A valid value that represents a dirty state (would never be equal to the actual 
-     * value but also isn't empty or unset). 
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getDirtyValue()
     {
@@ -130,9 +113,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Returns specific options for this type.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getOptions()
     {
@@ -142,8 +123,8 @@ class StringType implements TypeInterface
     /**
      * Returns a single option for this type by name.
      *
-     * @param   string                  Option name
-     * @return  array
+     * @param string $name Option name
+     * @return array
      */
     public function getOption($name)
     {
@@ -151,10 +132,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Sets specific options for this type.
-     *
-     * @param   array|Traversable           Option name/value pairs
-     * @return self
+     * {@inheritDoc}
      */
     public function setOptions($options)
     {
@@ -174,8 +152,9 @@ class StringType implements TypeInterface
     /**
      * Sets a specific option for this type.
      *
-     * @param   string                  Option name
-     * @param   mixed                   Value
+     * @param   string $name
+     * @param   mixed  $value
+     *
      * @return self
      */
     public function setOption($name, $value)
@@ -190,7 +169,8 @@ class StringType implements TypeInterface
     /**
      * Unsets an option.
      *
-     * @param   string                  Option name
+     * @param string $name
+     *
      * @return self
      */
     public function removeOption($name)
@@ -203,9 +183,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Clears options
-     *
-     * @return self
+     * {@inheritDoc}
      */
     public function clearOptions()
     {
@@ -214,9 +192,7 @@ class StringType implements TypeInterface
     }
 
     /**
-     * Validator configuration array to automatically include when building filters.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getValidators()
     {

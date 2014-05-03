@@ -33,9 +33,7 @@ use DateTime;
 class DateType extends DateTimeType
 {
     /**
-     * Clears options.
-     *
-     * @return self
+     * {@inheritDoc}
      */
     public function clearOptions()
     {
@@ -44,10 +42,7 @@ class DateType extends DateTimeType
     }
 
     /**
-     * A valid value that represents a dirty state (would never be equal to the actual 
-     * value but also isn't empty or unset). 
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getDirtyValue()
     {

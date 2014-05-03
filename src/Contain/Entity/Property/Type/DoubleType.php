@@ -32,11 +32,7 @@ use Contain\Exception\InvalidArgumentException;
 class DoubleType extends StringType
 {
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  double              Internal value
-     * @throws  COntain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value = null)
     {
@@ -56,12 +52,7 @@ class DoubleType extends StringType
     }
 
     /**
-     * Returns the internal value represented as an floating point value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  null|false|double
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
@@ -69,9 +60,7 @@ class DoubleType extends StringType
     }
 
     /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getEmptyValue()
     {
@@ -79,9 +68,7 @@ class DoubleType extends StringType
     }
 
     /**
-     * Validator configuration array to automatically include when building filters.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getValidators()
     {

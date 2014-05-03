@@ -33,11 +33,7 @@ use Traversable;
 class MixedType extends StringType
 {
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  mixed
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value = null)
     {
@@ -53,12 +49,7 @@ class MixedType extends StringType
     }
 
     /**
-     * Returns the internal value represented as an integer value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
@@ -66,9 +57,7 @@ class MixedType extends StringType
     }
 
     /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getEmptyValue()
     {

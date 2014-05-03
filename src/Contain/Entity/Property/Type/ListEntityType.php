@@ -50,9 +50,7 @@ class ListEntityType extends ListType
     protected $mapper;
 
     /**
-     * Clears options.
-     *
-     * @return self
+     * {@inheritDoc}
      */
     public function clearOptions()
     {
@@ -63,9 +61,7 @@ class ListEntityType extends ListType
     }
 
     /**
-     * Resolves the list item type.
-     *
-     * @return  Entity\Property\Type\EntityType
+     * {@inheritDoc}
      */
     public function getType()
     {
@@ -89,12 +85,7 @@ class ListEntityType extends ListType
     }
 
     /**
-     * Parses an array of entities (or entity array values) into serialized
-     * arrays to efficient store large numbers of objects.
-     *
-     * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value)
     {
@@ -108,12 +99,7 @@ class ListEntityType extends ListType
     }
 
     /**
-     * Returns the internal value represented as a string value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
