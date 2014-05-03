@@ -48,20 +48,21 @@ class Event
     protected $shouldPropogate = true;
 
     /**
-     * @var Contain\Entity\EntityInterface
+     * @var EntityInterface
      */
     protected $target;
 
     /**
      * Constructor
      *
-     * @param   array|Traversable               Properties
-     * @return self
+     * @param EntityInterface    $entity
+     * @param string             $event
+     * @param array|\Traversable $params
      */
     public function __construct(EntityInterface $entity, $event, array $params = array())
     {
         $this->entity     = $entity;
-        $this->event      = $event;
+        $this->event      = (string) $event;
         $this->parameters = $params;
     }
 
@@ -74,6 +75,7 @@ class Event
     public function stopPropogation()
     {
         $this->shouldPropogate = false;
+
         return $this;
     }
 
@@ -81,7 +83,7 @@ class Event
      * Answers whether or not this event should continue to be propogated
      * to event listeners.
      *
-     * @return  boolean
+     * @return bool
      */
     public function shouldPropogate()
     {
@@ -101,8 +103,9 @@ class Event
     /**
      * Retrieves a parameter by name.
      *
-     * @param   string                          Key
-     * @return  mixed
+     * @param string $name
+     *
+     * @return mixed
      */
     public function getParam($name)
     {
@@ -114,7 +117,7 @@ class Event
     /**
      * Retrieves a parameters.
      *
-     * @return  array
+     * @return array
      */
     public function getParams()
     {
@@ -124,9 +127,11 @@ class Event
     /**
      * Sets a parameter by name.
      *
-     * @param   string                          Key
-     * @param   mixed                           Value
+     * @param string $name
+     * @param mixed  $value
+     *
      * @return self
+     *
      * @throws  InvalidArgumentException
      */
     public function setParam($name, $value)
@@ -142,7 +147,8 @@ class Event
     /**
      * Sets parameters from a key/value array.
      *
-     * @param   array                           Key/value pairs
+     * @param array $params Key/value pairs
+     *
      * @return self
      */
     public function setParams($params)
@@ -157,7 +163,7 @@ class Event
     /**
      * Returns the entity target.
      *
-     * @return  Contain\Entity\EntityInterface
+     * @return EntityInterface
      */
     public function getTarget()
     {
