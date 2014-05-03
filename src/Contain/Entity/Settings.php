@@ -18,7 +18,7 @@ class Settings extends AbstractEntity
     /**
      * Initializes the properties of this entity.
      *
-     * @return  $this
+     * @return self
      */
     public function init()
     {
@@ -68,7 +68,7 @@ class Settings extends AbstractEntity
      * Prepends a value to a list property.
      *
      * @param   mixed                           Value to prepend
-     * @return  $this
+     * @return self
      */
     public function unshiftSettings($value)
     {
@@ -79,7 +79,7 @@ class Settings extends AbstractEntity
      * Appends a value to a list property.
      *
      * @param   mixed                           Value to append
-     * @return  $this
+     * @return self
      */
     public function pushSettings($value)
     {
@@ -146,7 +146,7 @@ class Settings extends AbstractEntity
      *
      * @param   mixed                           Value to add
      * @param   boolean                         True for prepend, false for append
-     * @return  $this
+     * @return self
      */
     public function addSettings($value, $prepend = true)
     {
@@ -167,7 +167,7 @@ class Settings extends AbstractEntity
      * Accessor setter for the settings property
      *
      * @param   See: Contain\Entity\Property\Type\ListType::parse()
-     * @return  $this
+     * @return self
      */
     public function setSettings($value)
     {
@@ -228,7 +228,7 @@ class Settings extends AbstractEntity
      *
      * @param   string                      Name
      * @param   mixed                       Value
-     * @return  $this
+     * @return self
      */
     public function addSetting($name, $value)
     {
@@ -239,7 +239,7 @@ class Settings extends AbstractEntity
      * Removes a setting by key.
      *
      * @param   string                      Name
-     * @return  $this
+     * @return self
      */
     public function removeSetting($name)
     {
@@ -262,7 +262,7 @@ class Settings extends AbstractEntity
      *
      * @param   string                      Name
      * @param   mixed                       Value
-     * @return  $this
+     * @return self
      */
     public function setSetting($name, $value)
     {

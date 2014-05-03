@@ -187,7 +187,7 @@ class Compiler implements EventManagerAwareInterface
      *
      * @param   string                  Template name
      * @param   array                   View variables
-     * @return  $this
+     * @return self
      */
     public function append($name, array $params = array())
     {
@@ -273,7 +273,7 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Builds the entity class and writes it to the filesystem.
      *
-     * @return  $this
+     * @return self
      */
     public function compile($definition)
     {
@@ -322,7 +322,7 @@ class Compiler implements EventManagerAwareInterface
      * Compiles the entity object target.
      *
      * @param   string              FQDN to the filter class
-     * @return  $this
+     * @return self
      */
     protected function compileEntity($filter = null)
     {
@@ -365,7 +365,7 @@ class Compiler implements EventManagerAwareInterface
      * Compiles the entity filter target, an instance of
      * Zend\InputFilter\InputFilter.
      *
-     * @return  $this
+     * @return self
      */
     protected function compileFilter()
     {
@@ -425,7 +425,7 @@ class Compiler implements EventManagerAwareInterface
      * Compiles the entity form target, an instance of
      * Zend\Form\Form.
      *
-     * @return  $this
+     * @return self
      */
     protected function compileForm($filter)
     {

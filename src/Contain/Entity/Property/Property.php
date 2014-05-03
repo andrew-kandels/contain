@@ -83,7 +83,7 @@ class Property
      * Injects the parent entity.
      *
      * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @return self
      */
     public function setParent(EntityInterface $parent = null)
     {
@@ -114,7 +114,7 @@ class Property
      * Hydrates the property from a syntax compatible with export().
      *
      * @param   array                           Serialized Options/Values
-     * @return  $this
+     * @return self
      */
     public function import(array $arr)
     {
@@ -167,7 +167,7 @@ class Property
      * export so they can be hydrated into a parent container property.
      *
      * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @return self
      */
     public function importEntity(EntityInterface $entity)
     {
@@ -231,7 +231,7 @@ class Property
      * Sets the value for this property.
      *
      * @param   mixed                   Value
-     * @return  $this
+     * @return self
      */
     public function setValue($value)
     {
@@ -247,7 +247,7 @@ class Property
      *
      * @param   integer                 Index
      * @param   mixed                   export() value
-     * @return  $this
+     * @return self
      * @throws  Contain\Entity\Exception\InvalidArgumentException
      */
     public function setValueAtIndex($index, $value)
@@ -286,7 +286,7 @@ class Property
      *
      * @param   Contain\Entity\EntityInterface
      * @param   integer                                         Index
-     * @return  $this
+     * @return self
      */
     public function watch(EntityInterface $entity, $index = null)
     {
@@ -438,7 +438,7 @@ class Property
     /**
      * Clears a property, setting it to an unset state.
      *
-     * @return  $this
+     * @return self
      */
     public function clear()
     {
@@ -449,7 +449,7 @@ class Property
     /**
      * Sets a property to its empty value.
      *
-     * @return  $this
+     * @return self
      */
     public function setEmpty()
     {
@@ -462,7 +462,7 @@ class Property
      * the current value of the property, which is ensured by making the persisted value
      * something one-of-a-kind.
      *
-     * @return  $this
+     * @return self
      */
     public function setDirty()
     {
@@ -474,7 +474,7 @@ class Property
      * Marks the current value as having been persisted for the sake of
      * dirty tracking.
      *
-     * @return  $this
+     * @return self
      */
     public function clean()
     {
@@ -541,7 +541,7 @@ class Property
      * Set entity options.
      *
      * @param   array|Traversable       Option name/value pairs
-     * @return  $this
+     * @return self
      */
     public function setOptions($options)
     {
@@ -563,7 +563,7 @@ class Property
      *
      * @param   string              Option name
      * @param   mixed               Option value
-     * @return  $this
+     * @return self
      */
     public function setOption($name, $value)
     {
@@ -615,7 +615,7 @@ class Property
     /**
      * Persists changes back to the parent's property array.
      *
-     * @return  $this
+     * @return self
      */
     public function save()
     {

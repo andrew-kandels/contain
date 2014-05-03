@@ -18,7 +18,7 @@ class Setting extends AbstractEntity
     /**
      * Initializes the properties of this entity.
      *
-     * @return  $this
+     * @return self
      */
     public function init()
     {
@@ -52,7 +52,7 @@ class Setting extends AbstractEntity
      * Accessor setter for the name property
      *
      * @param   See: Contain\Entity\Property\Type\StringType::parse()
-     * @return  $this
+     * @return self
      */
     public function setName($value)
     {
@@ -84,7 +84,7 @@ class Setting extends AbstractEntity
      * Accessor setter for the value property
      *
      * @param   See: Contain\Entity\Property\Type\MixedType::parse()
-     * @return  $this
+     * @return self
      */
     public function setValue($value)
     {

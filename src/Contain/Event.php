@@ -56,7 +56,7 @@ class Event
      * Constructor
      *
      * @param   array|Traversable               Properties
-     * @return  $this
+     * @return self
      */
     public function __construct(EntityInterface $entity, $event, array $params = array())
     {
@@ -69,7 +69,7 @@ class Event
      * Stops event propogation and short circuits the execution of any
      * events that fall after this one.
      *
-     * @return  $this
+     * @return self
      */
     public function stopPropogation()
     {
@@ -126,7 +126,7 @@ class Event
      *
      * @param   string                          Key
      * @param   mixed                           Value
-     * @return  $this
+     * @return self
      * @throws  InvalidArgumentException
      */
     public function setParam($name, $value)
@@ -143,7 +143,7 @@ class Event
      * Sets parameters from a key/value array.
      *
      * @param   array                           Key/value pairs
-     * @return  $this
+     * @return self
      */
     public function setParams($params)
     {

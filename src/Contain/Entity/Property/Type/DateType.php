@@ -35,7 +35,7 @@ class DateType extends DateTimeType
     /**
      * Clears options.
      *
-     * @return  $this
+     * @return self
      */
     public function clearOptions()
     {

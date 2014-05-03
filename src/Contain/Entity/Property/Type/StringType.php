@@ -39,7 +39,7 @@ class StringType implements TypeInterface
     /**
      * Constructor
      *
-     * @return  $this
+     * @return self
      */
     public function __construct()
     {
@@ -154,7 +154,7 @@ class StringType implements TypeInterface
      * Sets specific options for this type.
      *
      * @param   array|Traversable           Option name/value pairs
-     * @return  $this
+     * @return self
      */
     public function setOptions($options)
     {
@@ -176,7 +176,7 @@ class StringType implements TypeInterface
      *
      * @param   string                  Option name
      * @param   mixed                   Value
-     * @return  $this
+     * @return self
      */
     public function setOption($name, $value)
     {
@@ -191,7 +191,7 @@ class StringType implements TypeInterface
      * Unsets an option.
      *
      * @param   string                  Option name
-     * @return  $this
+     * @return self
      */
     public function removeOption($name)
     {
@@ -205,7 +205,7 @@ class StringType implements TypeInterface
     /**
      * Clears options
      *
-     * @return  $this
+     * @return self
      */
     public function clearOptions()
     {

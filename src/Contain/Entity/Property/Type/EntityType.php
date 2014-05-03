@@ -35,7 +35,7 @@ class EntityType extends StringType
     /**
      * Clears options.
      *
-     * @return  $this
+     * @return self
      */
     public function clearOptions()
     {

@@ -91,7 +91,7 @@ interface EntityInterface
      * Unsets one, some or all properties.
      *
      * @param string|array|\Traversable|null $property Propert(y|ies)
-     * @return $this
+     * @return self
      */
     public function clear($property = null);
 

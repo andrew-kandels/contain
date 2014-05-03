@@ -31,7 +31,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Initializes the properties of this entity.
      *
-     * @return  $this
+     * @return self
      */
     public function init()
     {
@@ -66,7 +66,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
      * Prepends a value to a list property.
      *
      * @param   string|integer                  Index to unset
-     * @return  $this
+     * @return self
      */
     public function unset<?php echo ucfirst($name); ?>($index)
     {
@@ -103,7 +103,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
      * Prepends a value to a list property.
      *
      * @param   mixed                           Value to prepend
-     * @return  $this
+     * @return self
      */
     public function unshift<?php echo ucfirst($name); ?>($value)
     {
@@ -114,7 +114,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
      * Appends a value to a list property.
      *
      * @param   mixed                           Value to append
-     * @return  $this
+     * @return self
      */
     public function push<?php echo ucfirst($name); ?>($value)
     {
@@ -181,7 +181,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
      *
      * @param   mixed                           Value to add
      * @param   boolean                         True for prepend, false for append
-     * @return  $this
+     * @return self
      */
     public function add<?php echo ucfirst($name); ?>($value, $prepend = true)
     {
@@ -203,7 +203,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
      * Accessor setter for the <?php echo $name; ?> property
      *
      * @param   See: <?php echo get_class($property->getType()); ?>::parse()
-     * @return  $this
+     * @return self
      */
     public function set<?php echo ucfirst($name); ?>($value)
     {

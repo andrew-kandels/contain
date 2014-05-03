@@ -82,7 +82,7 @@ interface TypeInterface
      * Sets specific options for this type.
      *
      * @param   array|Traversable           Option name/value pairs
-     * @return  $this
+     * @return self
      */
     public function setOptions($options);
 
@@ -96,7 +96,7 @@ interface TypeInterface
     /**
      * Clears options
      *
-     * @return  $this
+     * @return self
      */
     public function clearOptions();
 }

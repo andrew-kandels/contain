@@ -12,7 +12,7 @@ class Settings extends \Zend\Form\Form
     /**
      * Creates form fields for each of the entity properties.
      *
-     * @return  $this
+     * @return self
      */
     public function __construct()
     {

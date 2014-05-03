@@ -68,7 +68,7 @@ class Resolver
      * Constructor
      *
      * @param   string                      Query
-     * @return  $this
+     * @return self
      */
     public function __construct($query)
     {
@@ -86,7 +86,7 @@ class Resolver
      *
      * @param   Contain\Entity\EntityInterface              Entity
      * @param   string                                      Recursive query
-     * @return  $this
+     * @return self
      * @throws  InvalidArgumentException
      */
     public function scan(EntityInterface $entity, $query = null)
@@ -175,7 +175,7 @@ class Resolver
      *
      * @param   string                                      Message
      * @param   string                                      Exception class
-     * @return  $this
+     * @return self
      */
     protected function throwException($message = null, $e = '\InvalidArgumentException')
     {
@@ -192,7 +192,7 @@ class Resolver
      *
      * @param   string                      Class
      * @throws  InvalidArgumentException
-     * @return  $this
+     * @return self
      */
     public function assertType($type)
     {
@@ -262,7 +262,7 @@ class Resolver
     /**
      * Clears the steps which record how a property was found.
      *
-     * @return  $this
+     * @return self
      */
     public function clearSteps()
     {

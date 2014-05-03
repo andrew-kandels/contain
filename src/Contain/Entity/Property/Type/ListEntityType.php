@@ -52,7 +52,7 @@ class ListEntityType extends ListType
     /**
      * Clears options.
      *
-     * @return  $this
+     * @return self
      */
     public function clearOptions()
     {

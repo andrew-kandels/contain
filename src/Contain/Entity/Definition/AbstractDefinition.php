@@ -117,7 +117,7 @@ abstract class AbstractDefinition
     /**
      * Constructor
      *
-     * @return  $this
+     * @return self
      */
     public function __construct()
     {
@@ -128,7 +128,7 @@ abstract class AbstractDefinition
      * Called when an entity itself is instantiated. Used to register
      * events.
      *
-     * @return  $this
+     * @return self
      */
     public function init()
     {
@@ -342,7 +342,7 @@ abstract class AbstractDefinition
      * Unsets a property.
      *
      * @param   string              Name of the property
-     * @return  $this
+     * @return self
      */
     public function removeProperty($name)
     {
@@ -360,7 +360,7 @@ abstract class AbstractDefinition
      *
      * @param   string                  Target key (see above, e.g.: entity)
      * @param   string                  File system path
-     * @return  $this
+     * @return self
      */
     public function registerTarget($target, $path)
     {
@@ -410,7 +410,7 @@ abstract class AbstractDefinition
      * Imports the properties and most behaviors from another definition.
      *
      * @param   Contain\Entity\Definition\AbstractDefinition
-     * @return  $this
+     * @return self
      */
     public function import($definition)
     {
@@ -461,7 +461,7 @@ abstract class AbstractDefinition
      * Registers a method of the definition class that should be compiled into the end entity.
      *
      * @param   string              Method name
-     * @return  $this
+     * @return self
      */
     public function registerMethod($method)
     {
@@ -499,7 +499,7 @@ abstract class AbstractDefinition
      * Sets the entity name, defaults to the name of the definition class.
      *
      * @param   string                  Name
-     * @return  $this
+     * @return self
      */
     public function setName($name)
     {
@@ -528,7 +528,7 @@ abstract class AbstractDefinition
      * Sets the parent class the compiled entity will extend.
      *
      * @param   string
-     * @return  $this
+     * @return self
      */
     public function setParentClass($className)
     {
@@ -550,7 +550,7 @@ abstract class AbstractDefinition
      * Registers an interface the compiled entity will implement.
      *
      * @param   array
-     * @return  $this
+     * @return self
      */
     public function registerImplementor($implementor)
     {
@@ -564,7 +564,7 @@ abstract class AbstractDefinition
      * Sets the interfaces the compiled entity will implement.
      *
      * @param   array
-     * @return  $this
+     * @return self
      */
     public function setImplementors(array $implementors)
     {
@@ -586,7 +586,7 @@ abstract class AbstractDefinition
      * Set entity level options.
      *
      * @param   array|Traversable       Option name/value pairs
-     * @return  $this
+     * @return self
      */
     public function setOptions($options)
     {
@@ -608,7 +608,7 @@ abstract class AbstractDefinition
      *
      * @param   string              Option name
      * @param   mixed               Option value
-     * @return  $this
+     * @return self
      */
     public function setOption($name, $value)
     {

@@ -78,7 +78,7 @@ class Settings extends AbstractDefinition
      *
      * @param   string                      Name
      * @param   mixed                       Value
-     * @return  $this
+     * @return self
      */
     public function addSetting($name, $value)
     {
@@ -90,7 +90,7 @@ class Settings extends AbstractDefinition
      *
      * @param   string                      Name
      * @param   mixed                       Value
-     * @return  $this
+     * @return self
      */
     public function setSetting($name, $value)
     {
@@ -139,7 +139,7 @@ class Settings extends AbstractDefinition
      * Removes a setting by key.
      *
      * @param   string                      Name
-     * @return  $this
+     * @return self
      */
     public function removeSetting($name)
     {

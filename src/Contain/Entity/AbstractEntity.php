@@ -78,7 +78,7 @@ abstract class AbstractEntity implements EntityInterface
      * Constructor
      *
      * @param   array|Traversable               Properties
-     * @return  $this
+     * @return self
      */
     public function __construct($properties = null)
     {
@@ -108,7 +108,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Placeholder for initializing events or other basic functionaliy.
      *
-     * @return $this
+     * @return self
      */
     public function init()
     {
@@ -184,7 +184,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Clears all extended properties.
      *
-     * @return  $this
+     * @return self
      */
     public function clearExtendedProperties($properties = null)
     {
@@ -206,7 +206,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * Completely resets all properties and data for the entity.
      *
-     * @return  $this
+     * @return self
      */
     public function reset()
     {
@@ -226,7 +226,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @param   string                  Extended property name
      * @param   mixed                   Value to set
-     * @return  $this
+     * @return self
      */
     public function setExtendedProperty($name, $value)
     {
@@ -259,7 +259,7 @@ abstract class AbstractEntity implements EntityInterface
      * Unsets one, some or all properties.
      *
      * @param   string|array|Traversable|null       Propert(y|ies)
-     * @return  $this
+     * @return self
      */
     public function clear($property = null)
     {
@@ -295,7 +295,7 @@ abstract class AbstractEntity implements EntityInterface
      * or unmodified.
      *
      * @param   string|Contain\Entity\Property\Property|array|Traversable|null
-     * @return  $this
+     * @return self
      */
     public function clean($property = null)
     {
@@ -348,7 +348,7 @@ abstract class AbstractEntity implements EntityInterface
      * Marks a property as dirty.
      *
      * @param   string                      Property name
-     * @return  $this
+     * @return self
      */
     public function markDirty($name)
     {
@@ -426,7 +426,7 @@ abstract class AbstractEntity implements EntityInterface
      * Hydrates entity properties from an array.
      *
      * @param   array|Traversable   Property key/value pairs
-     * @return  $this
+     * @return self
      */
     public function fromArray($properties = null)
     {
@@ -524,7 +524,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string                  Property Name
      * @param   mixed                   Value
      * @param   boolean                 Fire Change Event?
-     * @return  $this
+     * @return self
      */
     public function set($name, $value, $fireChangeEvent = true)
     {
@@ -616,7 +616,7 @@ abstract class AbstractEntity implements EntityInterface
      * Flags the entity as being persisted.
      *
      * @param   boolean                 Value
-     * @return  $this
+     * @return self
      */
     public function persisted($value = true)
     {
@@ -630,7 +630,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string                      Name of property
      * @param   string                      Type (keyword or FQCN)
      * @param   array                       Options
-     * @return  $this
+     * @return self
      */
     public function define($property, $type, array $options = array())
     {
@@ -652,7 +652,7 @@ abstract class AbstractEntity implements EntityInterface
      * Persist changes to a property into the internal array.
      *
      * @param   Contain\Entity\Property\Property
-     * @return  $this
+     * @return self
      */
     public function saveProperty(Property $property)
     {
@@ -702,7 +702,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string                          Property name
      * @param   integer                         Index
      * @param   mixed                           Value to assign
-     * @return  $this
+     * @return self
      */
     public function put($name, $index, $item)
     {
@@ -827,7 +827,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @param   string                          Property name
      * @param   mixed                           Value to prepend
-     * @return  $this
+     * @return self
      */
     public function unshift($name, $value)
     {
@@ -859,7 +859,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @param   string                          Property name
      * @param   mixed                           Value to append
-     * @return  $this
+     * @return self
      */
     public function push($name, $value)
     {
@@ -980,7 +980,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string                          Property name
      * @param   array                           Array to merge with
      * @param   boolean                         True if existing list is the source vs. target
-     * @return  $this
+     * @return self
      */
     public function merge($name, $arr, $source = true)
     {
@@ -1021,7 +1021,7 @@ abstract class AbstractEntity implements EntityInterface
      *
      * @param   string                          Property name
      * @param   mixed                           Value to remove
-     * @return  $this
+     * @return self
      */
     public function remove($name, $value)
     {
@@ -1050,7 +1050,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string                          Property name
      * @param   mixed                           Value to add
      * @param   boolean                         True for prepend, false for append
-     * @return  $this
+     * @return self
      */
     public function add($name, $value, $prepend = true)
     {
@@ -1132,7 +1132,7 @@ abstract class AbstractEntity implements EntityInterface
      * @param   string                          Event name
      * @param   Closure|array                   Callback method/closure
      * @param   integer                         Priority
-     * @return  $this
+     * @return self
      */
     public function attach($event, $callback, $priority = 0)
     {
@@ -1193,7 +1193,7 @@ abstract class AbstractEntity implements EntityInterface
      * Clears all event listeners attach()'d to an event.
      *
      * @param   string                          Event name
-     * @return  $this
+     * @return self
      */
     public function clearListeners($event)
     {
