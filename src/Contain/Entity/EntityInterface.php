@@ -44,24 +44,27 @@ interface EntityInterface
     /**
      * Gets an array of all the entity's properties.
      *
-     * @param   boolean             Include unset properties
-     * @return  array
+     * @param bool $includeUnset Include unset properties
+     *
+     * @return array
      */
     public function properties($includeUnset = false);
 
     /**
      * Returns an array of all the entity properties
      *
-     * @param   boolean             Include unset properties
-     * @return  array
+     * @param boolean $includeUnset Include unset properties
+     *
+     * @return array
      */
     public function toArray($includeUnset = false);
 
     /**
      * Hydrates entity properties from an array.
      *
-     * @param   array|Traversable   Property key/value pairs
-     * @return  $this
+     * @param array|\Traversable   Property key/value pairs
+     *
+     * @return self
      */
     public function fromArray($properties);
 
@@ -69,8 +72,9 @@ interface EntityInterface
      * Returns an array of all the entity properties
      * as an array of string-converted values (no objects).
      *
-     * @param   boolean                 Include unset properties
-     * @return  array
+     * @param boolean $includeUnset Include unset properties
+     *
+     * @return array
      */
     public function export($includeUnset = false);
 
@@ -86,8 +90,8 @@ interface EntityInterface
     /**
      * Unsets one, some or all properties.
      *
-     * @param   string|array|Traversable|null       Propert(y|ies)
-     * @return  $this
+     * @param string|array|\Traversable|null $property Propert(y|ies)
+     * @return $this
      */
     public function clear($property = null);
 
@@ -95,8 +99,9 @@ interface EntityInterface
      * Marks a changed property (or all properties by default) as clean, 
      * or unmodified.
      *
-     * @param   string|array|Traversable|null       Propert(y|ies)
-     * @return  $this
+     * @param string|array|\Traversable|null $property Propert(y|ies)
+     *
+     * @return self
      */
     public function clean($property = null);
 
@@ -104,23 +109,25 @@ interface EntityInterface
      * Returns dirty, modified properties with their previous undirty
      * value (or a recursive array for child entities).
      *
-     * @return  array
+     * @return array
      */
     public function dirty();
 
     /**
      * Marks a property as dirty.
      *
-     * @param   string                      Property name
-     * @return  $this
+     * @param string $property Property name
+     *
+     * @return self
      */
     public function markDirty($property);
 
     /**
      * Gets the property type for a given property.
      *
-     * @param   string          Property name
-     * @return  Contain\Entity\Property\Type\TypeInterface
+     * @param string $property Property name
+     *
+     * @return \Contain\Entity\Property\Type\TypeInterface
      */
     public function type($property);
 }
