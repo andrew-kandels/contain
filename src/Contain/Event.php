@@ -19,8 +19,8 @@
 
 namespace Contain;
 
-use InvalidArgumentException;
 use Contain\Entity\EntityInterface;
+use InvalidArgumentException;
 
 /**
  * Lightweight Event Container

@@ -20,12 +20,12 @@
 namespace Contain\Entity;
 
 use Closure;
-use ContainMapper\Cursor;
 use Contain\Entity\Exception;
-use Contain\Entity\Property\Type;
 use Contain\Entity\Property\Property;
+use Contain\Entity\Property\Type;
 use Contain\Event;
 use Contain\Manager\TypeManager;
+use ContainMapper\Cursor;
 use Traversable;
 
 /**

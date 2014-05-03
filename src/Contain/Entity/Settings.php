@@ -1,7 +1,6 @@
 <?php
 namespace Contain\Entity;
 
-use Contain\Entity\AbstractEntity;
 use Contain\Entity\Property\Property;
 
 /**

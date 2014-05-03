@@ -20,9 +20,6 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Entity\Exception\InvalidArgumentException;
-use Contain\Entity\Exception\RuntimeException;
-use Contain\Entity\EntityInterface;
-use Contain\Entity\Property\Type\EntityType;
 
 /**
  * Hash table

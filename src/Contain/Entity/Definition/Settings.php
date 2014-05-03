@@ -19,8 +19,6 @@
 
 namespace Contain\Entity\Definition;
 
-use Contain\Entity\Definition\AbstractDefinition;
-
 /**
  * Template for a list of Setting key/value pairs with helper functions for
  * retrieving values quickly.

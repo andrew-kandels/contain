@@ -20,15 +20,14 @@
 namespace Contain\Entity\Compiler;
 
 use Contain\Entity\Definition\AbstractDefinition;
-use Contain\Entity\Exception\RuntimeException;
 use Contain\Entity\Exception\InvalidArgumentException;
-use Contain\Entity\Property\Type\EntityType;
-use Contain\Entity\Property\Type\ListType;
+use Contain\Entity\Exception\RuntimeException;
 use Contain\Entity\Property\Type;
+use Contain\Entity\Property\Type\EntityType;
 use ReflectionMethod;
 use Zend\EventManager\EventManager;
-use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Compiles an entity definition into a entity class.

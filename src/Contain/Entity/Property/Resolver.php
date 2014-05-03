@@ -19,10 +19,10 @@
 
 namespace Contain\Entity\Property;
 
-use InvalidArgumentException;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
+use InvalidArgumentException;
 
 /**
  * Represents a query for a property in a hierarchy and its solution.

@@ -20,7 +20,6 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Exception\InvalidArgumentException;
-use DateTime;
 
 /**
  * Date Data Type

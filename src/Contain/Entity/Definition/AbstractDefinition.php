@@ -19,9 +19,8 @@
 
 namespace Contain\Entity\Definition;
 
-use InvalidArgumentException;
-use RuntimeException;
 use Contain\Entity\Property\Property;
+use InvalidArgumentException;
 
 /**
  * Defines the behavior of an entity.

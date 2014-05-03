@@ -19,8 +19,6 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Entity\Exception\InvalidArgumentException;
-
 /**
  * Enumerated List Data Type
  *

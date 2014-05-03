@@ -20,8 +20,10 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Entity\Exception;
-use MongoDate; // if available
 use DateTime;
+use MongoDate;
+
+// if available
 
 /**
  * DateTime Data Type

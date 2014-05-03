@@ -19,10 +19,10 @@
 
 namespace Contain\Entity\Property;
 
-use Contain\Entity\Exception\InvalidArgumentException;
-use ContainMapper\Cursor;
-use Contain\Manager\TypeManager;
 use Contain\Entity\EntityInterface;
+use Contain\Entity\Exception\InvalidArgumentException;
+use Contain\Manager\TypeManager;
+use ContainMapper\Cursor;
 use Traversable;
 
 /**

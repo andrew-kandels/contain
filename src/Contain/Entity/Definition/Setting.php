@@ -19,8 +19,6 @@
 
 namespace Contain\Entity\Definition;
 
-use Contain\Entity\Definition\AbstractDefinition;
-
 /**
  * A single setting name/value pair.
  *
