@@ -20,8 +20,10 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Entity\Exception;
-use MongoDate; // if available
 use DateTime;
+use MongoDate;
+
+// if available
 
 /**
  * DateTime Data Type
@@ -34,9 +36,7 @@ use DateTime;
 class DateTimeType extends StringType
 {
     /**
-     * Clears options.
-     *
-     * @return  $this
+     * {@inheritDoc}
      */
     public function clearOptions()
     {
@@ -45,11 +45,7 @@ class DateTimeType extends StringType
     }
 
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  COntain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value)
     {
@@ -83,12 +79,7 @@ class DateTimeType extends StringType
     }
 
     /**
-     * Returns the internal value represented as a string value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
@@ -116,9 +107,7 @@ class DateTimeType extends StringType
     }
 
     /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getEmptyValue()
     {
@@ -126,10 +115,7 @@ class DateTimeType extends StringType
     }
 
     /**
-     * A valid value that represents a dirty state (would never be equal to the actual
-     * value but also isn't empty or unset).
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getDirtyValue()
     {

@@ -20,9 +20,6 @@
 namespace Contain\Entity\Property\Type;
 
 use Contain\Entity\Exception\InvalidArgumentException;
-use Contain\Entity\Exception\RuntimeException;
-use Contain\Entity\EntityInterface;
-use Contain\Entity\Property\Type\EntityType;
 
 /**
  * Hash table
@@ -35,11 +32,7 @@ use Contain\Entity\Property\Type\EntityType;
 class HashType extends StringType
 {
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  COntain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value)
     {
@@ -51,9 +44,9 @@ class HashType extends StringType
             throw new InvalidArgumentException('$value must be an array');
         }
 
-        foreach ($value as $key => $innerValue) {
+        foreach ($value as $innerValue) {
             if (is_array($innerValue)) {
-                foreach ($innerValue as $subKey => $subValue) {
+                foreach ($innerValue as $subValue) {
                     if (!is_scalar($subValue)) {
                         throw new InvalidArgumentException('All keys in $value must be scalar '
                             . 'or simple arrays'
@@ -72,12 +65,7 @@ class HashType extends StringType
     }
 
     /**
-     * Returns the internal value represented as a string value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
@@ -85,9 +73,7 @@ class HashType extends StringType
     }
 
     /**
-     * The value assigned when the property is unset.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getUnsetValue()
     {
@@ -95,9 +81,7 @@ class HashType extends StringType
     }
 
     /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getEmptyValue()
     {
@@ -105,10 +89,7 @@ class HashType extends StringType
     }
 
     /**
-     * A valid value that represents a dirty state (would never be equal to the actual 
-     * value but also isn't empty or unset). 
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getDirtyValue()
     {

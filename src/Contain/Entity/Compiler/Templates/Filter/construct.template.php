@@ -34,7 +34,7 @@ class <?php echo $this->name; ?> extends InputFilter
     /**
      * Construct and initialize the filters for the entity properties.
      *
-     * @return $this
+     * @return self
      */
     public function __construct()
     {

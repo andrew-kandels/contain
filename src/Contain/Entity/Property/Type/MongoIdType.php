@@ -19,7 +19,7 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception;
+use Contain\Entity\Exception\InvalidArgumentException;
 use MongoId;
 
 /**
@@ -33,11 +33,7 @@ use MongoId;
 class MongoIdType extends StringType
 {
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  integer             Internal value
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value = null)
     {
@@ -53,18 +49,11 @@ class MongoIdType extends StringType
             return new MongoId($value);
         }
 
-        throw new Exception\InvalidArgumentException('$value should be an instance of '
-            . 'MongoId or a string'
-        );
+        throw new InvalidArgumentException('$value should be an instance of MongoId or a string');
     }
 
     /**
-     * Returns the internal value represented as an integer value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  false|null|string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
@@ -76,9 +65,7 @@ class MongoIdType extends StringType
     }
 
     /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getEmptyValue()
     {
@@ -86,10 +73,7 @@ class MongoIdType extends StringType
     }
 
     /**
-     * The value to compare the internal value to which translates to not being
-     * set during hydration.
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getUnsetValue()
     {

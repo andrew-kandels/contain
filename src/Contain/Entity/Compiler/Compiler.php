@@ -20,15 +20,14 @@
 namespace Contain\Entity\Compiler;
 
 use Contain\Entity\Definition\AbstractDefinition;
-use Contain\Entity\Exception\RuntimeException;
 use Contain\Entity\Exception\InvalidArgumentException;
-use Contain\Entity\Property\Type\EntityType;
-use Contain\Entity\Property\Type\ListType;
+use Contain\Entity\Exception\RuntimeException;
 use Contain\Entity\Property\Type;
+use Contain\Entity\Property\Type\EntityType;
 use ReflectionMethod;
 use Zend\EventManager\EventManager;
-use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Compiles an entity definition into a entity class.
@@ -41,12 +40,12 @@ use Zend\EventManager\EventManagerAwareInterface;
 class Compiler implements EventManagerAwareInterface
 {
     /**
-     * @var Contain\Entity\Definition\AbstractDefinition
+     * @var \Contain\Entity\Definition\AbstractDefinition
      */
     protected $definition;
 
     /**
-     * @var Zend\EventManager\EventManagerInterface
+     * @var \Zend\EventManager\EventManagerInterface|null
      */
     protected $events;
 
@@ -58,8 +57,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Sets the definition file in which to compile.
      *
-     * @param   Contain\Entity\Definition\AbstractDefinition|string
-     * @return  self
+     * @param \Contain\Entity\Definition\AbstractDefinition|string $definition
+     *
+     * @return self
      */
     protected function setDefinition($definition)
     {
@@ -85,8 +85,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Set the event manager instance used by this context
      *
-     * @param  Zend\EventManager\EventManagerInterface $events
-     * @return mixed
+     * @param  \Zend\EventManager\EventManagerInterface $events
+     *
+     * @return self
      */
     public function setEventManager(EventManagerInterface $events)
     {
@@ -94,7 +95,7 @@ class Compiler implements EventManagerAwareInterface
         if (isset($this->eventIdentifier)) {
             if ((is_string($this->eventIdentifier))
                 || (is_array($this->eventIdentifier))
-                || ($this->eventIdentifier instanceof Traversable)
+                || ($this->eventIdentifier instanceof \Traversable)
             ) {
                 $identifiers = array_unique(array_merge($identifiers, (array) $this->eventIdentifier));
             } elseif (is_object($this->eventIdentifier)) {
@@ -112,7 +113,7 @@ class Compiler implements EventManagerAwareInterface
      *
      * Lazy-loads an EventManager instance if none registered.
      *
-     * @return Zend\EventManager\EventManagerInterface
+     * @return \Zend\EventManager\EventManagerInterface
      */
     public function getEventManager()
     {
@@ -125,8 +126,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Returns the full path to the target based on its key.
      *
-     * @param   string                  Target key (entity, filter, etc.)
-     * @return  string
+     * @param string $target Target key (entity, filter, etc.)
+     *
+     * @return string
      */
     public function getTargetFile($target)
     {
@@ -152,8 +154,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Returns the namespace for a given target key.
      *
-     * @param   string                  Target key (entity, filter, etc.)
-     * @return  string
+     * @param string $target Target key (entity, filter, etc.)
+     *
+     * @return string
      */
     public function getTargetNamespace($target)
     {
@@ -185,9 +188,10 @@ class Compiler implements EventManagerAwareInterface
      * Renders a template and writes the output to the active file
      * handle.
      *
-     * @param   string                  Template name
-     * @param   array                   View variables
-     * @return  $this
+     * @param string $name   Template name
+     * @param array  $params View variables
+     *
+     * @return self
      */
     public function append($name, array $params = array())
     {
@@ -224,8 +228,9 @@ class Compiler implements EventManagerAwareInterface
      * Imports the raw source code from a method in the definition class and anything
      * it imports.
      *
-     * @param   string              Method name
-     * @return  string
+     * @param string $method Method name
+     *
+     * @return string
      */
     protected function importMethods($method)
     {
@@ -242,10 +247,11 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Imports the raw source code from a single method in an object.
      *
-     * @param   object              Class object instance
-     * @param   string              Method name
-     * @param   boolean             Include function definition?
-     * @return  string
+     * @param string $className      Class object instance
+     * @param string $method         Method name
+     * @param bool   $withDefinition Include function definition?
+     *
+     * @return string
      */
     protected function importMethod($className, $method, $withDefinition = false)
     {
@@ -273,7 +279,9 @@ class Compiler implements EventManagerAwareInterface
     /**
      * Builds the entity class and writes it to the filesystem.
      *
-     * @return  $this
+     * @param \Contain\Entity\Definition\AbstractDefinition|string $definition
+     *
+     * @return self
      */
     public function compile($definition)
     {
@@ -283,7 +291,7 @@ class Compiler implements EventManagerAwareInterface
 
         $this->setDefinition($definition);
 
-        foreach ($this->definition->getProperties() as $name => $property) {
+        foreach ($this->definition->getProperties() as $property) {
             // dependency must be compiled first
             if ($property->getType() instanceof EntityType &&
                 $property->getOption('className') != 'Contain\Entity\EntityInterface') {
@@ -318,11 +326,12 @@ class Compiler implements EventManagerAwareInterface
         return $this;
     }
 
-    /*
+    /**
      * Compiles the entity object target.
      *
-     * @param   string              FQDN to the filter class
-     * @return  $this
+     * @param string|null $filter FQDN to the filter class
+     *
+     * @return self
      */
     protected function compileEntity($filter = null)
     {
@@ -365,7 +374,7 @@ class Compiler implements EventManagerAwareInterface
      * Compiles the entity filter target, an instance of
      * Zend\InputFilter\InputFilter.
      *
-     * @return  $this
+     * @return self
      */
     protected function compileFilter()
     {
@@ -391,7 +400,7 @@ class Compiler implements EventManagerAwareInterface
 
             if ($extra = $property->getOption('validators')) {
                 foreach ($validators as $index => $validator) {
-                    foreach ($extra as $subIndex => $subValidator) {
+                    foreach ($extra as $subValidator) {
                         if ($validator['name'] == $subValidator['name']) {
                             unset($validators[$index]);
                             break;
@@ -399,7 +408,7 @@ class Compiler implements EventManagerAwareInterface
                     }
                 }
 
-                foreach ($extra as $subIndex => $subValidator) {
+                foreach ($extra as $subValidator) {
                     $validators[] = $subValidator;
                 }
 
@@ -425,7 +434,9 @@ class Compiler implements EventManagerAwareInterface
      * Compiles the entity form target, an instance of
      * Zend\Form\Form.
      *
-     * @return  $this
+     * @param string|null $filter FQDN to the filter class
+     *
+     * @return self
      */
     protected function compileForm($filter)
     {

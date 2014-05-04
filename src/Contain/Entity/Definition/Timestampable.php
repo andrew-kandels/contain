@@ -34,7 +34,7 @@ class Timestampable extends AbstractDefinition
     /**
      * Sets up the entity properties.
      *
-     * @return  $this
+     * @return self
      */
     public function setUp()
     {

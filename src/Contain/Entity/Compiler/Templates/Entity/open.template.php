@@ -31,7 +31,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Initializes the properties of this entity.
      *
-     * @return  $this
+     * @return self
      */
     public function init()
     {
@@ -53,8 +53,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Searches for a value and returns its index or FALSE if not found.
      *
-     * @param   mixed                           Value to search for
-     * @param   boolean                         Strict type checking
+     * @param   mixed         $value  Value to search for
+     * @param   bool  $strict Strict type checking
+     *
      * @return  integer|false
      */
     public function indexOf<?php echo ucfirst($name); ?>($value, $strict = false)
@@ -65,8 +66,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Prepends a value to a list property.
      *
-     * @param   string|integer                  Index to unset
-     * @return  $this
+     * @param string|integer $index Index to unset
+     *
+     * @return self
      */
     public function unset<?php echo ucfirst($name); ?>($index)
     {
@@ -76,9 +78,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Sets a value for a list item at a given index.
      *
-     * @param   string                          Property name
-     * @param   integer                         Index
-     * @return  mixed|null                      Value or null if unset
+     * @param string $index Property name
+     *
+     * @return mixed|null Value or null if unset
      */
     public function put<?php echo ucfirst($name); ?>($index)
     {
@@ -88,9 +90,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Fetches a list item by its numerical index position.
      *
-     * @param   string                          Property name
-     * @param   integer                         Index
-     * @return  mixed|null                      Value or null if unset
+     * @param string $index Property name
+     *
+     * @return mixed|null Value or null if unset
      */
     public function at<?php echo ucfirst($name); ?>($index)
     {
@@ -102,8 +104,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Prepends a value to a list property.
      *
-     * @param   mixed                           Value to prepend
-     * @return  $this
+     * @param mixed $value Value to prepend
+     *
+     * @return self
      */
     public function unshift<?php echo ucfirst($name); ?>($value)
     {
@@ -113,8 +116,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Appends a value to a list property.
      *
-     * @param   mixed                           Value to append
-     * @return  $this
+     * @param mixed $value Value to append
+     *
+     * @return self
      */
     public function push<?php echo ucfirst($name); ?>($value)
     {
@@ -124,7 +128,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Removes a property from the end of a list and returns it.
      *
-     * @return  mixed                           List item (now removed)
+     * @param mixed $value
+     *
+     * @return mixed List item (now removed)
      */
     public function pop<?php echo ucfirst($name); ?>($value)
     {
@@ -134,7 +140,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Removes a property from the beginning of a list and returns it.
      *
-     * @return  mixed                           List item (now removed)
+     * @param mixed $value
+     *
+     * @return mixed List item (now removed)
      */
     public function shift<?php echo ucfirst($name); ?>($value)
     {
@@ -144,9 +152,10 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Extracts a slice of the list.
      *
-     * @param   integer                         Offset
-     * @param   integer|null                    Length
-     * @return  array
+     * @param int      $offset
+     * @param int|null $length
+     *
+     * @return array
      */
     public function slice<?php echo ucfirst($name); ?>($offset, $length = null)
     {
@@ -156,8 +165,8 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Merges the list with another array.
      *
-     * @param   array                           Array to merge with
-     * @param   boolean                         True if existing list is the source vs. target
+     * @param array $arr    Array to merge with
+     * @param bool  $source True if existing list is the source vs. target
      * @return  array
      */
     public function merge<?php echo ucfirst($name); ?>($arr, $source = true)
@@ -168,8 +177,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Removes a single item from the list by value if it exists.
      *
-     * @param   mixed                           Value to remove
-     * @return  array
+     * @param mixed $value Value to remove
+     *
+     * @return array
      */
     public function remove<?php echo ucfirst($name); ?>($value)
     {
@@ -179,9 +189,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Adds an item to the list if it doesn't already exist.
      *
-     * @param   mixed                           Value to add
-     * @param   boolean                         True for prepend, false for append
-     * @return  $this
+     * @param mixed $value   Value to add
+     * @param bool  $prepend True for prepend, false for append
+     * @return self
      */
     public function add<?php echo ucfirst($name); ?>($value, $prepend = true)
     {
@@ -192,7 +202,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Accessor getter for the <?php echo $name; ?> property
      *
-     * @return  See: <?php echo get_class($property->getType()); ?>::getValue()
+     * @return mixed See: <?php echo get_class($property->getType()); ?>::getValue()
      */
     public function get<?php echo ucfirst($name); ?>()
     {
@@ -202,8 +212,9 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Accessor setter for the <?php echo $name; ?> property
      *
-     * @param   See: <?php echo get_class($property->getType()); ?>::parse()
-     * @return  $this
+     * @param mixed $value See: <?php echo get_class($property->getType()); ?>::parse()
+     *
+     * @return self
      */
     public function set<?php echo ucfirst($name); ?>($value)
     {
@@ -213,7 +224,7 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     /**
      * Accessor existence checker for the <?php echo $name; ?> property
      *
-     * @return  boolean
+     * @return boolean
      */
     public function has<?php echo ucfirst($name); ?>()
     {

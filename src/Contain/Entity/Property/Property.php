@@ -19,9 +19,10 @@
 
 namespace Contain\Entity\Property;
 
-use ContainMapper\Cursor;
-use Contain\Manager\TypeManager;
 use Contain\Entity\EntityInterface;
+use Contain\Entity\Exception\InvalidArgumentException;
+use Contain\Manager\TypeManager;
+use ContainMapper\Cursor;
 use Traversable;
 
 /**
@@ -65,7 +66,7 @@ class Property
     protected $options = array();
 
     /**
-     * @var Contain\Entity\EntityInterface
+     * @var EntityInterface|null
      */
     protected $parent;
 
@@ -75,27 +76,30 @@ class Property
     protected $name;
 
     /**
-     * @var Contain\Manager\TypeManager
+     * @var TypeManager
      */
     protected $typeManager;
 
     /**
      * Injects the parent entity.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @param EntityInterface|null $parent
+     *
+     * @return self
      */
     public function setParent(EntityInterface $parent = null)
     {
         $this->parent = $parent;
+
         return $this;
     }
 
     /**
      * Gets or sets a type manager.
      *
-     * @param   Contain\Manager\TypeManager|null
-     * @return  Contain\Manager\TypeManager
+     * @param TypeManager|null $manager
+     *
+     * @return TypeManager
      */
     public function typeManager(TypeManager $manager = null)
     {
@@ -113,8 +117,9 @@ class Property
     /**
      * Hydrates the property from a syntax compatible with export().
      *
-     * @param   array                           Serialized Options/Values
-     * @return  $this
+     * @param array $arr Serialized Options/Values
+     *
+     * @return self
      */
     public function import(array $arr)
     {
@@ -128,12 +133,12 @@ class Property
         }
 
         if (empty($arr['type'])) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException('import expects a type index');
+            throw new InvalidArgumentException('import expects a type index');
         }
         $this->type = $arr['type'];
 
         if (empty($arr['name'])) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException('import expects a name index');
+            throw new InvalidArgumentException('import expects a name index');
         }
         $this->name = $arr['name'];
 
@@ -166,8 +171,9 @@ class Property
      * values that need to "bubble" up to a single property-compatible
      * export so they can be hydrated into a parent container property.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @param EntityInterface $entity
+     *
+     * @return self
      */
     public function importEntity(EntityInterface $entity)
     {
@@ -203,6 +209,8 @@ class Property
 
         if ($e = $this->parent->getExtendedProperty('_property')) {
             extract($e);
+            /* @var $parent EntityInterface */
+            /* @var $name string */
             $parent->property($name)->importEntity($this->parent);
         }
 
@@ -230,8 +238,9 @@ class Property
     /**
      * Sets the value for this property.
      *
-     * @param   mixed                   Value
-     * @return  $this
+     * @param mixed $value
+     *
+     * @return self
      */
     public function setValue($value)
     {
@@ -245,15 +254,17 @@ class Property
      * lists and cursors of entites and should probably not be used outside of
      * the Contain internals.
      *
-     * @param   integer                 Index
-     * @param   mixed                   export() value
-     * @return  $this
-     * @throws  Contain\Entity\Exception\InvalidArgumentException
+     * @param integer $index Index
+     * @param mixed   $value export() value
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException
      */
     public function setValueAtIndex($index, $value)
     {
         if (!isset($this->currentValue[$index])) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException('$index invalid for current value');
+            throw new InvalidArgumentException('$index invalid for current value');
         }
 
         $this->currentValue[$index] = $this->getType()->getType()->export($value);
@@ -267,14 +278,16 @@ class Property
      * lists and cursors of entites and should probably not be used outside of
      * the Contain internals.
      *
-     * @param   integer                 Index
-     * @return  mixed
-     * @throws  Contain\Entity\Exception\InvalidArgumentException
+     * @param integer $index
+     *
+     * @return mixed
+     *
+     * @throws InvalidArgumentException
      */
     public function getValueAtIndex($index)
     {
         if (!isset($this->currentValue[$index])) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException('$index invalid for current value');
+            throw new InvalidArgumentException('$index invalid for current value');
         }
 
         return $this->currentValue[$index];
@@ -284,9 +297,10 @@ class Property
      * Watches an entity for changes to its values, rolling those events
      * back up to the parent entity's property.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @param   integer                                         Index
-     * @return  $this
+     * @param EntityInterface $entity
+     * @param integer         $index
+     *
+     * @return self
      */
     public function watch(EntityInterface $entity, $index = null)
     {
@@ -301,6 +315,9 @@ class Property
             $entity = $event->getTarget();
             extract($entity->getExtendedProperty('_property'));
 
+            /* @var $parent EntityInterface */
+            /* @var $name string */
+            /* @var $index int|null */
             $property = $parent->property($name);
 
             if ($index !== null) {
@@ -320,7 +337,7 @@ class Property
      * getValue() for entity properties, which must always return an actual
      * entity that can be acted upon with events to send back change actions.
      *
-     * @return  Contain\Entity\EntityInterface
+     * @return EntityInterface
      */
     public function getEntityValue()
     {
@@ -354,7 +371,7 @@ class Property
      * getValue() for lists of entity types, which slow-hydrate entities from a
      * cursor. Changes to those entities should cycle back to the parent property.
      *
-     * @return  ContainMapper\Cursor|array
+     * @return \ContainMapper\Cursor|array
      */
     public function getListEntityValue()
     {
@@ -376,7 +393,7 @@ class Property
      * getValue() for lists which needs to watch any entities it spawns for changes to
      * propogate back to the parent property.
      *
-     * @return  array
+     * @return array
      */
     public function getListValue()
     {
@@ -394,7 +411,7 @@ class Property
     /**
      * Gets the value for this property.
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getValue()
     {
@@ -418,7 +435,7 @@ class Property
     /**
      * Returns true if the property has an unset value.
      *
-     * @return  boolean
+     * @return bool
      */
     public function isUnset()
     {
@@ -428,7 +445,7 @@ class Property
     /**
      * Returns true if the property has an empty value.
      *
-     * @return  boolean
+     * @return bool
      */
     public function isEmpty()
     {
@@ -438,7 +455,7 @@ class Property
     /**
      * Clears a property, setting it to an unset state.
      *
-     * @return  $this
+     * @return self
      */
     public function clear()
     {
@@ -449,7 +466,7 @@ class Property
     /**
      * Sets a property to its empty value.
      *
-     * @return  $this
+     * @return self
      */
     public function setEmpty()
     {
@@ -462,7 +479,7 @@ class Property
      * the current value of the property, which is ensured by making the persisted value
      * something one-of-a-kind.
      *
-     * @return  $this
+     * @return self
      */
     public function setDirty()
     {
@@ -474,7 +491,7 @@ class Property
      * Marks the current value as having been persisted for the sake of
      * dirty tracking.
      *
-     * @return  $this
+     * @return self
      */
     public function clean()
     {
@@ -485,7 +502,7 @@ class Property
     /**
      * Exports a serializable version of the current value.
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getExport()
     {
@@ -496,7 +513,7 @@ class Property
      * Returns true if the current value of the property differs from its
      * last persisted value.
      *
-     * @return  boolean
+     * @return bool
      */
     public function isDirty()
     {
@@ -506,7 +523,7 @@ class Property
     /**
      * Returns the value of this property when it was last persisted.
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getPersistedValue()
     {
@@ -517,7 +534,7 @@ class Property
      * Returns the type object which defines how the data type
      * behaves.
      *
-     * @return Contain\Entity\Property\Type\AbstractType
+     * @return \Contain\Entity\Property\Type\TypeInterface
      */
     public function getType()
     {
@@ -541,12 +558,12 @@ class Property
      * Set entity options.
      *
      * @param   array|Traversable       Option name/value pairs
-     * @return  $this
+     * @return self
      */
     public function setOptions($options)
     {
         if (!is_array($options) && !$options instanceof Traversable) {
-            throw new \Contain\Entity\Exception\InvalidArgumentException(
+            throw new InvalidArgumentException(
                 '$options must be an instance of Traversable or an array.'
             );
         }
@@ -561,9 +578,9 @@ class Property
     /**
      * Sets the value for an entity property's option.
      *
-     * @param   string              Option name
-     * @param   mixed               Option value
-     * @return  $this
+     * @param string $name  Option name
+     * @param mixed  $value Option value
+     * @return self
      */
     public function setOption($name, $value)
     {
@@ -574,7 +591,7 @@ class Property
     /**
      * Retrieves entity property's options as an array.
      *
-     * @return  array
+     * @return array
      */
     public function getOptions()
     {
@@ -584,7 +601,8 @@ class Property
     /**
      * Retrieves entity property's property by name.
      *
-     * @param   string              Option name
+     * @param   string     $name Option name
+     *
      * @return  array|null
      */
     public function getOption($name)
@@ -605,7 +623,7 @@ class Property
     /**
      * Gets the parent entity.
      *
-     * @return  Contain\Entity\EntityInterface
+     * @return EntityInterface|null
      */
     public function getParent()
     {
@@ -615,7 +633,7 @@ class Property
     /**
      * Persists changes back to the parent's property array.
      *
-     * @return  $this
+     * @return self
      */
     public function save()
     {

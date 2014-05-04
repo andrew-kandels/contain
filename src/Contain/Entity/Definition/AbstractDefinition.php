@@ -19,9 +19,8 @@
 
 namespace Contain\Entity\Definition;
 
-use InvalidArgumentException;
-use RuntimeException;
 use Contain\Entity\Property\Property;
+use InvalidArgumentException;
 
 /**
  * Defines the behavior of an entity.
@@ -62,7 +61,7 @@ abstract class AbstractDefinition
     protected $constants = array();
 
     /**
-     * @var array
+     * @var Property[]
      */
     protected $properties = array();
 
@@ -81,7 +80,7 @@ abstract class AbstractDefinition
     );
 
     /**
-     * @var array
+     * @var \Contain\Entity\Definition\AbstractDefinition[]
      */
     protected $import = array();
 
@@ -117,7 +116,7 @@ abstract class AbstractDefinition
     /**
      * Constructor
      *
-     * @return  $this
+     * @return self
      */
     public function __construct()
     {
@@ -128,7 +127,7 @@ abstract class AbstractDefinition
      * Called when an entity itself is instantiated. Used to register
      * events.
      *
-     * @return  $this
+     * @return self
      */
     public function init()
     {
@@ -137,8 +136,9 @@ abstract class AbstractDefinition
     /**
      * Registers a new alias.
      *
-     * @param  string               Name of the alias
-     * @param  string               Name of the target
+     * @param  string $name   Name of the alias
+     * @param  string $target Name of the target
+     *
      * @return self
      */
     public function setAlias($name, $target)
@@ -171,6 +171,8 @@ abstract class AbstractDefinition
     /**
      * Finds an alias by it's registered name.
      *
+     * @param string $name
+     *
      * @return string|false
      */
     public function getAlias($name)
@@ -178,14 +180,15 @@ abstract class AbstractDefinition
         if (array_key_exists($name, $this->aliases)) {
             return $this->aliases[$name];
         }
+
         return false;
     }
 
     /**
      * Registers a new constant.
      *
-     * @param   string              Name of the constant
-     * @param   scalar              Value of the constant
+     * @param   string $name  Name of the constant
+     * @param   mixed  $value Value of the constant
      * @return  self
      */
     public function setConstant($name, $value)
@@ -210,7 +213,7 @@ abstract class AbstractDefinition
     /**
      * Returns all of the entity's constants.
      *
-     * @return  array
+     * @return array
      */
     public function getConstants()
     {
@@ -220,8 +223,9 @@ abstract class AbstractDefinition
     /**
      * Finds a constant by its registered name.
      *
-     * @param   string              Name of the constant
-     * @return  scalar
+     * @param string $name Name of the constant
+     *
+     * @return mixed
      */
     public function getConstant($name)
     {
@@ -235,8 +239,9 @@ abstract class AbstractDefinition
     /**
      * Checks to see if a constant has been registered under a given name.
      *
-     * @param   string              Name of the constant
-     * @return  boolean
+     * @param string  $name Name of the constant
+     *
+     * @return bool
      */
     public function hasConstant($name)
     {
@@ -249,10 +254,11 @@ abstract class AbstractDefinition
      * be invoked directly for additional options or passed as a third
      * argument.
      *
-     * @param   string              Name of the property
-     * @param   string              Data type (string, integer, etc.)
-     * @param   array|Traversable   Options
-     * @return  Contain\Entity\Property
+     * @param string             $name    Name of the property
+     * @param string             $type    Data type (string, integer, etc.)
+     * @param array|\Traversable $options Options
+     *
+     * @return Property
      */
     public function setProperty($name, $type, $options = null)
     {
@@ -290,9 +296,10 @@ abstract class AbstractDefinition
     /**
      * Clones an instantiated property presumably from another entity.
      *
-     * @param   string              Name of the property
-     * @param   Contain\Entity\Property\Property
-     * @return  Contain\Entity\Property\Property
+     * @param string   $name     Name of the property
+     * @param Property $property
+     *
+     * @return Property
      */
     public function cloneProperty($name, Property $property)
     {
@@ -305,7 +312,7 @@ abstract class AbstractDefinition
     /**
      * Returns all of the entity's properties.
      *
-     * @return  Contain\Entity\Property[]
+     * @return Property[]
      */
     public function getProperties()
     {
@@ -315,8 +322,9 @@ abstract class AbstractDefinition
     /**
      * Finds a property object by its registered name.
      *
-     * @param   string              Name of the property
-     * @return  Contain\Entity\Property
+     * @param string $name Name of the property
+     *
+     * @return Property
      */
     public function getProperty($name)
     {
@@ -330,8 +338,9 @@ abstract class AbstractDefinition
     /**
      * Checks to see if a property has been registered under a given name.
      *
-     * @param   string              Name of the property
-     * @return  boolean
+     * @param string $name Name of the property
+     *
+     * @return bool
      */
     public function hasProperty($name)
     {
@@ -341,8 +350,9 @@ abstract class AbstractDefinition
     /**
      * Unsets a property.
      *
-     * @param   string              Name of the property
-     * @return  $this
+     * @param string $name Name of the property
+     *
+     * @return self
      */
     public function removeProperty($name)
     {
@@ -358,9 +368,10 @@ abstract class AbstractDefinition
      * 2) filter: The Zend\InputFilter\InputFilter implementation
      *            for validation and data sanitizing.
      *
-     * @param   string                  Target key (see above, e.g.: entity)
-     * @param   string                  File system path
-     * @return  $this
+     * @param string $target Target key (see above, e.g.: entity)
+     * @param string $path   File system path
+     *
+     * @return self
      */
     public function registerTarget($target, $path)
     {
@@ -380,7 +391,7 @@ abstract class AbstractDefinition
      * Returns an array of target keys and their paths (see setTarget()
      * for a list of valid keys and their definitions).
      *
-     * @return  array
+     * @return array
      */
     public function getTargets()
     {
@@ -391,8 +402,9 @@ abstract class AbstractDefinition
      * Gets the target path for a given target key (see setTarget()
      * for a list of valid keys and their definitions).
      *
-     * @param   string                  Target key (e.g.: entity)
-     * @return  string
+     * @param string $target Target key (e.g.: entity)
+     *
+     * @return string
      */
     public function getTarget($target)
     {
@@ -409,8 +421,9 @@ abstract class AbstractDefinition
     /**
      * Imports the properties and most behaviors from another definition.
      *
-     * @param   Contain\Entity\Definition\AbstractDefinition
-     * @return  $this
+     * @param \Contain\Entity\Definition\AbstractDefinition $definition
+     *
+     * @return self
      */
     public function import($definition)
     {
@@ -419,10 +432,6 @@ abstract class AbstractDefinition
                 throw new InvalidArgumentException('$definition must implement '
                     . 'Contain\Entity\Definition\AbstractDefinition.'
                 );
-            }
-
-            if (strpos('\\', $definition) === false) {
-                $def = 'Contain\Entity\Definition\\' . $definition;
             }
 
             $definition = new $definition();
@@ -450,7 +459,7 @@ abstract class AbstractDefinition
     /**
      * Returns the definition classes this definition imports.
      *
-     * @return  Contain\Entity\Definition\AbstractDefinition[]
+     * @return \Contain\Entity\Definition\AbstractDefinition[]
      */
     public function getImports()
     {
@@ -460,8 +469,9 @@ abstract class AbstractDefinition
     /**
      * Registers a method of the definition class that should be compiled into the end entity.
      *
-     * @param   string              Method name
-     * @return  $this
+     * @param string $method Method name
+     *
+     * @return self
      */
     public function registerMethod($method)
     {
@@ -476,7 +486,7 @@ abstract class AbstractDefinition
     /**
      * Returns all methods registered for the definition.
      *
-     * @return  array
+     * @return array
      */
     public function getRegisteredMethods()
     {
@@ -498,8 +508,9 @@ abstract class AbstractDefinition
     /**
      * Sets the entity name, defaults to the name of the definition class.
      *
-     * @param   string                  Name
-     * @return  $this
+     * @param string $name
+     *
+     * @return self
      */
     public function setName($name)
     {
@@ -510,7 +521,7 @@ abstract class AbstractDefinition
     /**
      * Gets the entity name, defaults to the name of the definition class.
      *
-     * @return  string
+     * @return string
      */
     public function getName()
     {
@@ -528,7 +539,7 @@ abstract class AbstractDefinition
      * Sets the parent class the compiled entity will extend.
      *
      * @param   string
-     * @return  $this
+     * @return self
      */
     public function setParentClass($className)
     {
@@ -549,8 +560,9 @@ abstract class AbstractDefinition
     /**
      * Registers an interface the compiled entity will implement.
      *
-     * @param   array
-     * @return  $this
+     * @param array
+     *
+     * @return self
      */
     public function registerImplementor($implementor)
     {
@@ -563,8 +575,9 @@ abstract class AbstractDefinition
     /**
      * Sets the interfaces the compiled entity will implement.
      *
-     * @param   array
-     * @return  $this
+     * @param array
+     *
+     * @return self
      */
     public function setImplementors(array $implementors)
     {
@@ -575,7 +588,7 @@ abstract class AbstractDefinition
     /**
      * Gets the interfaces the compiled entity will implement.
      *
-     * @return  array
+     * @return array
      */
     public function getImplementors()
     {
@@ -585,12 +598,12 @@ abstract class AbstractDefinition
     /**
      * Set entity level options.
      *
-     * @param   array|Traversable       Option name/value pairs
-     * @return  $this
+     * @param   array|\Traversable       Option name/value pairs
+     * @return self
      */
     public function setOptions($options)
     {
-        if (!is_array($options) && !$options instanceof Traversable) {
+        if (!is_array($options) && !$options instanceof \Traversable) {
             throw new InvalidArgumentException(
                 '$options must be an instance of Traversable or an array.'
             );
@@ -606,9 +619,10 @@ abstract class AbstractDefinition
     /**
      * Sets the value for an entity's option.
      *
-     * @param   string              Option name
-     * @param   mixed               Option value
-     * @return  $this
+     * @param string $name  Option name
+     * @param mixed  $value Option value
+     *
+     * @return self
      */
     public function setOption($name, $value)
     {
@@ -627,7 +641,7 @@ abstract class AbstractDefinition
     /**
      * Retrieves entity property's options as an array.
      *
-     * @return  array
+     * @return array
      */
     public function getOptions()
     {
@@ -637,7 +651,8 @@ abstract class AbstractDefinition
     /**
      * Retrieves entity property's property by name.
      *
-     * @param   string              Option name
+     * @param   string $name
+     *
      * @return  array|null
      */
     public function getOption($name)

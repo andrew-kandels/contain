@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
-require(__DIR__ . '/Bootstrap.php');
+
+require __DIR__ . '/../vendor/autoload.php';
 include(__DIR__ . '/Performance/Suite.php');
 
 $suite = new ContainTest\Performance\Suite();

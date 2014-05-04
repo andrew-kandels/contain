@@ -19,7 +19,6 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception\InvalidArgumentException;
 use Zend\Filter\Boolean;
 
 /**
@@ -33,11 +32,7 @@ use Zend\Filter\Boolean;
 class BooleanType extends StringType
 {
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  string              Internal value
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value)
     {
@@ -46,12 +41,7 @@ class BooleanType extends StringType
     }
 
     /**
-     * Returns the internal value represented as a string value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {

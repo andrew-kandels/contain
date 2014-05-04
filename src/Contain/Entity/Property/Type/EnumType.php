@@ -19,8 +19,6 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Entity\Exception\InvalidArgumentException;
-
 /**
  * Enumerated List Data Type
  *
@@ -32,9 +30,7 @@ use Contain\Entity\Exception\InvalidArgumentException;
 class EnumType extends StringType
 {
     /**
-     * Clears options.
-     *
-     * @return  $this
+     * {@inheritDoc}
      */
     public function clearOptions()
     {
@@ -43,11 +39,7 @@ class EnumType extends StringType
     }
 
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value)
     {
@@ -72,9 +64,7 @@ class EnumType extends StringType
     }
 
     /**
-     * Validator configuration array to automatically include when building filters.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getValidators()
     {

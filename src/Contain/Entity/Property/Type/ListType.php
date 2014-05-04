@@ -19,10 +19,9 @@
 
 namespace Contain\Entity\Property\Type;
 
+use Contain\Entity\EntityInterface;
 use Contain\Entity\Exception\InvalidArgumentException;
 use Contain\Entity\Exception\RuntimeException;
-use Contain\Entity\EntityInterface;
-use Contain\Entity\Property\Type\EntityType;
 
 /**
  * List of like-value items.
@@ -35,9 +34,7 @@ use Contain\Entity\Property\Type\EntityType;
 class ListType extends StringType
 {
     /**
-     * Clears options.
-     *
-     * @return  $this
+     * {@inheritDoc}
      */
     public function clearOptions()
     {
@@ -49,9 +46,9 @@ class ListType extends StringType
     }
 
     /**
-     * Resolves the list item type.
+     * @return TypeInterface
      *
-     * @return  Entity\Property\AbstractType
+     * @throws InvalidArgumentException
      */
     public function getType()
     {
@@ -103,11 +100,7 @@ class ListType extends StringType
     }
 
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  mixed               Internal value
-     * @throws  COntain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value)
     {
@@ -139,12 +132,7 @@ class ListType extends StringType
     }
 
     /**
-     * Returns the internal value represented as a string value
-     * for purposes of debugging or export.
-     *
-     * @param   mixed       Internal value
-     * @return  string
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function export($value)
     {
@@ -177,9 +165,7 @@ class ListType extends StringType
     }
 
     /**
-     * The value assigned when the property is unset.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getUnsetValue()
     {
@@ -187,9 +173,7 @@ class ListType extends StringType
     }
 
     /**
-     * The value to compare the internal value to which translates to empty or null.
-     *
-     * @return  array
+     * {@inheritDoc}
      */
     public function getEmptyValue()
     {
@@ -197,10 +181,7 @@ class ListType extends StringType
     }
 
     /**
-     * A valid value that represents a dirty state (would never be equal to the actual 
-     * value but also isn't empty or unset). 
-     *
-     * @return  mixed
+     * {@inheritDoc}
      */
     public function getDirtyValue()
     {

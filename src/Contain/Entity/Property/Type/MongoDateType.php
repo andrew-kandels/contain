@@ -19,7 +19,6 @@
 
 namespace Contain\Entity\Property\Type;
 
-use Contain\Exception;
 use MongoDate;
 
 /**
@@ -33,11 +32,7 @@ use MongoDate;
 class MongoDateType extends DateTimeType
 {
     /**
-     * Parse a given input into a suitable value for the current data type.
-     *
-     * @param   mixed               Value to be set
-     * @return  integer             Internal value
-     * @throws  Contain\Exception\InvalidArgumentException
+     * {@inheritDoc}
      */
     public function parse($value = null)
     {
