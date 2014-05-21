@@ -56,6 +56,11 @@ abstract class AbstractDefinition
     protected $aliases = array();
 
     /**
+     * @var string
+     */
+    protected $namespace;
+
+    /**
      * @var array
      */
     protected $constants = array();
@@ -658,5 +663,27 @@ abstract class AbstractDefinition
     public function getOption($name)
     {
         return isset($this->options[$name]) ? $this->options[$name] : null;
+    }
+
+    /**
+     * Sets a custom namespace for the compiled entity (as opposed to auto-detect).
+     *
+     * @param   string $namespace
+     * @return  self
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+        return $this;
+    }
+
+    /**
+     * Gets a custom namespace (if configured) for the compiled entity (as opposed to auto-detect).
+     *
+     * @return  string|null
+     */
+    public function getNamespace()
+    {
+        return ($this->namespace ?: null);
     }
 }

@@ -160,6 +160,10 @@ class Compiler implements EventManagerAwareInterface
      */
     public function getTargetNamespace($target)
     {
+        if ($this->definition->getNamespace()) {
+            return $this->definition->getNamespace();
+        }
+
         $path = $this->definition->getTarget($target);
         if (empty($path)) {
             throw new InvalidArgumentException(
