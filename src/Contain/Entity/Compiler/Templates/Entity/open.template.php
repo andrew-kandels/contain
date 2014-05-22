@@ -79,12 +79,13 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
      * Sets a value for a list item at a given index.
      *
      * @param string $index Property name
+     * @param mixed  $index Property value
      *
      * @return mixed|null Value or null if unset
      */
-    public function put<?php echo ucfirst($name); ?>($index)
+    public function put<?php echo ucfirst($name); ?>($index, $value)
     {
-        return $this->put('<?php echo $name; ?>', $index);
+        return $this->put('<?php echo $name; ?>', $index, $value);
     }
 
     /**
