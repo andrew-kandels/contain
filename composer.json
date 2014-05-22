@@ -36,6 +36,6 @@
         }
     },
     "bin": [
-        "scripts/compile.php"
+        "scripts/contain-compiler.php"
     ]
 }
