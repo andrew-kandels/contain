@@ -19,14 +19,14 @@
         "irc": "irc://irc.freenode.net/contain"
     },
     "require": {
-        "php": ">=5.3.3",
-        "zendframework/zendframework": "~2.0"
+        "php": ">=5.3.3"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.0"
     },
     "suggest": {
         "akandels/contain-mapper": "dev-master",
+        "zendframework/zendframework": "~2.0",
         "symfony/yaml": ">=2.1.0"
     },
     "autoload": {
