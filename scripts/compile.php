@@ -14,30 +14,36 @@ if (empty($argv[1])) {
     exit(1);
 }
 
-if (!file_exists($file = $argv[1])) {
-    fprintf(STDERR, "File '%s' does not exist.%s",
-        $file,
-        PHP_EOL
-    );
-    exit(1);
-}
+for ($index = 1; $index < $argc; $index++) {
+    $file = $argv[$index];
 
-$result = false;
+    if (!file_exists($file)) {
+        fprintf(STDERR, "File '%s' does not exist.%s",
+            $file,
+            PHP_EOL
+        );
+        exit(1);
+    }
 
-if (is_file($file)) {
-    $result = compile_file($file);
-}
+    $result = false;
 
-if (is_dir($file)) {
-    $iterator = new DirectoryIterator($file);
-
-    foreach ($iterator as $item) {
-        if (!$item->isFile() || $item->getExtension() != 'php') {
-            continue;
-        }
-
-        if (compile_file($item->getPathname())) {
+    if (is_file($file)) {
+        if (compile_file($file)) {
             $result = true;
+        }
+    }
+
+    if (is_dir($file)) {
+        $iterator = new DirectoryIterator($file);
+
+        foreach ($iterator as $item) {
+            if (!$item->isFile() || $item->getExtension() != 'php') {
+                continue;
+            }
+
+            if (compile_file($item->getPathname())) {
+                $result = true;
+            }
         }
     }
 }
