@@ -26,7 +26,7 @@ use Zend\Mvc\Service\ServiceManagerConfig;
 /********************************************************************************/
 // Configuration (defaults for a typical ZF2 application installing Contain via Composer)
 
-define('ZF2_APPLICATION_PATH', realpath(__DIR__ . '/../../../..'));
+define('ZF2_APPLICATION_PATH', realpath(__DIR__ . '/../../../../..'));
 define('ZF2_IS_MODULE', file_exists(ZF2_APPLICATION_PATH . '/Module.php'));
 if (ZF2_IS_MODULE) {
     $modulesPath = dirname(ZF2_APPLICATION_PATH);
@@ -44,7 +44,7 @@ if (!defined('APPLICATION_CONFIG_FILE')) {
 // DO NOT EDIT Below this line
 /********************************************************************************/
 
-define('CONTAIN_PATH', realpath(__DIR__ . '/..'));
+define('CONTAIN_PATH', realpath(__DIR__ . '/../..'));
 
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
@@ -72,4 +72,4 @@ if (ZF2_IS_MODULE) {
 $serviceManager = new ServiceManager(new ServiceManagerConfig($config['service_manager']));
 $serviceManager->setService('ApplicationConfig', $config);
 $serviceManager->get('ModuleManager')->loadModules();
-$serviceManager->setInvokableClass('Contain\Entity\Compiler\Complier', 'Contain\Entity\Compiler\Compiler');
+$serviceManager->setInvokableClass('Contain\Entity\Compiler\Compiler', 'Contain\Entity\Compiler\Compiler');

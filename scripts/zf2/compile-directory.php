@@ -1,10 +1,9 @@
-#!/usr/bin/env php
 <?php
 /**
  * Contain Project
  *
- * Recursively scans the Contain directory for internal entities and compiles
- * them into the project tree.
+ * Recursively scans each module in the main project directory for entity
+ * definitions and compiles them one-by-one.
  *
  * This source file is subject to the BSD license bundled with
  * this package in the LICENSE.txt file. It is also available
@@ -23,17 +22,30 @@
 
 require_once(__DIR__ . '/abstract-script.php');
 
-$compiler = $serviceManager->get('Contain\Entity\Compiler\Compiler');
-$iterator = new \DirectoryIterator(CONTAIN_PATH . '/src/Contain/Entity/Definition');
-$exitCode = 0;
+if (empty($argv[1])) {
+    fprintf(STDERR, "Syntax: compile-directory (e.g.: src/Contain/Entity/Definition)\n"
+        . "Note: Your project must support autoloading for the specified classes.\n"
+    );
+    exit(1);
+}
 
-foreach ($iterator as $entity) {
+$compiler = $serviceManager->get('Contain\Entity\Compiler\Compiler');
+$entityIterator = new \DirectoryIterator($argv[1]);
+$exitCode = 0;
+$num = 0;
+
+foreach ($entityIterator as $entity) {
     if ($entity->isFile() && $entity->getExtension() == 'php') {
-        $className = str_replace('/', '\\', preg_replace(
-            '!^' . preg_quote(CONTAIN_PATH) . '/src/(.*)\.php$!',
-            '$1',
-            $entity->getPathname()
-        ));
+        $num++;
+
+        $pos = strpos($entity->getPathname(), 'src/');
+        if ($pos === false) {
+            fprintf(STDERR, "[ Failed ]\nThere must be a 'src' directory referenced.");
+            exit(1);
+        }
+
+        $className = substr($entity->getPathname(), $pos + 4, -4);
+        $className = str_replace('/', '\\', $className);
 
         if (preg_match('/(Abstract|Interface)/', $className)) {
             continue;

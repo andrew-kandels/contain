@@ -1,1 +1,5 @@
 autoload_classmap.php
+composer.phar
+composer.lock
+*.swp
+vendor

@@ -19,17 +19,15 @@
 
 namespace Contain\Entity\Definition;
 
-use DateTime;
-
 /**
- * Mixin for entities with createdAt/updatedAt timestamps.
+ * Demo definition for a basic User entity model.
  *
  * @category    akandels
  * @package     contain
  * @copyright   Copyright (c) 2013 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class Timestampable extends AbstractDefinition
+class DemoUser extends AbstractDefinition
 {
     /**
      * Sets up the entity properties.
@@ -39,31 +37,23 @@ class Timestampable extends AbstractDefinition
     public function setUp()
     {
         $this
-            ->setProperty('createdAt', 'dateTime', array('required' => true))
-            ->setProperty('updatedAt', 'dateTime', array('required' => true))
+            ->registerTarget(AbstractDefinition::ENTITY, __DIR__ . '/..')
+            ->import('Contain\Entity\Definition\Timestampable')
+            ->registerMethod('name')
+            ->setProperty('firstName', 'string', array('required' => true))
+            ->setProperty('lastName',  'string', array('required' => true))
         ;
     }
 
-    public function init()
+    /**
+     * Returns a concatenated first and last name, or whatever is presently set.
+     *
+     * @return  string
+     */
+    public function name()
     {
-        $this->attach('insert.pre', function ($e) {
-            $entity = $e->getTarget();
-            $now    = new \DateTime('now');
-            if (!$entity->getCreatedAt()) {
-                $entity->setCreatedAt($now);
-            }
-
-            if (!$entity->getUpdatedAt()) {
-               $entity->setUpdatedAt($now);
-            }
-        });
-
-        $this->attach('update.pre', function ($e) {
-            $entity = $e->getTarget();
-            $now    = new \DateTime('now');
-            if (!$entity->getUpdatedAt()) {
-               $entity->setUpdatedAt($now);
-            }
-        });
+        return implode(' ', array_filter(array($this->getFirstName(), $this->getLastName()), function ($a) {
+            return $a;
+        }));
     }
 }

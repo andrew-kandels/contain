@@ -263,7 +263,7 @@ abstract class AbstractDefinition
      * @param string             $type    Data type (string, integer, etc.)
      * @param array|\Traversable $options Options
      *
-     * @return Property
+     * @return self
      */
     public function setProperty($name, $type, $options = null)
     {
@@ -295,7 +295,7 @@ abstract class AbstractDefinition
             }
         }
 
-        return $obj;
+        return $this;
     }
 
     /**

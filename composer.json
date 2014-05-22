@@ -35,7 +35,7 @@
             "ContainTest": "tests/"
         }
     },
-    "config": {
-        "bin-dir": "scripts"
-    }
+    "bin": [
+        "scripts/compile.php"
+    ]
 }
