@@ -21,8 +21,7 @@ namespace Contain\Entity\Property\Type;
 
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Exception\InvalidArgumentException;
-use ContainMapper\Cursor;
-use ContainMapper\Mapper;
+use Contain\Cursor;
 use Traversable;
 
 /**
@@ -42,11 +41,6 @@ class ListEntityType extends ListType
      * Contain\Entity\Property\Type\EntityType
      */
     protected $entityType;
-
-    /**
-     * ContainMapper\Mapper
-     */
-    protected $mapper;
 
     /**
      * {@inheritDoc}
@@ -78,8 +72,6 @@ class ListEntityType extends ListType
         }
         $type->setOption('className', $className);
 
-        $this->mapper = new Mapper($className);
-
         return ($this->entityType = $type);
     }
 
@@ -92,9 +84,7 @@ class ListEntityType extends ListType
             return $this->getEmptyValue();
         }
 
-        $this->getType();
-
-        return new Cursor($this->mapper, $value);
+        return new Cursor($this->getType()->getOption('className'), $value);
     }
 
     /**
