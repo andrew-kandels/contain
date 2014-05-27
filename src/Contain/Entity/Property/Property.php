@@ -22,7 +22,7 @@ namespace Contain\Entity\Property;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Exception\InvalidArgumentException;
 use Contain\Manager\TypeManager;
-use ContainMapper\Cursor;
+use Contain\Cursor;
 use Traversable;
 
 /**
@@ -371,7 +371,7 @@ class Property
      * getValue() for lists of entity types, which slow-hydrate entities from a
      * cursor. Changes to those entities should cycle back to the parent property.
      *
-     * @return \ContainMapper\Cursor|array
+     * @return \Contain\Cursor|array
      */
     public function getListEntityValue()
     {
@@ -380,10 +380,9 @@ class Property
         $parent       = $this->parent;
 
         if ($value instanceof Cursor) {
-            $value->getEventManager()->attach('hydrate', function ($event) use ($parent, $propertyName) {
-                $entity = $event->getTarget();
-                $parent->property($propertyName)->watch($entity, $event->getParam('index'));
-            }, -1000);
+            $value->setHydrator(function ($entity, $data, $index) use ($parent, $propertyName) {
+                $parent->property($propertyName)->watch($entity, $index);
+            });
         }
 
         return $value;

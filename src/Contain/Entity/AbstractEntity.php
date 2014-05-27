@@ -25,7 +25,7 @@ use Contain\Entity\Property\Property;
 use Contain\Entity\Property\Type;
 use Contain\Event;
 use Contain\Manager\TypeManager;
-use ContainMapper\Cursor;
+use Contain\Cursor;
 use Traversable;
 
 /**

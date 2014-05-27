@@ -169,6 +169,18 @@ class Cursor implements Iterator
     }
 
     /**
+     * Sets a hydrator called with each new entity.
+     *
+     * @param   Closure
+     * @return  self
+     */
+    public function setHydrator($callback)
+    {
+        $this->hydrator = $callback;
+        return $this;
+    }
+
+    /**
      * Hydrates an entity into an object, re-using the previous object if it can.
      *
      * @param   mixed $data
@@ -194,7 +206,7 @@ class Cursor implements Iterator
         $entity->clean()->trigger('hydrate.post');
 
         if (is_callable($this->hydrator)) {
-            call_user_func($this->hydrator, $entity, $data);
+            call_user_func($this->hydrator, $entity, $data, $this->position);
         }
 
         if ($this->entity !== false) {
