@@ -39,7 +39,7 @@ class ListEntityTypeTest extends \PHPUnit_Framework_TestCase
             array('firstName' => 'Mrs.'),
         ));
 
-        $this->assertInstanceOf('ContainMapper\Cursor', $this->entity->getListEntity());
+        $this->assertInstanceOf('Contain\Cursor', $this->entity->getListEntity());
     }
 
     public function testListEntityExport()

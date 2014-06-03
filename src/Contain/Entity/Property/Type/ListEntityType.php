@@ -21,12 +21,11 @@ namespace Contain\Entity\Property\Type;
 
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Exception\InvalidArgumentException;
-use ContainMapper\Cursor;
-use ContainMapper\Mapper;
+use Contain\Cursor;
 use Traversable;
 
 /**
- * ContainMapper\Cursor list of entities which slow-hydrate for memory efficiency.
+ * Contain\Cursor list of entities which slow-hydrate for memory efficiency.
  * NOTE: The ListEntityType only starts being more CPU/memory performant when the count of
  *       sub-entities gets rather large (about 1,000 decent sized entities). Prior to that,
  *       it's generally faster and more efficent just to use the ListType with type = entity.
@@ -42,11 +41,6 @@ class ListEntityType extends ListType
      * Contain\Entity\Property\Type\EntityType
      */
     protected $entityType;
-
-    /**
-     * ContainMapper\Mapper
-     */
-    protected $mapper;
 
     /**
      * {@inheritDoc}
@@ -78,8 +72,6 @@ class ListEntityType extends ListType
         }
         $type->setOption('className', $className);
 
-        $this->mapper = new Mapper($className);
-
         return ($this->entityType = $type);
     }
 
@@ -92,9 +84,7 @@ class ListEntityType extends ListType
             return $this->getEmptyValue();
         }
 
-        $this->getType();
-
-        return new Cursor($this->mapper, $value);
+        return new Cursor($this->getType()->getOption('className'), $value);
     }
 
     /**
@@ -121,7 +111,7 @@ class ListEntityType extends ListType
         }
 
         if (!is_array($value)) {
-            throw new InvalidArgumentException('$value for ListEntityType should be an array or ContainMapper\Cursor');
+            throw new InvalidArgumentException('$value for ListEntityType should be an array or Contain\Cursor');
         }
 
         foreach ($value as $index => $item) {

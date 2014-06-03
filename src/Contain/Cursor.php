@@ -21,6 +21,7 @@ namespace Contain;
 
 use Iterator;
 use Traversable;
+use Closure;
 
 /**
  * Cursor for slow hydration of iterable entity models.
@@ -30,7 +31,7 @@ use Traversable;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class Cursor extends Service\AbstractService implements Iterator
+class Cursor implements Iterator
 {
     /**
      * @var string
@@ -57,6 +58,11 @@ class Cursor extends Service\AbstractService implements Iterator
     protected $entity;
 
     /**
+     * @var Callable
+     */
+    protected $hydrator;
+
+    /**
      * @var array
      */
     protected $options = array();
@@ -67,13 +73,14 @@ class Cursor extends Service\AbstractService implements Iterator
      * @param \Contain\Entity\EntityInterface|string $entity
      * @param array|\Iterator $cursor
      */
-    public function __construct($entity, $cursor)
+    public function __construct($entity, $cursor, $hydrator = null)
     {
         if (! ($cursor instanceof Iterator || $cursor instanceof Traversable || is_array($cursor))) {
             throw new Exception\InvalidArgumentException('Cursor expects $cursor argument to be iterable/traversable');
         }
 
-        $this->cursor = $cursor;
+        $this->hydrator = $hydrator;
+        $this->cursor   = $cursor;
 
         if ($entity instanceof Entity\EntityInterface) {
             $this->entity    = $entity;
@@ -162,6 +169,18 @@ class Cursor extends Service\AbstractService implements Iterator
     }
 
     /**
+     * Sets a hydrator called with each new entity.
+     *
+     * @param   Closure
+     * @return  self
+     */
+    public function setHydrator($callback)
+    {
+        $this->hydrator = $callback;
+        return $this;
+    }
+
+    /**
      * Hydrates an entity into an object, re-using the previous object if it can.
      *
      * @param   mixed $data
@@ -169,7 +188,10 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     protected function hydrate($data)
     {
-        $data   = iterator_to_array($data);
+        if (!is_array($data)) {
+            $data = iterator_to_array($data);
+        }
+
         $entity = null;
 
         if ($this->entity) {
@@ -183,9 +205,9 @@ class Cursor extends Service\AbstractService implements Iterator
 
         $entity->clean()->trigger('hydrate.post');
 
-        $this->getEventManager()->trigger('hydrate', $entity, array(
-            'index' => $this->position,
-        ));
+        if (is_callable($this->hydrator)) {
+            call_user_func($this->hydrator, $entity, $data, $this->position);
+        }
 
         if ($this->entity !== false) {
             $this->entity = $entity;
