@@ -284,6 +284,10 @@ abstract class AbstractDefinition
 
         $this->properties[$name] = $obj;
 
+        if ($alias = $obj->getOption('alias')) {
+            $this->setAlias($alias, $name);
+        }
+
         if ($this->getOption('auto_alias')) {
             $alias = preg_replace_callback('/(_[a-z])/', function ($letters) {
                 $letter = substr(array_shift($letters), 1, 1);

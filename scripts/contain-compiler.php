@@ -18,57 +18,75 @@ if (empty($argv[1])) {
     exit(1);
 }
 
-for ($index = 1; $index < $argc; $index++) {
-    $file = $argv[$index];
+$retry = array();
+$files = array_slice($argv, 1);
 
-    if (!file_exists($file)) {
-        fprintf(STDERR, "File '%s' does not exist.%s",
-            $file,
-            PHP_EOL
-        );
-        exit(1);
-    }
-
-    $result = false;
-
-    if (is_file($file)) {
-        if (compile_file($file)) {
-            $result = true;
-        }
-    }
-
-    if (is_dir($file)) {
-        $iterator = new DirectoryIterator($file);
-
-        foreach ($iterator as $item) {
-            if (!$item->isFile() || $item->getExtension() != 'php') {
-                continue;
-            }
-
-            if (compile_file($item->getPathname())) {
-                $result = true;
-            }
-        }
-    }
+while (compile_args($files, $retry)) {
+    $files = $retry;
+    $retry = array();
 }
 
-if (!$result) {
-    printf("No classes found which extend Contain\Entity\Definition\AbstractDefinition -- nothing to do.%s%s",
-        PHP_EOL,
-        PHP_EOL
+if ($retry) {
+    fprintf(STDERR, "\nAll done, but failed to resolve dependencies for the following entity models:\n    - %s\n\n",
+        implode("\n    - ", $retry)
     );
-    exit(0);
+    exit(1);
 }
 
 printf("%sAll done.%s%s", PHP_EOL, PHP_EOL, PHP_EOL);
 exit(0);
+
+function compile_args(array $files, array &$retry)
+{
+    $didSomething = false;
+
+    foreach ($files as $file) {
+        if (!file_exists($file)) {
+            fprintf(STDERR, "File '%s' does not exist.%s",
+                $file,
+                PHP_EOL
+            );
+            exit(1);
+        }
+
+        if (is_file($file)) {
+            if ($compileResult = compile_file($file)) {
+                $didSomething = true;
+            }
+
+            if ($compileResult === false) {
+                $retry[] = $file;
+            }
+        }
+
+        if (is_dir($file)) {
+            $iterator = new DirectoryIterator($file);
+
+            foreach ($iterator as $item) {
+                if (!$item->isFile() || $item->getExtension() != 'php') {
+                    continue;
+                }
+
+                if ($compileResult = compile_file($item->getPathname())) {
+                    $didSomething = true;
+                }
+
+                if ($compileResult === false) {
+                    $retry[] = $item->getPathname();
+                }
+            }
+        }
+    }
+
+    return $didSomething;
+}
 
 function compile_file($file)
 {
     require_once($file);
 
     if (!$definitions = get_definitions($file)) {
-        return false;
+        return null;
     }
 
     $compiler = new Contain\Entity\Compiler\Compiler;
@@ -80,6 +98,13 @@ function compile_file($file)
             printf("[ Ok ]\n");
         }
     } catch (Exception $e) {
+        // dependency issue, may depend on an entity model compiled later on -- retry
+        printf("[ Retry - Dependency? ]\n");
+        if ($e->getMessage() == '$type invalid as type alias or class name.') {
+            return false;
+        }
+
+        // legitimate exception
         fprintf(STDERR, "[ Failed ]\nException: %s\n--\n%s\n\n", $e->getMessage(), $e->getTraceAsString());
         exit(1);
     }
