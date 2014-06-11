@@ -36,8 +36,14 @@ class BooleanType extends StringType
      */
     public function parse($value)
     {
-        $filter = new Boolean(Boolean::TYPE_ALL);
-        return $filter->filter($value) ? '1' : '0';
+        if (class_exists('Zend\Filter\Boolean')) {
+            $filter = new Boolean(Boolean::TYPE_ALL);
+            return $filter->filter($value) ? '1' : '0';
+        }
+
+        return !in_array(strtolower($value), array(
+            'no', '0', 'false', '', 'nein', 'net', 'off', 'n', 'f',
+        ));
     }
 
     /**
