@@ -76,7 +76,7 @@ class Cursor implements Iterator
     public function __construct($entity, $cursor, $hydrator = null)
     {
         if (! ($cursor instanceof Iterator || $cursor instanceof Traversable || is_array($cursor))) {
-            throw new Exception\InvalidArgumentException('Cursor expects $cursor argument to be iterable/traversable');
+            throw new \InvalidArgumentException('Cursor expects $cursor argument to be iterable/traversable');
         }
 
         $this->hydrator = $hydrator;
