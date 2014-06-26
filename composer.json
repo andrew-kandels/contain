@@ -26,7 +26,12 @@
     },
     "suggest": {
         "akandels/contain-mapper": "dev-master",
-        "zendframework/zendframework": "~2.0",
+        "zendframework/zend-filter": "~2.2",
+        "zendframework/zend-form": "~2.2",
+        "zendframework/zend-inputfilter": "~2.2",
+        "zendframework/zend-mvc": "~2.2",
+        "zendframework/zend-servicemanager": "~2.2",
+        "zendframework/zend-validator": "~2.2",
         "symfony/yaml": ">=2.1.0"
     },
     "autoload": {
