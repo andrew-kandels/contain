@@ -465,6 +465,8 @@ abstract class AbstractEntity implements EntityInterface
             }
         }
 
+        $result = $this->trigger('export', $result);
+
         return $result;
     }
 
