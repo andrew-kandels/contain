@@ -129,14 +129,15 @@ class Event
      *
      * @param string $name
      * @param mixed  $value
+     * @param bool   $allowExtraParams
      *
      * @return self
      *
      * @throws  InvalidArgumentException
      */
-    public function setParam($name, $value)
+    public function setParam($name, $value, $allowExtraParams = false)
     {
-        if (!isset($this->parameters[$name])) {
+        if (!$allowExtraParams && !isset($this->parameters[$name])) {
             throw new InvalidArgumentException('"' . $name . '" is not a valid key in the parameters array');
         }
 
@@ -148,13 +149,14 @@ class Event
      * Sets parameters from a key/value array.
      *
      * @param array $params Key/value pairs
+     * @param bool  $allowExtraParams
      *
      * @return self
      */
-    public function setParams($params)
+    public function setParams($params, $allowExtraParams = false)
     {
         foreach ($params as $key => $value) {
-            $this->setParam($key, $value);
+            $this->setParam($key, $value, $allowExtraParams);
         }
 
         return $this;
