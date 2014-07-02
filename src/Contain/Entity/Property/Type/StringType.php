@@ -51,12 +51,12 @@ class StringType implements TypeInterface
      */
     public function parse($value)
     {
-        if ($value === $this->getEmptyValue()) {
-            return $value;
+        if (is_object($value) && method_exists($value, '__toString')) {
+            $value = (string) $value;
         }
 
-        if (!$value) {
-            return $this->getUnsetValue();
+        if ($value === $this->getEmptyValue()) {
+            return $value;
         }
 
         if (is_string($value)) {
@@ -67,8 +67,8 @@ class StringType implements TypeInterface
             return (string) $value;
         }
 
-        if (is_object($value) && method_exists($value, '__toString')) {
-            return (string) $value;
+        if (!$value) {
+            return $this->getUnsetValue();
         }
 
         throw new Exception\InvalidArgumentException('$value is invalid for string type');
