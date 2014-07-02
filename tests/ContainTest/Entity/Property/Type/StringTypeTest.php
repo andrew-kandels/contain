@@ -20,7 +20,6 @@ class StringTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('', $this->type->parse(''));
         $this->assertNull($this->type->parse(false));
         $this->assertNull($this->type->parse(null));
-        $this->assertNull($this->type->parse(0));
     }
 
     public function testParseString()
@@ -30,6 +29,7 @@ class StringTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testParseNumeric()
     {
+        $this->assertEquals('0', $this->type->parse(0));
         $this->assertEquals('123', $this->type->parse(123));
         $this->assertEquals('123', $this->type->parse(123.0));
         $this->assertEquals('123', $this->type->parse((double) 123.0));
@@ -53,7 +53,6 @@ class StringTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('', $this->type->export(''));
         $this->assertEquals('', $this->type->export(false));
         $this->assertEquals('', $this->type->export(null));
-        $this->assertEquals('', $this->type->export(0));
     }
 
     public function testExportString()
@@ -63,6 +62,7 @@ class StringTypeTest extends \PHPUnit_Framework_TestCase
 
     public function testExportNumeric()
     {
+        $this->assertEquals('0', $this->type->export(0));
         $this->assertEquals('123', $this->type->export(123));
         $this->assertEquals('123', $this->type->export(123.0));
         $this->assertEquals('123', $this->type->export((double) 123.0));
