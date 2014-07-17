@@ -22,7 +22,12 @@
         "php": ">=5.3.3"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.0"
+        "phpunit/phpunit": "~4.0",
+        "zendframework/zend-filter": "~2.2",
+        "zendframework/zend-inputfilter": "~2.2",
+        "zendframework/zend-servicemanager": "~2.2",
+        "zendframework/zend-stdlib": "~2.2",
+        "zendframework/zend-validator": "~2.2"
     },
     "suggest": {
         "akandels/contain-mapper": "dev-master",
