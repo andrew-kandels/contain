@@ -130,6 +130,13 @@ class Compiler
             $path = $matches[3];
         } elseif (preg_match('!src/(.*)!', $path, $matches)) {
             $path = $matches[1];
+        } else {
+            // attempt to determine the pathing, work in reverse
+            $search = explode('\\', get_class($this->definition));
+            $search = array_shift($search);
+            if (preg_match("!($search)/(.*)!", $path, $matches)) {
+                $path = $matches[1] . '/' . $matches[2];
+            }
         }
 
         return str_replace('/', '\\', $path);
