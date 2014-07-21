@@ -45,19 +45,21 @@ interface EntityInterface
      * Gets an array of all the entity's properties.
      *
      * @param bool $includeUnset Include unset properties
+     * @param bool $includeExtended Include extended properties
      *
      * @return array
      */
-    public function properties($includeUnset = false);
+    public function properties($includeUnset = false, $includeExtended = false);
 
     /**
      * Returns an array of all the entity properties
      *
      * @param boolean $includeUnset Include unset properties
+     * @param bool $includeExtended Include extended properties
      *
      * @return array
      */
-    public function toArray($includeUnset = false);
+    public function toArray($includeUnset = false, $includeExtended = false);
 
     /**
      * Hydrates entity properties from an array.
@@ -73,10 +75,11 @@ interface EntityInterface
      * as an array of string-converted values (no objects).
      *
      * @param boolean $includeUnset Include unset properties
+     * @param boolean $includeExtended Include extended properties
      *
      * @return array
      */
-    public function export($includeUnset = false);
+    public function export($includeUnset = false, $includeExtended = false);
 
     /**
      * Returns an array of the columns flagged as primary as the 

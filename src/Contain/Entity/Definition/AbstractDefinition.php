@@ -79,9 +79,10 @@ abstract class AbstractDefinition
      * @var array
      */
     protected $options = array(
-        'iteration'  => true,
-        'events'     => false,
-        'auto_alias' => false,
+        'iteration'     => true,
+        'events'        => false,
+        'auto_alias'    => false,
+        'auto_extended' => false,
     );
 
     /**

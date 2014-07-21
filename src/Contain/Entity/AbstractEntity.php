@@ -39,6 +39,11 @@ use Traversable;
 abstract class AbstractEntity implements EntityInterface
 {
     /**
+     * @var boolean
+     */
+    protected $autoExtended = false;
+
+    /**
      * @var array
      */
     protected $aliases = array();
@@ -363,7 +368,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritDoc}
      */
-    public function properties($includeUnset = false)
+    public function properties($includeUnset = false, $includeExtended = false)
     {
         $result = array();
 
@@ -373,13 +378,17 @@ abstract class AbstractEntity implements EntityInterface
             }
         }
 
+        if ($includeExtended) {
+            $result = array_merge($result, $this->getExtendedProperties());
+        }
+
         return $result;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function toArray($includeUnset = false)
+    public function toArray($includeUnset = false, $includeExtended = false)
     {
         $result = array();
 
@@ -394,6 +403,10 @@ abstract class AbstractEntity implements EntityInterface
             if ($includeUnset || !$property->isUnset()) {
                 $result[$name] = $property->getValue();
             }
+        }
+
+        if ($includeExtended) {
+            $result = array_merge($result, $this->getExtendedProperties());
         }
 
         return $result;
@@ -420,6 +433,8 @@ abstract class AbstractEntity implements EntityInterface
         foreach ($properties as $key => $value) {
             if ($property = $this->property($key)) {
                 $this->set($key, $value, false);
+            } else if ($this->autoExtended) {
+                $this->setExtendedProperty($key, $value);
             }
         }
 
@@ -431,7 +446,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritDoc}
      */
-    public function export($includeProperties = null, $includeUnset = false)
+    public function export($includeProperties = null, $includeUnset = false, $includeExtended = false)
     {
         $result = array();
 
@@ -465,6 +480,10 @@ abstract class AbstractEntity implements EntityInterface
             }
         }
 
+        if ($includeExtended) {
+            $result = array_merge($result, $this->getExtendedProperties());
+        }
+
         return $result;
     }
 
@@ -480,6 +499,8 @@ abstract class AbstractEntity implements EntityInterface
             );
 
             return $value;
+        } else if ($this->autoExtended) {
+            return $this->getExtendedProperty($name);
         }
 
         return null;
@@ -491,6 +512,9 @@ abstract class AbstractEntity implements EntityInterface
     public function set($name, $value, $fireChangeEvent = true)
     {
         if (!$property = $this->property($name)) {
+            if ($this->autoExtended) {
+                $this->setExtendedProperty($name, $value);
+            }
             return $this;
         }
 
