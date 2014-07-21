@@ -15,7 +15,6 @@ class <?php echo $this->name; ?> extends AbstractEntity<?php
     if ($this->implementors): ?> implements <?php echo implode(', ', $this->implementors); endif; ?>
 
 {
-    protected $autoExtended = <?php var_export($this->getOption('auto_extended')); ?>
 <?php foreach ($this->constants as $name => $value): ?>
     const <?php echo strtoupper($name); ?> = <?php var_export($value); ?>;
 <?php endforeach; ?>

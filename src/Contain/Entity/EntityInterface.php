@@ -45,11 +45,10 @@ interface EntityInterface
      * Gets an array of all the entity's properties.
      *
      * @param bool $includeUnset Include unset properties
-     * @param bool $includeExtended Include extended properties
      *
      * @return array
      */
-    public function properties($includeUnset = false, $includeExtended = false);
+    public function properties($includeUnset = false);
 
     /**
      * Returns an array of all the entity properties
