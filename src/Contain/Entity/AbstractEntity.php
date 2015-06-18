@@ -547,17 +547,17 @@ abstract class AbstractEntity implements EntityInterface
         $filter->isValid();
 
         $this->messages = $filter->getMessages();
-        $values         = $filter->getValues();
+        $filteredValues = $filter->getValues();
 
-        foreach ($this->messages as $index => $values) {
+        foreach ($this->messages as $index => $messages) {
             if ($properties && !in_array($index, $properties)) {
                 unset($this->messages[$index]);
-                unset($values[$index]);
+                unset($filteredValues[$index]);
             }
         }
 
         // update properties with filtered values
-        foreach ($values as $index => $value) {
+        foreach ($filteredValues as $index => $value) {
             $this->set($index, $value);
         }
 
